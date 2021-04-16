@@ -1,0 +1,118 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+ 
+layout(local_size_x=2) in;
+layout(triangles, max_vertices=256, max_primitives=512) out;
+
+out PerVertexData
+{
+  vec3 normal;
+} v_out[];   
+
+perprimitiveNV out PerPrimitiveData 
+{
+  vec4 color;
+} p_out[];
+
+uniform mat4 m_pvm;
+uniform mat3 m_normal;
+
+// Given an Index (0 <= Index < 20), returns a distinct color
+vec4 distinctColor (uint idx) {
+
+  if (idx >= 20) return vec4 (1.0, 1.0, 1.0, 1.0); // White is error
+
+  vec4 colors[20] = { vec4(0.90196, 0.09804, 0.29412, 1.0),
+                      vec4(0.23529, 0.70588, 0.29412, 1.0),
+                      vec4(1.00000, 0.88235, 0.09804, 1.0),
+                      vec4(0.00000, 0.50980, 0.78431, 1.0),
+                      vec4(0.96078, 0.50980, 0.18824, 1.0),
+                      vec4(0.56863, 0.11765, 0.70588, 1.0),
+                      vec4(0.27451, 0.94118, 0.94118, 1.0),
+                      vec4(0.94118, 0.19608, 0.90196, 1.0),
+                      vec4(0.82353, 0.96078, 0.23529, 1.0),
+                      vec4(0.98039, 0.74510, 0.83137, 1.0),
+                      vec4(0.00000, 0.50196, 0.50196, 1.0),
+                      vec4(0.86275, 0.74510, 1.00000, 1.0),
+                      vec4(0.66667, 0.43137, 0.15686, 1.0),
+                      vec4(1.00000, 0.98039, 0.78431, 1.0),
+                      vec4(0.50196, 0.00000, 0.00000, 1.0),
+                      vec4(0.66667, 1.00000, 0.76471, 1.0),
+                      vec4(0.50196, 0.50196, 0.00000, 1.0),
+                      vec4(1.00000, 0.84314, 0.70588, 1.0),
+                      vec4(0.00000, 0.00000, 0.50196, 1.0),
+                      vec4(0.50196, 0.50196, 0.50196, 1.0)};
+
+  return colors[idx];
+
+}
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+  float vertices[];
+};
+
+layout(std430, binding = 2) readonly buffer indicesBuffer
+{
+  uint indices[];
+};
+
+layout(std430, binding = 3) readonly buffer primitivesBuffer
+{
+  uint primitives[];
+};
+
+layout(std430, binding = 4) readonly buffer meshletsBuffer
+{
+  uint meshlets[];
+};
+
+void main()
+{
+
+  // Inputs
+  uint local_id  = gl_LocalInvocationID.x;
+  uint global_id  = gl_GlobalInvocationID.x;
+  uint meshlet_id = gl_WorkGroupID.x;
+  uint workg_len = gl_WorkGroupSize.x;
+
+  // Meshlet Info
+  uint indices_start = meshlets[meshlet_id * 4 + 0];
+  uint indices_count = meshlets[meshlet_id * 4 + 1];
+  uint primitives_start = meshlets[meshlet_id * 4 + 2];
+  uint primitives_count = meshlets[meshlet_id * 4 + 3];
+
+  // No. Primitives
+  gl_PrimitiveCountNV = primitives_count / 3;
+
+  // Vertices
+  uint vertices_per_thread = (indices_count + workg_len - 1) / workg_len;
+  for (int i=0; i < vertices_per_thread; i++) {
+
+    uint idx = min (i * workg_len + local_id, indices_count - 1);
+    uint index = indices[indices_start + idx];
+
+    vec4 vertex = vec4(vertices[index * 3 + 0],
+                       vertices[index * 3 + 1],
+                       vertices[index * 3 + 2], 1.0);
+
+    gl_MeshVerticesNV[idx].gl_Position = m_pvm * vertex;
+    v_out[idx].normal = m_normal * vertex.xyz;
+  }
+
+  // Primitives
+  uint primitives_per_thread = (primitives_count / 3 + workg_len - 1) / workg_len;
+  for (int i=0; i < primitives_per_thread; i++) {
+
+    uint idx = min ((i * workg_len + local_id) * 3, primitives_count - 3);
+
+    gl_PrimitiveIndicesNV[idx + 0] = primitives[primitives_start + idx + 0];
+    gl_PrimitiveIndicesNV[idx + 1] = primitives[primitives_start + idx + 1];
+    gl_PrimitiveIndicesNV[idx + 2] = primitives[primitives_start + idx + 2];
+
+    // Per-primitive Output
+    p_out[local_id].color = distinctColor(global_id);
+
+  }
+ 
+}

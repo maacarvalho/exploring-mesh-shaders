@@ -1,0 +1,89 @@
+<?xml version="1.0" ?>
+<materialLib name="colorBufferLib">
+	<shaders>
+		<shader name="vec4ColorBufferShaders" 		ms = "shaders/vec4_colorbuffer.mesh" 
+													ps = "shaders/color.frag" />
+		<shader name="vec3ColorBufferShaders" 		ms = "shaders/vec3_colorbuffer.mesh" 
+													ps = "shaders/color.frag" />										
+		<shader name="flatColorBufferShaders" 		ms = "shaders/flat_colorbuffer.mesh" 
+													ps = "shaders/color.frag" />
+	</shaders>
+	
+	<buffers>
+		<buffer name="vec4ColorBuffer" >
+			<DIM x=6 y=1 z=1 />
+			<structure>
+				<field value="VEC4" />
+			</structure>
+			<file name="buffers/colors.vec4"/>
+		</buffer>
+		<buffer name="vec3ColorBuffer" >
+			<DIM x=6 y=1 z=1 />
+			<structure>
+				<field value="VEC3" />
+			</structure>
+			<file name="buffers/colors.vec3"/>
+		</buffer>
+		<buffer name="flatColorBuffer" >
+			<DIM x=6 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+				<field value="FLOAT" />
+				<field value="FLOAT" />
+				<field value="FLOAT" />
+			</structure>
+			<file name="buffers/colors.vec4"/>
+		</buffer>
+	</buffers>	
+
+	<materials>
+		<!-- Mesh Shader with a Vec4 Color Buffer -->
+		<material name="vec4ColorBufferMat">
+			<buffers>
+				<buffer name="vec4ColorBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+			</buffers>
+			<shader name="vec4ColorBufferShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+		<!-- Mesh Shader with a Vec3 Color Buffer -->
+		<material name="vec3ColorBufferMat">
+			<buffers>
+				<buffer name="vec3ColorBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+			</buffers>
+			<shader name="vec3ColorBufferShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+		<!-- Mesh Shader with a Flattened Color Buffer -->
+		<material name="flatColorBufferMat">
+			<buffers>
+				<buffer name="flatColorBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+			</buffers>
+			<shader name="flatColorBufferShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+	</materials>
+</materialLib>

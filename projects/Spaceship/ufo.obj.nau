@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<project name="Obj Renderer" >
+    <assets>
+        <attributes>
+            <attribute name="SCALE" data="FLOAT" type="RENDERER" value="0.1" />
+        </attributes>
+
+        <scenes>
+            <scene name="objScene" type="Scene">
+                <SCALE x=0.1 y=0.1 z=0.1 />
+                <file name="../../assets/spaceship/ufo.obj"/>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="objViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+            </viewport>
+        </viewports>		
+
+        <cameras>
+            <camera name="objCamera" >
+                <viewport name="objViewport" />
+                <TYPE value="PERSPECTIVE"/>
+                <FOV value = "90"/>
+                <NEAR value= "0.01"/>
+                <FAR value= "100"/>
+                <POSITION x="5" y="5" z="5" w="1" />
+                <LOOK_AT_POINT x="0" y="0" z="0" />
+            </camera>
+        </cameras>
+        
+        <lights>
+            <light name="objLight">
+                <DIRECTION x="-2" y="-6" z="-2" />
+                <COLOR r="1" g="1" b="1" />
+            </light>
+        </lights>
+    
+        <materialLibs>
+            <materialLib filename="ufo.obj.mlib"/>
+        </materialLibs>
+    </assets>
+    
+    <pipelines>
+        <pipeline name="Mesh Pipeline" default="true">
+            <pass class="mesh" name="meshPass001">
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <material name="mat001" fromLibrary="objMatLib" count="1" />
+            </pass>
+            <pass class="mesh" name="meshPass000">
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <material name="mat000" fromLibrary="objMatLib" count="6" />
+            </pass>
+        </pipeline>
+        <pipeline name="Traditional Pipeline" default="true">
+            <pass class="default" name="vertGeomPass">
+                <camera name="objCamera" />
+                <scenes>
+                    <scene name="objScene" />
+                </scenes>
+                <lights>
+                    <light name="objLight" />
+                </lights>
+            </pass>	
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="Properties" >
+            <pipelineList label="Pipeline" />
+            <var label="Scale" type="RENDERER" context="CURRENT" component="SCALE" def="min=0 max=1"/>
+        </window>
+    </interface>
+</project>

@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<project name="Simple" width="512" height="512">
+	<assets>
+		<scenes>
+			<scene name="Al"  param="USE_ADJACENCY" >
+				<file name="..\..\models\sponza/crytek-sponza/sponza.nbo"/>
+
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=1 FAR=10000.0 />
+				<POSITION x=0 y=431.5 z=7.5 />
+				<VIEW x=0.927018 y=-0.227978 z=-0.297764 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x="1.0" y="-0.5" z="-2" />
+			</light>
+		</lights>
+		<materialLibs>
+			<materialLib filename="geomAdj.mlib"/>
+		</materialLibs>
+	</assets>
+	
+	<pipelines>
+		<pipeline name="geometry shader test" default="true">
+			<pass class="default" name="pass1">
+				<scenes>
+					<scene name="Al" />
+				</scenes>
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="Geometry With Adjacency" toMaterial="showContours" />
+				</materialMaps>
+			</pass>
+		</pipeline>
+	</pipelines>
+</project>

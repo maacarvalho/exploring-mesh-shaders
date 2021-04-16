@@ -1,0 +1,385 @@
+<?xml version="1.0" ?>
+<materialLib name="meshletLib">
+	<shaders>
+		<shader name="meshletShaders" 		ms = "shaders/renderer.mesh" 
+											ps = "shaders/color.frag" />
+	</shaders>
+	
+	<buffers>
+        <!--NO OPTIMIZATION-->
+		<buffer name="verticesBuffer" >
+            <file name="../../assets/asteroids/optimized/asteroid.noOpt.obj.vertices"/>
+            <DIM x=9830408 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBuffer" >
+            <file name="../../assets/asteroids/optimized/asteroid.noOpt.obj.indices"/>
+            <DIM x=3379131 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBuffer" >
+            <file name="../../assets/asteroids/optimized/asteroid.noOpt.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBuffer" >
+            <file name="../../assets/asteroids/optimized/asteroid.noOpt.obj.meshlets"/>
+            <DIM x=52800 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+        <!--HOPPE -->
+		<buffer name="verticesBufferHoppe" >
+            <file name="../../assets/asteroids/optimized/asteroid.hoppe.obj.vertices"/>
+            <DIM x=9861120 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBufferHoppe" >
+            <file name="../../assets/asteroids/optimized/asteroid.hoppe.obj.indices"/>
+            <DIM x=2982852 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBufferHoppe" >
+            <file name="../../assets/asteroids/optimized/asteroid.hoppe.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBufferHoppe" >
+            <file name="../../assets/asteroids/optimized/asteroid.hoppe.obj.meshlets"/>
+            <DIM x=46608 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+        <!-- K-CACHE -->
+		<buffer name="verticesBufferKCache" >
+            <file name="../../assets/asteroids/optimized/asteroid.linyu.obj.vertices"/>
+            <DIM x=9861120 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBufferKCache" >
+            <file name="../../assets/asteroids/optimized/asteroid.linyu.obj.indices"/>
+            <DIM x=4864085 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBufferKCache" >
+            <file name="../../assets/asteroids/optimized/asteroid.linyu.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBufferKCache" >
+            <file name="../../assets/asteroids/optimized/asteroid.linyu.obj.meshlets"/>
+            <DIM x=76068 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+        <!-- TIPSIFY -->
+		<buffer name="verticesBufferTipsify" >
+            <file name="../../assets/asteroids/optimized/asteroid.tipsify.obj.vertices"/>
+            <DIM x=9861120 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBufferTipsify" >
+            <file name="../../assets/asteroids/optimized/asteroid.tipsify.obj.indices"/>
+            <DIM x=4428561 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBufferTipsify" >
+            <file name="../../assets/asteroids/optimized/asteroid.tipsify.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBufferTipsify" >
+            <file name="../../assets/asteroids/optimized/asteroid.tipsify.obj.meshlets"/>
+            <DIM x=69224 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+        <!--TOM FORSYTH-->
+		<buffer name="verticesBufferTomF" >
+            <file name="../../assets/asteroids/optimized/asteroid.tomf.obj.vertices"/>
+            <DIM x=9861120 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBufferTomF" >
+            <file name="../../assets/asteroids/optimized/asteroid.tomf.obj.indices"/>
+            <DIM x=3368932 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBufferTomF" >
+            <file name="../../assets/asteroids/optimized/asteroid.tomf.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBufferTomF" >
+            <file name="../../assets/asteroids/optimized/asteroid.tomf.obj.meshlets"/>
+            <DIM x=52640 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+        <!--GBATCH -->
+		<buffer name="verticesBufferGBatch" >
+            <file name="../../assets/asteroids/optimized/asteroid.sbatch.obj.vertices"/>
+            <DIM x=262084 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<buffer name="indicesBufferGBatch" >
+            <file name="../../assets/asteroids/optimized/asteroid.sbatch.obj.indices"/>
+            <DIM x=3070636 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="primitivesBufferGBatch" >
+            <file name="../../assets/asteroids/optimized/asteroid.sbatch.obj.primitives"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<buffer name="meshletsBufferGBatch" >
+            <file name="../../assets/asteroids/optimized/asteroid.sbatch.obj.meshlets"/>
+            <DIM x=47984 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+	</buffers>	
+
+	<materials>
+        <material name="noOptMat">
+			<buffers>
+				<buffer name="verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="NOOPT_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+        <material name="hoppeMat">
+			<buffers>
+				<buffer name="verticesBufferHoppe">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBufferHoppe">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBufferHoppe">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBufferHoppe">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="HOPPE_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+        <material name="kCacheMat">
+			<buffers>
+				<buffer name="verticesBufferKCache">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBufferKCache">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBufferKCache">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBufferKCache">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="KCACHE_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+        <material name="tipsifyMat">
+			<buffers>
+				<buffer name="verticesBufferTipsify">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBufferTipsify">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBufferTipsify">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBufferTipsify">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="TIPSIFY_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+		<material name="tomfMat">
+			<buffers>
+				<buffer name="verticesBufferTomF">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBufferTomF">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBufferTomF">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBufferTomF">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="TOMF_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+        <material name="gbatchMat">
+			<buffers>
+				<buffer name="verticesBufferGBatch">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBufferGBatch">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBufferGBatch">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBufferGBatch">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+                             component="SCALE" />
+                    <valueof uniform="translation"
+                             type="RENDERER" context="CURRENT"
+                             component="GBATCH_TRANSLATION" />
+				</values>
+			</shader>
+		</material>
+	</materials>
+</materialLib>

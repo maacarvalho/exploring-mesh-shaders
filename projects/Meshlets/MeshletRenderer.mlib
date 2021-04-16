@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<materialLib name="meshletLib">
+	<shaders>
+		<shader name="meshletShaders" 		ms = "shaders/renderer.mesh" 
+											ps = "shaders/color.frag" />
+	</shaders>
+	
+	<buffers>
+		<!-- Buffer that contains all the vertices of an object -->
+		<buffer name="verticesBuffer" >
+            <!--<file name="../../assets/cube/cube.obj.vertices"/>-->
+            <!--<file name="../../assets/among_us/among_us_opt.obj.vertices"/>-->
+            <!--<DIM x=5835 y=1 z=1 />-->
+            <!--<file name="../../assets/spaceship/ufo_opt.obj.vertices"/>-->
+			<!--<DIM x=4521 y=1 z=1 />-->
+            <!--<file name="../../assets/asteroids/lods/asteroid_0.obj.vertices"/>-->
+            <!--<DIM x=44 y=1 z=1 />-->
+            <file name="../../assets/spaceship/ufo.obj.vertices"/>
+            <DIM x=3740 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+		<!-- Buffer that contains the indices of the vertices of each meshlet -->
+		<buffer name="indicesBuffer" >
+            <!--<file name="../../assets/cube/cube.obj.indices"/>-->
+            <!--<file name="../../assets/among_us/among_us_opt.obj.indices"/>-->
+            <!--<DIM x=2220 y=1 z=1 />-->
+            <!--<file name="../../assets/spaceship/ufo_opt.obj.indices"/>-->
+			<!--<DIM x=1521 y=1 z=1 />-->
+            <!--<file name="../../assets/asteroids/lods/asteroid_0.obj.indices"/>-->
+            <!--<DIM x=11 y=1 z=1 />-->
+            <file name="../../assets/spaceship/ufo.obj.indices"/>
+            <DIM x=1183 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<!-- Buffer that contains the primitives (built with the indices) of each meshlet -->
+		<buffer name="primitivesBuffer" >
+            <!--<file name="../../assets/cube/cube.obj.primitives"/>-->
+            <!--<file name="../../assets/among_us/among_us_opt.obj.primitives"/>-->
+            <!--<DIM x=10236 y=1 z=1 />-->
+            <!--<file name="../../assets/spaceship/ufo_opt.obj.primitives"/>-->
+			<!--<DIM x=5118 y=1 z=1 />-->
+            <!--<file name="../../assets/asteroids/lods/asteroid_0.obj.primitives"/>-->
+            <!--<DIM x=54 y=1 z=1 />-->
+            <file name="../../assets/spaceship/ufo.obj.primitives"/>
+            <DIM x=5118 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+		<!-- Buffer that contains the boundaries of each meshlet in the indices' and primitives' buffer -->
+		<buffer name="meshletsBuffer" >
+            <!--<file name="../../assets/cube/cube.obj.meshlets"/>-->
+            <!--<file name="../../assets/among_us/among_us_opt.obj.meshlets"/>-->
+            <!--<DIM x=36 y=1 z=1 />-->
+            <!--<file name="../../assets/spaceship/ufo_opt.obj.meshlets"/>-->
+			<!--<DIM x=24 y=1 z=1 />-->
+            <!--<file name="../../assets/asteroids/lods/asteroid_0.obj.meshlets"/>-->
+            <!--<DIM x=4 y=1 z=1 />-->
+            <file name="../../assets/spaceship/ufo.obj.meshlets"/>
+            <DIM x=32 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+		</buffer>
+	</buffers>	
+
+	<materials>
+		<material name="meshletMat">
+			<buffers>
+				<buffer name="verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+				</buffer>
+				<buffer name="indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+				</buffer>
+				<buffer name="primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+				</buffer>
+			</buffers>
+			<shader name="meshletShaders" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+					<valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT" 
+							 component="SCALE" />
+				</values>
+			</shader>
+		</material>
+	</materials>
+</materialLib>

@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<project name="Squares with Mesh Shaders" >
+	<assets>
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>		
+
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<TYPE value="PERSPECTIVE"/>
+				<FOV value = "60"/>
+				<NEAR value= "1"/>
+				<FAR value= "100"/>
+               	<POSITION x="2.5" y="3.5" z="8" w="1" />
+                <LOOK_AT_POINT x="2.5" y="3.5" z="0" w="0" />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x="-2" y="-6" z="-2" />
+				<COLOR r="0.9" g="0.9" b="0.9" />
+			</light>
+		</lights>
+	
+        <materialLibs>
+            <materialLib filename="ColorBuffer.mlib"/>
+        </materialLibs>
+	</assets>
+	
+    <pipelines>
+		<pipeline name="ColorBufferVec4" default="true">
+			<pass class="mesh" name="pass1">
+                <material name="vec4ColorBufferMat" fromLibrary="colorBufferLib" count = 6 />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+			</pass>
+		</pipeline>
+		<pipeline name="ColorBufferVec3" default="true">
+			<pass class="mesh" name="pass1">
+                <material name="vec3ColorBufferMat" fromLibrary="colorBufferLib" count = 6 />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+			</pass>
+		</pipeline>
+		<pipeline name="ColorBufferFlat" default="true">
+			<pass class="mesh" name="pass1">
+                <material name="flatColorBufferMat" fromLibrary="colorBufferLib" count = 6 />
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+			</pass>
+		</pipeline>
+	</pipelines>
+
+	<interface>
+		<window label="Pipeline" >
+			<pipelineList label="Option" />
+		</window>
+	</interface>
+</project>

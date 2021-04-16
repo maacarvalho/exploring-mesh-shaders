@@ -1,0 +1,117 @@
+<?xml version="1.0" ?>
+<project name="depth buffer" width=1200 height=400 >
+	<assets>
+		<scenes>
+			<scene name="CubeLand">
+				<file name="..\..\models\bench.obj"/>
+			</scene>	
+		</scenes>
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+			<viewport name="SmallViewport1" >
+				<SIZE width=0.33 height=1 />
+				<CLEAR_COLOR  r="0.0" g="0.0" b="0.0" />
+			</viewport>
+			<viewport name="SmallViewport2" >
+				<ORIGIN x = 0.33 y =0 />
+				<SIZE width=0.34 height=1 />
+				<CLEAR_COLOR  r=0.0 g=0.0 b=0.0 />
+			</viewport>
+			<viewport name="SmallViewport3" >
+				<ORIGIN x = 0.67 y =0 />
+				<SIZE  width=".33"  height=1/>
+				<CLEAR_COLOR  r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+		
+        <cameras>
+            <camera name="ClipSpaceCamera">
+                <ELEVATION_ANGLE value="-0.0700121" />
+                <FAR value="1000" />
+                <LOOK_AT_POINT x="-3.03828" y="-0.129955" z="2.94233" w="1" />
+                <POSITION x="-4.03531" y="-0.06" z="2.91025" w="1" />
+                <VIEW x="0.997034" y="-0.0699549" z="0.0320831" w="0" />
+                <ZX_ANGLE value="1.53863" />
+                <viewport name="SmallViewport3" />
+            </camera>
+            <camera name="GodCamera">
+                <ELEVATION_ANGLE value="-0.381523" />
+                <FAR value="1000" />
+                <LOOK_AT_POINT x="-1.33905" y="28.0377" z="-57.0843" w="1" />
+                <POSITION x="-1.49" y="28.41" z="-58" w="1" />
+                <VIEW x="0.150946" y="-0.372334" z="0.915741" w="0" />
+                <ZX_ANGLE value="0.163366" />
+                <viewport name="SmallViewport2" />
+            </camera>
+            <camera name="UserCamera">
+                <ELEVATION_ANGLE value="-0.190329" />
+                <FAR value="50" />
+                <LOOK_AT_POINT x="-17.7991" y="6.32082" z="-2.82971" w="1" />
+                <NEAR value="10" />
+                <POSITION x="-18.734" y="6.51" z="-3.13" w="1" />
+                <VIEW x="0.934899" y="-0.189182" z="0.300289" w="0" />
+                <ZX_ANGLE value="1.26001" />
+                <viewport name="SmallViewport1" />
+            </camera>
+        </cameras>
+		
+		<lights>
+			<light name="Sun" >
+				<POSITION x="-52" y="77.0" z="-27.0" />
+				<DIRECTION x="-1" y="1" z="1" />
+				<COLOR r="0.9" g="0.9" b="0.9" />
+			</light>
+		</lights>
+		
+		<materialLibs>
+			<materialLib filename="matricesDemoMaterials.mlib"/>
+		</materialLibs>
+	</assets>
+	
+	<pipelines>
+		<pipeline name="shadow" default="true" defaultCamera="UserCamera">
+		
+			<pass class="default" name="pass1">
+				<scenes>
+					<scene name="CubeLand" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<camera name="UserCamera" />
+			</pass>
+			
+			<pass class="default" name="pass2">
+				<scenes>
+					<scene name="CubeLand" />
+					<scene name="UserCamera" />
+				</scenes>
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<camera name="GodCamera" />
+			</pass>
+			
+			<pass class="default" name="pass3">
+				<scenes>
+					<scene name="CubeLand" />
+					<scene name="UserCamera" />
+				</scenes>
+				<camera name="ClipSpaceCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<injectionMaps>
+					<map toMaterial="*">
+						<shader fromMaterial ="imageSpace" fromLibrary="Matrices Demo Materials" />
+					</map>
+				</injectionMaps>
+			</pass>
+			
+			
+
+		</pipeline>
+	</pipelines>
+</project>

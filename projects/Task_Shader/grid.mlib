@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<materialLib name="gridLib">
+	<shaders>
+		<shader name="onlyMeshShader" 		ms = "shaders/6_workgroup_4_thread.mesh" 
+											ps = "shaders/color.frag" />
+		<shader name="passthroughTaskShader" 	ts = "shaders/1_workgroup_1_thread.task"	
+												ms = "shaders/6_workgroup_4_thread.mesh" 
+												ps = "shaders/color.frag" />
+		<shader name="multipleCallTaskShader" 	ts = "shaders/6_workgroup_1_thread.task"	
+												ms = "shaders/1_workgroup_4_thread.mesh" 
+												ps = "shaders/color.frag" />
+	</shaders>
+
+	<materials>
+		<!-- Only (6,4) Mesh Shader -->
+		<material name="onlyMeshMat">
+			<shader name="onlyMeshShader" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+		<!-- (1,1) Task and (6,4) Mesh Shader -->
+		<material name="passthroughTaskMat">
+			<shader name="passthroughTaskShader" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+		<!-- (6,1) Task and (1,4) Mesh Shader -->
+		<material name="multipleCallTaskMat">
+			<shader name="multipleCallTaskShader" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+				</values>
+			</shader>
+		</material>
+	</materials>
+</materialLib>

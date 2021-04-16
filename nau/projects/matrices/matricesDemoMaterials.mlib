@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<materialLib name="Matrices Demo Materials">
+
+	<renderTargets>		
+		<renderTarget name="color">
+			<SIZE width=512 height=512 />
+			<CLEAR_VALUES r="0.0" g = "0.0" b = "0.0" a = "0.0"/>
+			<colors>
+				<color name="color1" 	internalFormat="RGBA" />
+			</colors>
+		</renderTarget>
+	</renderTargets>
+
+
+	<shaders>
+		<shader name="imageSpace" ps="shaders/imageSpace.frag" vs="shaders/imageSpace.vert" />
+	</shaders>
+
+
+	<materials>
+		<material name="imageSpace">
+			
+			<shader name="imageSpace">
+				<values>
+					<valueof uniform="pUser" 		type="CAMERA" 
+													context="UserCamera" 
+													component="PROJECTION_MATRIX" /> 
+													
+					<valueof uniform="vUser" 		type="CAMERA" 
+													context="UserCamera" 
+													component="VIEW_MATRIX" /> 
+													
+													
+					<valueof uniform="PV" 			type="RENDERER" context="CURRENT" 
+													component="PROJECTION_VIEW" />
+
+					<valueof uniform="modelMatrix" 	type="RENDERER" context="CURRENT" 
+													component="MODEL" />
+														
+														
+					<valueof uniform="lightDir" 	type="LIGHT" 
+													context="Sun" 
+													component="DIRECTION" />
+
+					<valueof uniform="diffuse" 		type="COLOR" context="CURRENT" 				
+													component="DIFFUSE" />
+
+					<valueof uniform="emission" 	type="COLOR" context="CURRENT" 				
+													component="EMISSION" />
+
+					<valueof uniform="ambient" 		type="COLOR" context="CURRENT" 
+													component="AMBIENT" />
+													
+				</values>
+			</shader>
+		</material>		
+		
+
+	</materials>
+</materialLib>
