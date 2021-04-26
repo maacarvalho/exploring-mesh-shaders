@@ -1,0 +1,1518 @@
+<?xml version="1.0" ?>
+<materialLib name="objMatLib">
+    
+    <textures>
+        <texture name="tex" filename="../../assets/asteroids/lods/asteroid.jpg" mipmap=true />
+    </textures>
+
+	<shaders>
+        <shader name="meshShaders" 	    ms = "shaders/mesh_asteroids.mesh" 
+										ps = "shaders/asteroids.frag" />
+		<shader name="tradShaders" 	    vs = "shaders/trad_asteroids.vert" 
+										ps = "shaders/asteroids.frag" />
+    </shaders>
+   
+	<buffers>
+		<!-- LOD 0 -->
+		<buffer name="a0_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.vertices.buf"/>
+            <DIM x=44 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a0_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.normals.buf"/>
+            <DIM x=33 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a0_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.texcoords.buf"/>
+            <DIM x=102 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a0_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.000.indices.buf"/>
+            <DIM x=102 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a0_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.000.primitives.buf"/>
+            <DIM x=54 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a0_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_0.obj.000.meshlets.buf"/>
+            <DIM x=4 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 1 -->
+		<buffer name="a1_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.vertices.buf"/>
+            <DIM x=156 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a1_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.normals.buf"/>
+            <DIM x=117 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a1_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.texcoords.buf"/>
+            <DIM x=228 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a1_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.000.indices.buf"/>
+            <DIM x=228 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a1_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.000.primitives.buf"/>
+            <DIM x=222 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a1_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_1.obj.000.meshlets.buf"/>
+            <DIM x=4 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 2 -->
+		<buffer name="a2_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.vertices.buf"/>
+            <DIM x=608 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a2_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.normals.buf"/>
+            <DIM x=456 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a2_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.texcoords.buf"/>
+            <DIM x=693 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a2_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.000.indices.buf"/>
+            <DIM x=693 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a2_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.000.primitives.buf"/>
+            <DIM x=900 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a2_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_2.obj.000.meshlets.buf"/>
+            <DIM x=4 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 3 -->
+		<buffer name="a3_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.vertices.buf"/>
+            <DIM x=2408 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a3_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.normals.buf"/>
+            <DIM x=1806 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a3_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.texcoords.buf"/>
+            <DIM x=2274 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a3_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.000.indices.buf"/>
+            <DIM x=2427 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a3_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.000.primitives.buf"/>
+            <DIM x=3600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a3_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_3.obj.000.meshlets.buf"/>
+            <DIM x=16 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 4 -->
+		<buffer name="a4_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.vertices.buf"/>
+            <DIM x=9608 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a4_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.normals.buf"/>
+            <DIM x=7206 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a4_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.texcoords.buf"/>
+            <DIM x=8094 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a4_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.000.indices.buf"/>
+            <DIM x=9126 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a4_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.000.primitives.buf"/>
+            <DIM x=14400 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a4_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_4.obj.000.meshlets.buf"/>
+            <DIM x=48 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 5 -->
+		<buffer name="a5_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.vertices.buf"/>
+            <DIM x=38408 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a5_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.normals.buf"/>
+            <DIM x=28803 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a5_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.texcoords.buf"/>
+            <DIM x=30540 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a5_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.000.indices.buf"/>
+            <DIM x=37326 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a5_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.000.primitives.buf"/>
+            <DIM x=57600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a5_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_5.obj.000.meshlets.buf"/>
+            <DIM x=196 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 6 -->
+		<buffer name="a6_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.vertices.buf"/>
+            <DIM x=153608 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a6_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.normals.buf"/>
+            <DIM x=115203 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a6_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.texcoords.buf"/>
+            <DIM x=118464 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a6_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.000.indices.buf"/>
+            <DIM x=146502 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a6_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.000.primitives.buf"/>
+            <DIM x=230400 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a6_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_6.obj.000.meshlets.buf"/>
+            <DIM x=764 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 7 -->
+		<buffer name="a7_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.vertices.buf"/>
+            <DIM x=614408 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a7_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.normals.buf"/>
+            <DIM x=460761 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a7_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.texcoords.buf"/>
+            <DIM x=467064 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a7_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.000.indices.buf"/>
+            <DIM x=574416 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a7_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.000.primitives.buf"/>
+            <DIM x=921600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a7_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_7.obj.000.meshlets.buf"/>
+            <DIM x=2996 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 8 -->
+		<buffer name="a8_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.vertices.buf"/>
+            <DIM x=2457608 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a8_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.normals.buf"/>
+            <DIM x=1842423 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a8_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.texcoords.buf"/>
+            <DIM x=1855428 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a8_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.000.indices.buf"/>
+            <DIM x=2335677 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a8_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.000.primitives.buf"/>
+            <DIM x=3686400 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a8_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_8.obj.000.meshlets.buf"/>
+            <DIM x=12168 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+		<!-- LOD 9 -->
+		<buffer name="a9_verticesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.vertices.buf"/>
+            <DIM x=9830408 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a9_normalsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.normals.buf"/>
+            <DIM x=7352583 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+        <buffer name="a9_texcoordsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.texcoords.buf"/>
+            <DIM x=7395840 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>
+        <buffer name="a9_indicesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.000.indices.buf"/>
+            <DIM x=10137393 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>    
+        <buffer name="a9_primitivesBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.000.primitives.buf"/>
+            <DIM x=14745600 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+        <buffer name="a9_meshletsBuffer" >
+            <file name="../../assets/asteroids/lods/asteroid_9.obj.000.meshlets.buf"/>
+            <DIM x=52800 y=1 z=1 />
+			<structure>
+				<field value="UINT" />
+			</structure>
+        </buffer>
+    </buffers>	
+
+	<materials>
+
+		<!-- MESH SHADERS -->
+
+		<!-- LOD 0 -->
+        <material name="mesh_asteroid_0">
+
+            <buffers>
+                <buffer name="a0_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a0_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a0_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a0_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a0_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a0_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A0_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+        <!-- LOD 1 -->
+        <material name="mesh_asteroid_1">
+
+            <buffers>
+                <buffer name="a1_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a1_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a1_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a1_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a1_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a1_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+					
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A1_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 2 -->
+        <material name="mesh_asteroid_2">
+
+            <buffers>
+                <buffer name="a2_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a2_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a2_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a2_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a2_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a2_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A2_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 3 -->
+        <material name="mesh_asteroid_3">
+
+            <buffers>
+                <buffer name="a3_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a3_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a3_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a3_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a3_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a3_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A3_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 4 -->
+        <material name="mesh_asteroid_4">
+
+            <buffers>
+                <buffer name="a4_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a4_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a4_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a4_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a4_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a4_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A4_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 5 -->
+        <material name="mesh_asteroid_5">
+
+            <buffers>
+                <buffer name="a5_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a5_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a5_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a5_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a5_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a5_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A5_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 6 -->
+        <material name="mesh_asteroid_6">
+
+            <buffers>
+                <buffer name="a6_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a6_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a6_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a6_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a6_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a6_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A6_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 7 -->
+        <material name="mesh_asteroid_7">
+
+            <buffers>
+                <buffer name="a7_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a7_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a7_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a7_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a7_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a7_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A7_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 8 -->
+        <material name="mesh_asteroid_8">
+
+            <buffers>
+                <buffer name="a8_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a8_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a8_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a8_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a8_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a8_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+					
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A8_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+		<!-- LOD 9 -->
+        <material name="mesh_asteroid_9">
+
+            <buffers>
+                <buffer name="a9_verticesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="a9_normalsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="2" />
+                </buffer>
+                <buffer name="a9_texcoordsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="3" />
+				</buffer>
+				<buffer name="a9_indicesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="4" />
+                </buffer>
+				<buffer name="a9_primitivesBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="5" />
+				</buffer>
+				<buffer name="a9_meshletsBuffer">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="6" />
+				</buffer>
+            </buffers>
+            
+            <textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="meshShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A9_DISPLACEMENT" />
+                </values>
+            </shader>
+
+        </material>
+
+		<!-- TRAD SHADERS -->
+
+		<!-- LOD 0 -->
+		<material name="trad_asteroid_0">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A0_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 1 -->
+		<material name="trad_asteroid_1">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A1_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 2 -->
+		<material name="trad_asteroid_2">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A2_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 3 -->
+		<material name="trad_asteroid_3">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A3_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 4 -->
+		<material name="trad_asteroid_4">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A4_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 5 -->
+		<material name="trad_asteroid_5">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A5_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 6 -->
+		<material name="trad_asteroid_6">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A6_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 7 -->
+		<material name="trad_asteroid_7">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A7_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 8 -->
+		<material name="trad_asteroid_8">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A8_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		<!-- LOD 9 -->
+		<material name="trad_asteroid_9">
+
+			<textures>
+                <texture name="tex" UNIT=0 />
+            </textures>
+	        
+            <shader name="tradShaders" >
+				<values>
+                    <valueof uniform="tex"
+                             type="TEXTURE_BINDING" context="CURRENT"
+                             component="UNIT" id=0 />
+            
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+							 
+					<valueof uniform="m_normal" 
+							 type="RENDERER" context="CURRENT" 
+							 component="NORMAL" />
+							 
+					<valueof uniform="m_view" 
+							 type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+							 
+					<valueof uniform="l_dir" 
+							 type="LIGHT" context="objLight"
+							 component="DIRECTION" />
+
+                    <valueof uniform="scale" 
+							 type="RENDERER" context="CURRENT"
+                             component="SCALE" />
+
+					<valueof uniform="displacement" 
+							 type="RENDERER" context="CURRENT"
+                             component="A9_DISPLACEMENT" />
+                </values>
+            </shader>
+		</material>
+		
+	</materials>
+	
+</materialLib>

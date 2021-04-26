@@ -4,20 +4,20 @@
 layout(local_size_x=32) in;
 layout(triangles, max_vertices=256, max_primitives=512) out;
 
-taskNV in perTaskData {
-  uint task_id;
-} t_in;
-
 out PerVertexData
 {
   vec3 normal;
   vec2 texCoord;
+  vec3 lightDir;
 } v_out[];   
 
 uniform mat4 m_pvm;
+uniform vec4 l_dir;
+uniform mat4 m_view;
 uniform mat3 m_normal;
 
 uniform float scale;
+uniform float displacement;
 
 layout(std430, binding = 1) readonly buffer verticesBuffer
 {
@@ -46,13 +46,15 @@ layout(std430, binding = 5) readonly buffer primitivesBuffer
 
 layout(std430, binding = 6) readonly buffer meshletsBuffer
 {
-    uint meshlets[];
+  uint meshlets[];
 };
 
 vec4 transform (vec4 vertex) {
-    
-    vec4 v = vertex + vec4(float(t_in.task_id) * 0.5, 0, 0, 0);
-    return v;
+
+  vec3 transformed = vertex.xyz * scale;
+  transformed.x += displacement;
+
+  return vec4 (transformed, vertex.w);
 
 }
 
@@ -79,23 +81,26 @@ void main()
   for (int i=0; i < vertices_per_thread; i++) {
 
     uint idx = min (i * workg_len + local_id, indices_count - 1);
-    uint index = indices[indices_start + idx];
+    uint vIndex = indices[(indices_start + idx) * 3 + 0];
+    uint nIndex = indices[(indices_start + idx) * 3 + 1];
+    uint tIndex = indices[(indices_start + idx) * 3 + 2];
 
-    vec4 vertex = vec4(scale * vertices[index * 4 + 0],
-                       scale * vertices[index * 4 + 1],
-                       scale * vertices[index * 4 + 2],
-                       vertices[index * 4 + 3]);
+    vec4 vertex = transform(vec4(vertices[vIndex * 4 + 0],
+                                 vertices[vIndex * 4 + 1],
+                                 vertices[vIndex * 4 + 2],
+                                 vertices[vIndex * 4 + 3]));
 
-    vec3 normal = vec3(normals[index * 3 + 0],
-                       normals[index * 3 + 1],
-                       normals[index * 3 + 2]);
+    vec3 normal = vec3(normals[nIndex * 3 + 0],
+                       normals[nIndex * 3 + 1],
+                       normals[nIndex * 3 + 2]);
 
-    vec2 texCoord = vec2(texCoords[index * 2 + 0],
-                         texCoords[index * 2 + 1]);
+    vec2 texCoord = vec2(texCoords[tIndex * 3 + 0],
+                         texCoords[tIndex * 3 + 1]);
 
-    gl_MeshVerticesNV[idx].gl_Position = m_pvm * transform(vertex);
-    v_out[idx].normal = m_normal * normal;
+    gl_MeshVerticesNV[idx].gl_Position = m_pvm * vertex;
+    v_out[idx].normal = normalize(m_normal * normal);
     v_out[idx].texCoord = texCoord;
+    v_out[idx].lightDir = normalize(vec3(m_view * l_dir));
   }
 
   // Primitives
