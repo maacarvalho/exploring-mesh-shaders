@@ -6,7 +6,8 @@
     </textures>
 
 	<shaders>
-        <shader name="meshShaders" 	    ms = "shaders/mesh_asteroids.mesh" 
+        <shader name="meshShaders" 	    ts = "shaders/mesh_asteroids.task" 
+										ms = "shaders/mesh_asteroids.mesh" 
 										ps = "shaders/asteroids.frag" />
 		<shader name="tradShaders" 	    vs = "shaders/trad_asteroids.vert" 
 										ps = "shaders/asteroids.frag" />

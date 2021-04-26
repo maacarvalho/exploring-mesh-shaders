@@ -4,6 +4,10 @@
 layout(local_size_x=32) in;
 layout(triangles, max_vertices=256, max_primitives=512) out;
 
+taskNV in perTaskData {
+  uint task_id;
+} t_in;
+
 out PerVertexData
 {
   vec3 normal;
@@ -64,7 +68,7 @@ void main()
   // Inputs
   uint local_id  = gl_LocalInvocationID.x;
   uint global_id  = gl_GlobalInvocationID.x;
-  uint meshlet_id = gl_WorkGroupID.x;
+  uint meshlet_id = t_in.task_id;
   uint workg_len = gl_WorkGroupSize.x;
 
   // Meshlet Info
