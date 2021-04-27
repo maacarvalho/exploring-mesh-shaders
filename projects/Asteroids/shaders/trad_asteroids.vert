@@ -23,6 +23,7 @@ vec4 transform (vec4 vertex) {
 
   vec3 transformed = vertex.xyz * scale;
   transformed.x += displacement;
+  transformed.z -= 2.50 * gl_InstanceID;
 
   return vec4 (transformed, vertex.w);
 

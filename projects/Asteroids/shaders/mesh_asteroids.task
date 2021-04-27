@@ -12,6 +12,6 @@ void main()
   
   t_out.task_id = gl_WorkGroupID.x;
 
-  gl_TaskCountNV = 1;
+  gl_TaskCountNV = 10;
  
 }
