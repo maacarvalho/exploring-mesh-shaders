@@ -22,8 +22,8 @@ CACHE_SIZE                = 98304
 N_WARPS                   = 4
 MAX_MESHLET_SIZE          = CACHE_SIZE / N_WARPS
 --MAX_MESHLET_SIZE          = 168
-MAX_MESHLET_VERTICES      = 256
-MAX_MESHLET_PRIMITIVES    = 512
+--MAX_MESHLET_VERTICES      = 64
+--MAX_MESHLET_PRIMITIVES    = 128
 
 -- Size of a vertex
 GEOMETRY_SIZE             = 0
@@ -348,14 +348,23 @@ printObj = function ()
 end
 
 -- "main"
-if arg[1] == '-p' then
+--if arg[1] == '-p' then
     -- Setting file path
-    OBJ_PATH = arg[2]
+    --OBJ_PATH = arg[2]
     -- Printing contents of the file
-    printObj()
-else
+    --printObj()
+--else
     -- Setting file path
-    OBJ_PATH = arg[1]
+    --OBJ_PATH = arg[1]
     -- Converting file
-    convertObj()
-end
+    --convertObj()
+--end
+
+-- Setting file path
+OBJ_PATH = arg[1]
+-- Setting max_vertices and max_primitives
+MAX_MESHLET_VERTICES      = arg[2]
+MAX_MESHLET_PRIMITIVES    = arg[3]
+
+-- Converting file
+convertObj()

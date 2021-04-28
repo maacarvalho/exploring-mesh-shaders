@@ -51,20 +51,20 @@ else
     done
 
     echo "================================== Counters ==============================="
-    echo "Vertex Count: $vertices_count"
-    echo "Normals Count: $normals_count"
-    echo "TexCoords Count: $texcoords_count"
+    echo "Vertex Count: $vertices_count;"
+    echo "Normals Count: $normals_count;"
+    echo "TexCoords Count: $texcoords_count;"
 
     
     for m in "${!indices_count[@]}"
     do
 
-        echo "Indices Count ($m):  ${indices_count[$m]}"
-        echo "Primitives Count ($m):  ${primitives_count[$m]}"
-        echo "Meshlets Count ($m):  ${meshlets_count[$m]}"
-        echo "Meshes Count ($m):  ${meshes_count[$m]}"
-        echo "Diffuse ($m): " ${diffuse_colors[$m]}
-        echo "Texture ($m): " ${textures[$m]}
+        echo "Indices Count ($m):  ${indices_count[$m]};"
+        echo "Primitives Count ($m):  ${primitives_count[$m]};"
+        echo "Meshlets Count ($m):  ${meshlets_count[$m]};"
+        echo "Meshes Count ($m):  ${meshes_count[$m]};"
+        echo "Diffuse ($m):  ${diffuse_colors[$m]};"
+        echo "Texture ($m):  ${textures[$m]};"
 
     done
 
@@ -205,7 +205,12 @@ else
 			<structure>
 				<field value=\"FLOAT\" />
 			</structure>
-		</buffer>
+		</buffer>"
+
+    
+    if [ ! -z "${textures[$m]}" ]
+    then
+        mlib_str+="
         <buffer name=\"texcoordsBuffer\" >
             <file name=\"$basename.texcoords.buf\"/>
             <DIM x=$texcoords_count y=1 z=1 />
@@ -213,7 +218,7 @@ else
 				<field value=\"FLOAT\" />
 			</structure>
         </buffer>"
-
+    fi
 
     for m in "${!indices_count[@]}"
     do
@@ -259,11 +264,19 @@ else
                 <buffer name=\"normalsBuffer\">
 					<TYPE value=\"SHADER_STORAGE\" />
     				<BINDING_POINT value=\"2\" />
-                </buffer>
+                </buffer>"
+
+
+        if [ ! -z "${textures[$m]}" ]
+        then
+            mlib_str+="
                 <buffer name=\"texcoordsBuffer\">
 					<TYPE value=\"SHADER_STORAGE\" />
     				<BINDING_POINT value=\"3\" />
-				</buffer>
+				</buffer>"
+        fi
+
+        mlib_str+="
 				<buffer name=\"indicesBuffer$m\">
 					<TYPE value=\"SHADER_STORAGE\" />
     				<BINDING_POINT value=\"4\" />
