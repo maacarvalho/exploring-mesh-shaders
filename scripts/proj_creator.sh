@@ -13,8 +13,8 @@ else
 
     sizes=$(wc $1*)
 
-    echo "================================== Sizes =================================="
-    echo "$sizes"
+    #echo "================================== Sizes =================================="
+    #echo "$sizes"
 
     vertices_count=$(echo "$sizes" | awk '/vertices.buf/ {print $2}')
     normals_count=$(echo "$sizes" | awk '/normals.buf/ {print $2}')
@@ -50,25 +50,25 @@ else
         material_count+=1 
     done
 
-    echo "================================== Counters ==============================="
-    echo "Vertex Count: $vertices_count;"
-    echo "Normals Count: $normals_count;"
-    echo "TexCoords Count: $texcoords_count;"
+    #echo "================================== Counters ==============================="
+    #echo "Vertex Count: $vertices_count;"
+    #echo "Normals Count: $normals_count;"
+    #echo "TexCoords Count: $texcoords_count;"
 
     
-    for m in "${!indices_count[@]}"
-    do
+    #for m in "${!indices_count[@]}"
+    #do
 
-        echo "Indices Count ($m):  ${indices_count[$m]};"
-        echo "Primitives Count ($m):  ${primitives_count[$m]};"
-        echo "Meshlets Count ($m):  ${meshlets_count[$m]};"
-        echo "Meshes Count ($m):  ${meshes_count[$m]};"
-        echo "Diffuse ($m):  ${diffuse_colors[$m]};"
-        echo "Texture ($m):  ${textures[$m]};"
+        #echo "Indices Count ($m):  ${indices_count[$m]};"
+        #echo "Primitives Count ($m):  ${primitives_count[$m]};"
+        #echo "Meshlets Count ($m):  ${meshlets_count[$m]};"
+        #echo "Meshes Count ($m):  ${meshes_count[$m]};"
+        #echo "Diffuse ($m):  ${diffuse_colors[$m]};"
+        #echo "Texture ($m):  ${textures[$m]};"
 
-    done
+    #done
 
-    echo "================================== Project ================================"
+    #echo "================================== Project ================================"
 
     proj_str="<?xml version=\"1.0\" ?>
 <project name=\"Obj Renderer\" >
@@ -165,7 +165,7 @@ else
 
     echo "$proj_str" > ${1}.nau
 
-    echo "================================== Material Lib ==========================="
+    #echo "================================== Material Lib ==========================="
 
     mlib_str="<?xml version=\"1.0\" ?>
 <materialLib name=\"objMatLib\">

@@ -363,8 +363,8 @@ end
 -- Setting file path
 OBJ_PATH = arg[1]
 -- Setting max_vertices and max_primitives
-MAX_MESHLET_VERTICES      = arg[2]
-MAX_MESHLET_PRIMITIVES    = arg[3]
+MAX_MESHLET_VERTICES      = tonumber(arg[2])
+MAX_MESHLET_PRIMITIVES    = tonumber(arg[3])
 
 -- Converting file
 convertObj()
