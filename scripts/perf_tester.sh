@@ -121,7 +121,6 @@ void main()
 create_tex_frag_shader() {
 
     echo "#version 460
-//#extension GL_NV_mesh_shader : enable
 
 uniform sampler2D tex;
 
@@ -155,7 +154,6 @@ void main()
 create_color_frag_shader() {
 
     echo "#version 460
-//#extension GL_NV_mesh_shader : enable
 
 uniform vec3 diffuse;
 
@@ -182,28 +180,61 @@ void main()
 
 }
 
+## Creates a vertex shader that is equivalent to the mesh shader
+create_vert_shader() {
+
+    echo "#version 460
+
+uniform mat4 m_pvm;
+uniform vec4 l_dir;
+uniform mat4 m_view;
+uniform mat3 m_normal;
+
+uniform float scale;
+
+in vec4 position;
+in vec4 normal;
+in vec4 texCoord0;
+
+out PerVertexData
+{
+  vec3 normal;
+  vec2 texCoord;
+  vec3 lightDir;
+} v_out;  
+
+void main()
+{
+	v_out.normal = normalize(m_normal * vec3(normal));
+	v_out.texCoord = vec2(texCoord0);
+	v_out.lightDir = normalize(vec3(m_view * l_dir));
+
+	gl_Position = m_pvm * vec4(scale * position.xyz, position.w);
+}"
+
+}
 ## Creates a lua script for measure pipeline times
 create_timer_lua_script () {
 
-    echo "startTimer = function()
+    echo "startTimer_$1_$2_$3 = function()
 	local timer = {}
 	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
 
-	local file = io.open(\"$dirname/performance.csv\", \"a\")
-    local str = string.gsub(string.format(\"%f;\", timer[1]), \"[.]\", \",\")
+	local file = io.open(\"performance.csv\", \"a\")
+    local str = string.gsub(string.format(\"%d;%d;%d;%f;\", $1, $2, $3, timer[1]), \"[.]\", \",\")
 	file:write(str)
 	file:close()
 
 end
 
-stopTimer = function()
+stopTimer_$1_$2_$3 = function()
 	local timer = {}
 	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
 
     local frame_counter = {}
     getAttr(\"RENDERER\", \"CURRENT\", \"FRAME_COUNT\", 0, frame_counter)
 	
-	local file = io.open(\"$dirname/performance.csv\", \"a\");
+	local file = io.open(\"performance.csv\", \"a\");
     local str = string.gsub(string.format(\"%f;%f\\n\", timer[1], frame_counter[1]), \"[.]\", \",\")
 	file:write(str)
 	file:close()
@@ -227,11 +258,7 @@ create_proj () {
             <attribute name=\"SCALE\" data=\"FLOAT\" type=\"RENDERER\" value=\"0.1\" />$attributes_str
         </attributes>
 
-        <scenes>
-            <!--scene name=\"objScene\" type=\"Scene\"-->
-                <!--SCALE x=0.1 y=0.1 z=0.1 /-->
-                <!--file name=\"$basename\"/-->
-            <!--/scene-->
+        <scenes>$scenes_str
         </scenes>
 
         <viewports>
@@ -329,8 +356,10 @@ measure_buffers () {
             meshlets_count[$mat]=$(echo "$sizes" | awk "/.$mat.meshlets.buf/ {print \$2}")
             meshes_count[$mat]=$(echo "$sizes" | awk "/.$mat.meshlets.buf/ {print \$1}")
             diffuse_colors[$mat]=$(awk "/^$mat/ {printf \"x=\\\"%s\\\" y=\\\"%s\\\" z=\\\"%s\\\"\", \$2, \$3, \$4}" ${1}.materials.buf)
-            textures[$mat]=$(awk "/^$mat/ {print \$5}" ${1}.materials.buf)
-
+            if [[ ! $(awk "/^$mat/ {print \$5}" ${1}.materials.buf) -eq "" ]] 
+            then
+                textures[$mat]=$(awk "/^$mat/ {print \$5}" ${1}.materials.buf)
+            fi
         else
             break
         fi
@@ -358,11 +387,118 @@ measure_buffers () {
 
 }
 
+add_traditional_pipeline () {
+
+    # SCENES
+
+    scenes_str+="
+            <scene name=\"objScene\" type=\"Scene\">
+                <file name=\"$basename\"/>
+            </scene>"
+
+    # PIPELINES
+
+    pipelines_str+="
+        <pipeline name=\"Traditional\" default=\"true\" frameCount = 500>
+            <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
+            <pass class=\"default\" name=\"traditionalPass\">
+                <scenes>
+                    <scene name=\"objScene\" />
+                </scenes>
+                <camera name=\"objCamera\" />
+                <lights>
+                    <light name=\"objLight\" />
+                </lights>
+                <materialMaps>
+					<map fromMaterial=\"*\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_000\" />
+                </materialMaps>
+            </pass>
+            <postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
+        </pipeline>"
+ 
+    # SHADERS
+
+    if [ ! "${#textures[@]}" -eq 0 ] 
+    then
+        shaders_str+="
+        <shader name=\"tradTex\" 	                  vs = \"shaders/objTrad.vert\" 
+										            ps = \"shaders/objTex.frag\" />"
+
+    else
+        shaders_str+="
+        <shader name=\"tradColor\"                    vs = \"shaders/objTrad.vert\" 
+										            ps = \"shaders/objColor.frag\" />"
+    fi
+
+    # MATERIALS
+
+    for m in "${!indices_count[@]}"
+    do
+        materials_str+="
+        <material name=\"tradMat_$m\">
+        "
+
+        if [ ! -z "${textures[$m]}" ] 
+        then
+
+            materials_str+="
+            <textures>
+                <texture name=\"tex$m\" UNIT=0 />
+            </textures>
+	        
+            <shader name=\"tradTex\" >
+				<values>
+                    <valueof uniform=\"tex\"
+                             type=\"TEXTURE_BINDING\" context=\"CURRENT\"
+                             component=\"UNIT\" id=0 />
+            "
+
+        else 
+            
+            materials_str+="
+            <shader name=\"tradColor\" >
+				<values>
+                    <valueof uniform=\"diffuse\"
+                             type=\"RENDERER\" context=\"CURRENT\"
+                             component=\"DIFFUSE_$m\" />
+            "
+        fi
+
+        materials_str+="
+					<valueof uniform=\"m_pvm\" 
+							 type=\"RENDERER\" context=\"CURRENT\" 
+							 component=\"PROJECTION_VIEW_MODEL\" />
+							 
+					<valueof uniform=\"m_normal\" 
+							 type=\"RENDERER\" context=\"CURRENT\" 
+							 component=\"NORMAL\" />
+							 
+					<valueof uniform=\"m_view\" 
+							 type=\"RENDERER\" context=\"CURRENT\" 
+							 component=\"VIEW\" />
+							 
+					<valueof uniform=\"l_dir\" 
+							 type=\"LIGHT\" context=\"objLight\"
+							 component=\"DIRECTION\" />
+
+                    <valueof uniform=\"scale\" 
+							 type=\"RENDERER\" context=\"CURRENT\"
+                             component=\"SCALE\" />
+                </values>
+            </shader>
+
+        </material>
+        "
+
+    done
+    
+}
+
 add_pipelines () {
 
     pipelines_str+="
         <pipeline name=\"Mesh_$1_$2_$3\" default=\"true\" frameCount = 500>
-            <preScript file="times.lua" script="startTimer" />"
+            <preScript file=\"scripts/times.$1.$2.$3.lua\" script=\"startTimer_$1_$2_$3\" />"
     
     for m in "${!indices_count[@]}"
     do
@@ -377,7 +513,7 @@ add_pipelines () {
     done
 
     pipelines_str+="
-            <postScript file="times.lua" script="stopTimer" />
+            <postScript file=\"scripts/times.$1.$2.$3.lua\" script=\"stopTimer_$1_$2_$3\" />
         </pipeline>"
 
 }
@@ -392,7 +528,7 @@ add_attributes () {
             if [ -z "${textures[$m]}" ] 
             then 
                 attributes_str+="
-                <attribute name=\"DIFFUSE_$m\" data=\"VEC3\" type=\"RENDERER\" ${diffuse_colors[$m]} />"
+            <attribute name=\"DIFFUSE_$m\" data=\"VEC3\" type=\"RENDERER\" ${diffuse_colors[$m]} />"
             fi
         done
     fi
@@ -421,7 +557,7 @@ add_shaders () {
     shaders_str+="
         <shader name=\"meshColor_$1_$2_$3\"         ms = \"shaders/obj.$1.$2.$3.mesh\" 
 										            ps = \"shaders/objColor.frag\" />"
-    if [ ! -z "${textures[$m]}" ]
+    if [ ! "${#textures[@]}" -eq 0 ] 
     then
         shaders_str+="
         <shader name=\"meshTex_$1_$2_$3\" 	        ms = \"shaders/obj.$1.$2.$3.mesh\" 
@@ -449,7 +585,7 @@ add_buffers () {
 		</buffer>"
 
     
-    if [ ! -z "${textures[$m]}" ]
+    if [ ! "${#textures[@]}" -eq 0 ] 
     then
         buffers_str+="
         <buffer name=\"texcoordsBuffer_$1_$2\" >
@@ -604,8 +740,8 @@ else
     #max_vertices=( 256 128 64 32 16 8 )
     #max_primitives=( 512 256 128 64 32 16 8 )
     #local_size=( 32 16 8 )
-    max_vertices=( 256 )
-    max_primitives=( 512 )
+    max_vertices=( 256 128 )
+    max_primitives=( 512 256 )
     local_size=( 32 16 )
 
     declare vertices_count
@@ -618,6 +754,7 @@ else
     declare -A diffuse_colors
     declare -A textures
 
+    scenes_str=""
     pipelines_str=""
     attributes_str=""
     textures_str=""
@@ -630,21 +767,29 @@ else
     [[ ! -f "$dirname/shaders/objTex.frag" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
     [[ ! -f "$dirname/shaders/objColor.frag" ]] && create_color_frag_shader > "$dirname/shaders/objColor.frag"
 
-    # Creating performance recorder
-    [[ ! -d "$dirname/times.lua" ]] && create_timer_lua_script > "$dirname/times.lua"
+    # Creating vertex shader
+    [[ ! -f "$dirname/shaders/objTrad.vert" ]] && create_vert_shader > "$dirname/shaders/objTrad.vert"
 
-    materials_loaded=false
+    # Creating performance script for traditional pipeline
+    [[ ! -d "$dirname/scripts" ]] && mkdir "$dirname/scripts"
+    [[ ! -f "$dirname/scripts/times.0.0.0.lua" ]] && create_timer_lua_script 0 0 0 > "$dirname/scripts/times.0.0.0.lua"
+
+    materials_loaded=0
 
     for maxv in "${max_vertices[@]}"
     do
         for maxp in "${max_primitives[@]}" 
         do
-            folder=$(printf "%03d_%03d" $maxv $maxp)
+            folder=$(printf "buffers/%03d_%03d" $maxv $maxp)
 
             # Creating mesh shader
             for locs in "${local_size[@]}"
             do
+                # Creating mesh shader
                 [[ ! -f "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh" ]] && create_mesh_shader $locs $maxv $maxp > "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh"
+
+                # Creating lua script for performance measuring
+                [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script $locs $maxv $maxp > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
             done
 
             # Folder for the buffers
@@ -661,8 +806,19 @@ else
 
             fi
 
-            # Measure buffers
+            # Getting information on the materials of the mesh
             measure_buffers "$dirname/$folder/$basename"
+
+            # Measure buffers
+            if [[ $materials_loaded -eq 0 ]]
+            then
+
+                # Creating traditional pipeline
+                add_traditional_pipeline 
+
+                materials_loaded=1
+
+            fi
 
             add_attributes
             add_textures
