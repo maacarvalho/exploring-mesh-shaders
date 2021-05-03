@@ -182,6 +182,37 @@ void main()
 
 }
 
+## Creates a lua script for measure pipeline times
+create_timer_lua_script () {
+
+    echo "startTimer = function()
+	local timer = {}
+	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
+
+	local file = io.open(\"$dirname/performance.csv\", \"a\")
+    local str = string.gsub(string.format(\"%f;\", timer[1]), \"[.]\", \",\")
+	file:write(str)
+	file:close()
+
+end
+
+stopTimer = function()
+	local timer = {}
+	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
+
+    local frame_counter = {}
+    getAttr(\"RENDERER\", \"CURRENT\", \"FRAME_COUNT\", 0, frame_counter)
+	
+	local file = io.open(\"$dirname/performance.csv\", \"a\");
+    local str = string.gsub(string.format(\"%f;%f\\n\", timer[1], frame_counter[1]), \"[.]\", \",\")
+	file:write(str)
+	file:close()
+
+end
+
+"
+}
+
 ## Creates a project for testing combinations
 # Arguments
 # 1 - String with the basename of .obj file
@@ -197,10 +228,10 @@ create_proj () {
         </attributes>
 
         <scenes>
-            <scene name=\"objScene\" type=\"Scene\">
-                <SCALE x=0.1 y=0.1 z=0.1 />
-                <file name=\"$basename\"/>
-            </scene>
+            <!--scene name=\"objScene\" type=\"Scene\"-->
+                <!--SCALE x=0.1 y=0.1 z=0.1 /-->
+                <!--file name=\"$basename\"/-->
+            <!--/scene-->
         </scenes>
 
         <viewports>
@@ -233,7 +264,7 @@ create_proj () {
         </materialLibs>
     </assets>
     
-    <pipelines>$pipelines_str
+    <pipelines mode="RUN_ALL">$pipelines_str
     </pipelines>
 
     <interface>
@@ -330,7 +361,8 @@ measure_buffers () {
 add_pipelines () {
 
     pipelines_str+="
-        <pipeline name=\"Mesh_$1_$2_$3\" default=\"true\">"
+        <pipeline name=\"Mesh_$1_$2_$3\" default=\"true\" frameCount = 500>
+            <preScript file="times.lua" script="startTimer" />"
     
     for m in "${!indices_count[@]}"
     do
@@ -345,35 +377,42 @@ add_pipelines () {
     done
 
     pipelines_str+="
+            <postScript file="times.lua" script="stopTimer" />
         </pipeline>"
 
 }
 
 add_attributes () {
 
-    attributes_str=""
-    for m in "${!indices_count[@]}"
-    do
-        if [ -z "${textures[$m]}" ] 
-        then 
-            attributes_str+="
-            <attribute name=\"DIFFUSE_$m\" data=\"VEC3\" type=\"RENDERER\" ${diffuse_colors[$m]} />"
-        fi
-    done
+    if [ -z "$attributes_str" ]
+    then
+        attributes_str=""
+        for m in "${!indices_count[@]}"
+        do
+            if [ -z "${textures[$m]}" ] 
+            then 
+                attributes_str+="
+                <attribute name=\"DIFFUSE_$m\" data=\"VEC3\" type=\"RENDERER\" ${diffuse_colors[$m]} />"
+            fi
+        done
+    fi
 
 }
 
 add_textures () {
 
-    textures_str=""
-    for m in "${!indices_count[@]}"
-    do
-        if [ ! -z "${textures[$m]}" ]
-        then
-            textures_str+="
-        <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
-        fi
-    done
+    if [ -z "$textures_str" ]
+    then
+        textures_str=""
+        for m in "${!indices_count[@]}"
+        do
+            if [ ! -z "${textures[$m]}" ]
+            then
+                textures_str+="
+            <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
+            fi
+        done
+    fi
 
 }
 
@@ -562,9 +601,12 @@ else
     dirname=$(dirname $filepath)
     basename=$(basename $filepath)
 
-    max_vertices=( 512 256 )
+    #max_vertices=( 256 128 64 32 16 8 )
+    #max_primitives=( 512 256 128 64 32 16 8 )
+    #local_size=( 32 16 8 )
+    max_vertices=( 256 )
     max_primitives=( 512 )
-    local_size=( 32 16 8 )
+    local_size=( 32 16 )
 
     declare vertices_count
     declare normals_count
@@ -587,6 +629,9 @@ else
     [[ ! -d "$dirname/shaders" ]] && mkdir "$dirname/shaders"
     [[ ! -f "$dirname/shaders/objTex.frag" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
     [[ ! -f "$dirname/shaders/objColor.frag" ]] && create_color_frag_shader > "$dirname/shaders/objColor.frag"
+
+    # Creating performance recorder
+    [[ ! -d "$dirname/times.lua" ]] && create_timer_lua_script > "$dirname/times.lua"
 
     materials_loaded=false
 
@@ -619,17 +664,9 @@ else
             # Measure buffers
             measure_buffers "$dirname/$folder/$basename"
 
-            # Add test to project
-            #if [ $materials_loaded -eq false ] 
-            #then
-                
             add_attributes
             add_textures
 
-                #materials_loaded=true
-
-            #fi
-            
             for locs in "${local_size[@]}"
             do
                 add_pipelines $locs $maxv $maxp
