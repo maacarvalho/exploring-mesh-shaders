@@ -287,7 +287,7 @@ create_proj () {
         </lights>
     
         <materialLibs>
-            <materialLib filename=\"$basename.mlib\"/>
+            <materialLib filename=\"$basename.$1.$2.mlib\"/>
         </materialLibs>
     </assets>
     
@@ -737,12 +737,12 @@ else
     dirname=$(dirname $filepath)
     basename=$(basename $filepath)
 
-    #max_vertices=( 256 128 64 32 16 8 )
-    #max_primitives=( 512 256 128 64 32 16 8 )
-    #local_size=( 32 16 8 )
-    max_vertices=( 256 128 )
-    max_primitives=( 512 256 )
-    local_size=( 32 16 )
+    max_vertices=( 256 128 64 32 16 8 )
+    max_primitives=( 512 256 128 64 32 16 8 )
+    local_size=( 32 16 8 )
+    #max_vertices=( 256 128 )
+    #max_primitives=( 512 256 )
+    #local_size=( 32 16 )
 
     declare vertices_count
     declare normals_count
@@ -831,11 +831,21 @@ else
             done
 
             add_buffers $maxv $maxp
+            
+            # Creating projects
+            create_proj $maxv $maxp > $filepath.$maxv.$maxp.nau
+            create_mlib > $filepath.$maxv.$maxp.mlib
+
+            # Clearing project settings
+            scenes_str=""
+            pipelines_str=""
+            attributes_str=""
+            textures_str=""
+            shaders_str=""
+            buffers_str=""
+            materials_str=""
 
         done
     done
-
-    create_proj > $filepath.nau
-    create_mlib > $filepath.mlib
 
 fi
