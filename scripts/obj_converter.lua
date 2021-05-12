@@ -1,6 +1,10 @@
 -- File Path
 OBJ_PATH = nil
 
+-- Conversion Parameters
+CONVERT_NORMALS   = true
+CONVERT_MATERIALS = true
+
 -- File Extensions
 V_EXT       = ".vertices.buf"
 VT_EXT      = ".texcoords.buf"
@@ -22,8 +26,8 @@ CACHE_SIZE                = 98304
 N_WARPS                   = 4
 MAX_MESHLET_SIZE          = CACHE_SIZE / N_WARPS
 --MAX_MESHLET_SIZE          = 168
---MAX_MESHLET_VERTICES      = 64
---MAX_MESHLET_PRIMITIVES    = 128
+MAX_MESHLET_PRIMITIVES    = 32
+MAX_MESHLET_VERTICES      = 32
 
 -- Size of a vertex
 GEOMETRY_SIZE             = 0
@@ -64,8 +68,8 @@ write_primitive = function (prim)
     for _, v in ipairs(prim) do
 
         local v_key = v.vi
-        if v.vni then v_key = v_key.." "..v.vni end
-        if v.vti then v_key = v_key.." "..v.vti end
+        if v.vni and CONVERT_NORMALS then v_key = v_key.." "..v.vni end
+        if v.vti and CONVERT_MATERIALS then v_key = v_key.." "..v.vti end
 
         if MESHLETS[CUR_MATERIAL].INDICES_DICT[v_key] == nil then
             -- Updating meshlet size accordingly
@@ -110,8 +114,8 @@ write_primitive = function (prim)
         for _, v in ipairs(prim) do
 
             local v_key = v.vi
-            if v.vni then v_key = v_key.." "..v.vni end
-            if v.vti then v_key = v_key.." "..v.vti end
+            if v.vni and CONVERT_NORMALS then v_key = v_key.." "..v.vni end
+            if v.vti and CONVERT_MATERIALS then v_key = v_key.." "..v.vti end
 
             if MESHLETS[CUR_MATERIAL].INDICES_DICT[v_key] == nil then
                 -- Associating the global vertex index to the meshlet index
@@ -122,8 +126,8 @@ write_primitive = function (prim)
                 -- Writing index
                 if FD_I == nil then FD_I = io.open(OBJ_PATH..I_EXT, "w+") end
                 FD_I:write((v.vi - 1).." ")
-                if v.vni then FD_I:write((v.vni - 1).." ") else FD_I:write((-1).." ") end
-                if v.vti then FD_I:write((v.vti - 1).." ") else FD_I:write((-1).." ") end
+                if v.vni and CONVERT_NORMALS then FD_I:write((v.vni - 1).." ") else FD_I:write((-1).." ") end
+                if v.vti and CONVERT_MATERIALS then FD_I:write((v.vti - 1).." ") else FD_I:write((-1).." ") end
             end
 
             -- Incrementing the number of primitives currently in the mesh
@@ -200,7 +204,7 @@ convertObj = function ()
             -- Writing string to file
             FD_V:write(v_str, '\n')
 
-        elseif type == "vt" then
+        elseif type == "vt" and CONVERT_MATERIALS then
 
             -- Setting the size the texture coordinates take
             if TEXCOORDS_SIZE == 0 then TEXCOORDS_SIZE = 4 end
@@ -211,7 +215,7 @@ convertObj = function ()
             -- Writing string to file
             FD_VT:write(vt_str, '\n')
 
-        elseif type == "vn" then
+        elseif type == "vn" and CONVERT_NORMALS then
 
             -- Setting the size the geometry takes
             if NORMALS_SIZE == 0 then NORMALS_SIZE = 3 end
@@ -234,7 +238,7 @@ convertObj = function ()
 
             end
 
-        elseif type == "mtllib" then
+        elseif type == "mtllib" and CONVERT_MATERIALS then
 
             -- Processing .mtl file
             for mtl_line in mtl_loader.load(parsed_line.file, MTL_TYPES) do
@@ -277,7 +281,7 @@ convertObj = function ()
             -- Opening .materials file
             FD_MT = io.open(OBJ_PATH..MT_EXT, "w+")
 
-        elseif type == "usemtl" then
+        elseif type == "usemtl" and CONVERT_MATERIALS then
 
             -- Closing previous material files if open
             if FD_I then FD_I:close() end
@@ -308,7 +312,7 @@ convertObj = function ()
                 MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = 0
 
                 -- Writing material to file
-                FD_MT:write(string.format("%03d", m.idx).." "..m.Kd.r.." "..m.Kd.g.." "..m.Kd.b)
+                FD_MT:write(string.format("%03d", m.idx).." " ..CUR_MATERIAL.." "..m.Kd.r.." "..m.Kd.g.." "..m.Kd.b)
                 if m.map_Kd ~= nil then
                     FD_MT:write(" "..m.map_Kd)
                 end
@@ -347,24 +351,47 @@ printObj = function ()
 
 end
 
--- "main"
---if arg[1] == '-p' then
-    -- Setting file path
-    --OBJ_PATH = arg[2]
-    -- Printing contents of the file
-    --printObj()
---else
-    -- Setting file path
-    --OBJ_PATH = arg[1]
-    -- Converting file
-    --convertObj()
---end
+-- Parses the program arguments
+--- FORMAT: lua obj_converter.lua [FLAGS] file.obj
+--- FLAGS:
+----- [-mv #n] Sets #n as the max number of vertices that a meshlet should have
+----- [-mp #n] Sets #n as the max number of primitives that a meshlet should have
+----- [-nn] Makes the conversion ignore the normals
+----- [-nm] Makes the conversion ignore the materials
+parseArguments = function (arg)
 
--- Setting file path
-OBJ_PATH = arg[1]
--- Setting max_vertices and max_primitives
-MAX_MESHLET_VERTICES      = tonumber(arg[2])
-MAX_MESHLET_PRIMITIVES    = tonumber(arg[3])
+    for i=1, #(arg) - 1 do
+
+        if arg[i] == "-mv" then
+
+            assert (tonumber(arg[i+1]), "Flag -mv must be followed by a number.")
+            MAX_MESHLET_VERTICES = tonumber(arg[i+1])
+            i = i + 1
+
+        elseif arg[i] == "-mp" then
+
+            assert (tonumber(arg[i+1]), "Flag -mp must be followed by a number.")
+            MAX_MESHLET_PRIMITIVES = tonumber(arg[i+1])
+            i = i + 1
+
+        elseif arg[i] == "-nn" then
+
+            CONVERT_NORMALS = false
+
+        elseif arg[i] == "-nm" then
+
+            CONVERT_MATERIALS = false
+
+        end
+
+    end
+
+    OBJ_PATH = arg[#arg]
+
+end
+
+-- Parsing arguments
+parseArguments(arg)
 
 -- Converting file
 convertObj()

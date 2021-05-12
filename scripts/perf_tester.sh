@@ -255,7 +255,7 @@ create_proj () {
 <project name=\"Obj Renderer\" >
     <assets>
         <attributes>
-            <attribute name=\"SCALE\" data=\"FLOAT\" type=\"RENDERER\" value=\"0.1\" />$attributes_str
+            <attribute name=\"SCALE\" data=\"FLOAT\" type=\"RENDERER\" value=\"1\" />$attributes_str
         </attributes>
 
         <scenes>$scenes_str
@@ -274,8 +274,8 @@ create_proj () {
                 <FOV value = \"90\"/>
                 <NEAR value= \"0.01\"/>
                 <FAR value= \"100\"/>
-                <POSITION x=\"5\" y=\"5\" z=\"5\" w=\"1\" />
-                <LOOK_AT_POINT x=\"0\" y=\"0\" z=\"0\" />
+                <POSITION x=\"0.075\" y=\"0.1\" z=\"0.025\" w=\"1\" />
+                <LOOK_AT_POINT x=\"-1\" y=\"-0.3\" z=\"0\" />
             </camera>
         </cameras>
         
@@ -297,7 +297,7 @@ create_proj () {
     <interface>
         <window label=\"Properties\" >
             <pipelineList label=\"Pipeline\" />
-            <var label=\"Scale\" type=\"RENDERER\" context=\"CURRENT\" component=\"SCALE\" def=\"min=0 max=1\"/>
+            <var label=\"Scale\" type=\"RENDERER\" context=\"CURRENT\" component=\"SCALE\" def=\"min=0 max=100\"/>
         </window>
     </interface>
 </project>"
@@ -355,10 +355,11 @@ measure_buffers () {
             primitives_count[$mat]=$(echo "$sizes" | awk "/.$mat.primitives.buf/ {print \$2}")
             meshlets_count[$mat]=$(echo "$sizes" | awk "/.$mat.meshlets.buf/ {print \$2}")
             meshes_count[$mat]=$(echo "$sizes" | awk "/.$mat.meshlets.buf/ {print \$1}")
-            diffuse_colors[$mat]=$(awk "/^$mat/ {printf \"x=\\\"%s\\\" y=\\\"%s\\\" z=\\\"%s\\\"\", \$2, \$3, \$4}" ${1}.materials.buf)
-            if [[ ! $(awk "/^$mat/ {print \$5}" ${1}.materials.buf) -eq "" ]] 
+            material_names[$mat]=$(awk "/^$mat/ {printf \$2}" ${1}.materials.buf)
+            diffuse_colors[$mat]=$(awk "/^$mat/ {printf \"x=\\\"%s\\\" y=\\\"%s\\\" z=\\\"%s\\\"\", \$3, \$4, \$5}" ${1}.materials.buf)
+            if [[ ! -z "$(awk "/^$mat/ {print \$6}" ${1}.materials.buf)" ]] 
             then
-                textures[$mat]=$(awk "/^$mat/ {print \$5}" ${1}.materials.buf)
+                textures[$mat]=$(awk "/^$mat/ {print \$6}" ${1}.materials.buf)
             fi
         else
             break
@@ -366,25 +367,6 @@ measure_buffers () {
         
         material_count+=1 
     done
-
-    #echo "================================== Counters ==============================="
-    #echo "Vertex Count: $vertices_count;"
-    #echo "Normals Count: $normals_count;"
-    #echo "TexCoords Count: $texcoords_count;"
-
-    
-    #for m in "${!indices_count[@]}"
-    #do
-
-        #echo "Indices Count ($m):  ${indices_count[$m]};"
-        #echo "Primitives Count ($m):  ${primitives_count[$m]};"
-        #echo "Meshlets Count ($m):  ${meshlets_count[$m]};"
-        #echo "Meshes Count ($m):  ${meshes_count[$m]};"
-        #echo "Diffuse ($m):  ${diffuse_colors[$m]};"
-        #echo "Texture ($m):  ${textures[$m]};"
-
-    #done
-
 }
 
 add_traditional_pipeline () {
@@ -423,12 +405,11 @@ add_traditional_pipeline () {
         shaders_str+="
         <shader name=\"tradTex\" 	                  vs = \"shaders/objTrad.vert\" 
 										            ps = \"shaders/objTex.frag\" />"
+    fi
 
-    else
-        shaders_str+="
+    shaders_str+="
         <shader name=\"tradColor\"                    vs = \"shaders/objTrad.vert\" 
 										            ps = \"shaders/objColor.frag\" />"
-    fi
 
     # MATERIALS
 
@@ -725,7 +706,32 @@ add_materials () {
 }
 
 
-if [ $# -ne 2 ] 
+create_runner_script () {
+
+    echo "#!/usr/bin/bash
+
+project_files=\$(ls | awk '/.nau/ {print \$0}')
+
+for proj in \$project_files
+do 
+    
+    echo \"Running: \$proj\"
+
+    # Running Nau project
+    cmd.exe /C start \$proj
+
+    # Waiting for Nau project to finish
+    while [[ ! -z \$(tasklist.exe | awk '/composerImGui/ {print \$0}') ]]
+    do
+        sleep 1
+    done
+
+done"
+
+}
+
+
+if [ $# -ne 1 ] 
 then
 
     echo "Illegal number of parameters" >&2
@@ -737,12 +743,12 @@ else
     dirname=$(dirname $filepath)
     basename=$(basename $filepath)
 
-    max_vertices=( 256 128 64 32 16 8 )
-    max_primitives=( 512 256 128 64 32 16 8 )
-    local_size=( 32 16 8 )
-    #max_vertices=( 256 128 )
-    #max_primitives=( 512 256 )
-    #local_size=( 32 16 )
+    #max_vertices=( 256 128 64 32 16 8 )
+    #max_primitives=( 512 256 128 64 32 16 8 )
+    #local_size=( 32 16 8 )
+    max_vertices=( 32 )
+    max_primitives=( 128 )
+    local_size=( 32 )
 
     declare vertices_count
     declare normals_count
@@ -751,6 +757,7 @@ else
     declare -A primitives_count
     declare -A meshlets_count
     declare -A meshes_count
+    declare -A material_names
     declare -A diffuse_colors
     declare -A textures
 
@@ -774,35 +781,32 @@ else
     [[ ! -d "$dirname/scripts" ]] && mkdir "$dirname/scripts"
     [[ ! -f "$dirname/scripts/times.0.0.0.lua" ]] && create_timer_lua_script 0 0 0 > "$dirname/scripts/times.0.0.0.lua"
 
+    # Creating running script
+    [[ ! -f "$dirname/proj_runner.sh" ]] && create_runner_script > "$dirname/proj_runner.sh"
+
     materials_loaded=0
 
     for maxv in "${max_vertices[@]}"
     do
         for maxp in "${max_primitives[@]}" 
         do
+            # Creating folder to hold the buffers
+            [[ ! -d "$dirname/buffers" ]] && mkdir "$dirname/buffers"
+
             folder=$(printf "buffers/%03d_%03d" $maxv $maxp)
-
-            # Creating mesh shader
-            for locs in "${local_size[@]}"
-            do
-                # Creating mesh shader
-                [[ ! -f "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh" ]] && create_mesh_shader $locs $maxv $maxp > "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh"
-
-                # Creating lua script for performance measuring
-                [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script $locs $maxv $maxp > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
-            done
 
             # Folder for the buffers
             [[ ! -d $dirname/$folder ]] && mkdir $dirname/$folder
 
+            # Converting .obj to buffers if necessary
             if [[ ! -f "$dirname/$folder/$basename.vertices.buf" ]]
             then
                 
-                # Create buffers
-                lua obj_converter.lua $filepath $maxv $maxp
+                # Creating buffers
+                lua obj_converter.lua -mv $maxv -mp $maxp $filepath 
 
-                # Copy buffers to folder
-                mv $filepath.* $dirname/$folder
+                # Copying buffers to folder
+                mv $filepath.*.buf $dirname/$folder
 
             fi
 
@@ -820,6 +824,17 @@ else
 
             fi
 
+            # Creating mesh shader
+            for locs in "${local_size[@]}"
+            do
+                # Creating mesh shader
+                [[ ! -f "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh" ]] && create_mesh_shader $locs $maxv $maxp > "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh"
+
+                # Creating lua script for performance measuring
+                [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script $locs $maxv $maxp > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
+            done
+
+            # Creating project file
             add_attributes
             add_textures
 
