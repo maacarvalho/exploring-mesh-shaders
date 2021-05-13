@@ -189,6 +189,42 @@ convertObj = function ()
     local obj_loader = require "lib/obj_loader"
     local mtl_loader = require "lib/mtl_loader"
 
+    if not CONVERT_MATERIALS then
+
+        -- Updating current material
+        CUR_MATERIAL = "*"
+        -- Storing current material index
+        MATERIALS[CUR_MATERIAL] = {idx = MATERIALS_IDX}
+        MATERIALS[CUR_MATERIAL].Kd = {
+            r = "0.5",
+            g = "0.5",
+            b = "0.5"
+        }
+
+        -- Getting current material's properties
+        local m = MATERIALS[CUR_MATERIAL]
+
+        -- Opening files for the new materials
+        FD_I = io.open(OBJ_PATH..string.format(".%03d", m.idx)..I_EXT, "a")
+        FD_P = io.open(OBJ_PATH..string.format(".%03d", m.idx)..P_EXT, "a")
+        FD_M = io.open(OBJ_PATH..string.format(".%03d", m.idx)..M_EXT, "a")
+
+        -- Starting Meshlet information for current material
+        MESHLETS[CUR_MATERIAL] = {}
+        MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
+        MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
+        MESHLETS[CUR_MATERIAL].INDICES_OFFSET = 0
+        MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
+        MESHLETS[CUR_MATERIAL].PRIMITIVES_OFFSET = 0
+        MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = 0
+
+        -- Writing material to file
+        FD_MT = io.open(OBJ_PATH..MT_EXT, "w+")
+        FD_MT:write(string.format("%03d", m.idx).." " ..CUR_MATERIAL.." "..m.Kd.r.." "..m.Kd.g.." "..m.Kd.b)
+        FD_MT:write("\n")
+
+    end
+
     for parsed_line in obj_loader.load(OBJ_PATH, OBJ_TYPES) do
 
         local type = parsed_line.type
@@ -249,19 +285,8 @@ convertObj = function ()
                     CUR_MATERIAL = mtl_line.m
                     -- Storing current material index
                     MATERIALS[CUR_MATERIAL] = {idx = MATERIALS_IDX}
-
-                    -- Clearing the files for the materials
-                    --FD_I = io.open(OBJ_PATH..string.format(".%03d", MATERIALS_IDX)..I_EXT, "w+")
-                    --FD_P = io.open(OBJ_PATH..string.format(".%03d", MATERIALS_IDX)..P_EXT, "w+")
-                    --FD_M = io.open(OBJ_PATH..string.format(".%03d", MATERIALS_IDX)..M_EXT, "w+")
-
-                    --if FD_I then FD_I:close() end
-                    --if FD_P then FD_P:close() end
-                    --if FD_M then FD_M:close() end
-
                     -- Incrementing the index for the next material
                     MATERIALS_IDX = MATERIALS_IDX + 1
-
 
                 elseif mtl_line.type == "Kd" then
 

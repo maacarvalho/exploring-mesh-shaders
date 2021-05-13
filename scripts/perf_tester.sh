@@ -202,7 +202,7 @@ configure_mesh_pipelines () {
             if [ ! -z "${textures[$m]}" ]
             then
                 textures_str+="
-            <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
+        <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
             fi
         done
     fi
@@ -291,8 +291,15 @@ configure_traditional_pipeline () {
                 <lights>
                     <light name=\"objLight\" />
                 </lights>
-                <materialMaps>
-					<map fromMaterial=\"*\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_000\" />
+                <materialMaps>"
+
+    for m in "${!material_names[@]}"
+    do
+        pipelines_str+="
+					<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />"
+    done
+    
+    pipelines_str+="
                 </materialMaps>
             </pass>
             <postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
@@ -499,7 +506,7 @@ else
             then
                 
                 # Creating buffers
-                lua obj_converter.lua -mv $maxv -mp $maxp $filepath 
+                lua obj_converter.lua -mv $maxv -mp $maxp -nm $filepath 
 
                 # Copying buffers to folder
                 mv $filepath.*.buf $dirname/$folder
