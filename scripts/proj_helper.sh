@@ -289,7 +289,7 @@ void main()
 ## Creates a lua script for measure pipeline times
 create_timer_lua_script () {
 
-    echo "startTimer_$locs_$maxv_$maxp = function()
+    echo "startTimer_${locs}_${maxv}_${maxp} = function()
 	local timer = {}
 	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
 
@@ -300,7 +300,7 @@ create_timer_lua_script () {
 
 end
 
-stopTimer_$locs_$maxv_$maxp = function()
+stopTimer_${locs}_${maxv}_${maxp} = function()
 	local timer = {}
 	getAttr(\"RENDERER\", \"CURRENT\", \"TIMER\", 0, timer)
 

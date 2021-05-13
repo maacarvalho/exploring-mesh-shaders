@@ -82,19 +82,23 @@ configure_mesh_pipelines () {
     ## --------------------------------------- Materials ---------------------------------------
         for m in "${!indices_count[@]}"
         do
-        materials_str+="
+            materials_str+="
         <material name=\"meshMat_${locs}_${maxv}_${maxp}_$m\">
 
             <buffers>
                 <buffer name=\"verticesBuffer_${maxv}_${maxp}\">
                     <TYPE value=\"SHADER_STORAGE\" />
                     <BINDING_POINT value=\"1\" />
-                </buffer>
+                </buffer>"
+
+        if [ ! -z "${normals_count}" ]
+        then
+            materials_str+="
                 <buffer name=\"normalsBuffer_${maxv}_${maxp}\">
                     <TYPE value=\"SHADER_STORAGE\" />
                     <BINDING_POINT value=\"2\" />
                 </buffer>"
-
+        fi
 
         if [ ! -z "${textures[$m]}" ]
         then
@@ -216,14 +220,19 @@ configure_mesh_pipelines () {
 			<structure>
 				<field value=\"FLOAT\" />
 			</structure>
-		</buffer>
+		</buffer>"
+
+    if [ ! -z "${normals_count}" ]
+    then
+        buffers_str+="
         <buffer name=\"normalsBuffer_${maxv}_${maxp}\" >
             <file name=\"$folder/$basename.normals.buf\"/>
             <DIM x=$normals_count y=1 z=1 />
-			<structure>
-				<field value=\"FLOAT\" />
-			</structure>
-		</buffer>"
+            <structure>
+                <field value=\"FLOAT\" />
+            </structure>
+        </buffer>"
+    fi
 
     
     if [ ! "${#textures[@]}" -eq 0 ] 
@@ -506,7 +515,7 @@ else
             then
                 
                 # Creating buffers
-                lua obj_converter.lua -mv $maxv -mp $maxp -nm $filepath 
+                lua obj_converter.lua -mv $maxv -mp $maxp -nm -nn $filepath 
 
                 # Copying buffers to folder
                 mv $filepath.*.buf $dirname/$folder
