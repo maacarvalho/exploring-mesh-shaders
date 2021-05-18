@@ -235,7 +235,7 @@ configure_mesh_pipelines () {
     fi
 
     
-    if [ ! "${#textures[@]}" -eq 0 ] 
+    if [[ ! -z "$texcoords_count" ]]
     then
         buffers_str+="
         <buffer name=\"texcoordsBuffer_${maxv}_${maxp}\" >
@@ -316,36 +316,30 @@ configure_traditional_pipeline () {
  
 
     ## --------------------------------------- Attributes ---------------------------------------
-    if [ -z "$attributes_str" ]
-    then
-        attributes_str=""
-        for m in "${!indices_count[@]}"
-        do
-            if [ -z "${textures[$m]}" ] 
-            then 
-                attributes_str+="
+    attributes_str=""
+    for m in "${!indices_count[@]}"
+    do
+        if [[ -z "${textures[$m]}" ]]
+        then 
+            attributes_str+="
             <attribute name=\"DIFFUSE_$m\" data=\"VEC3\" type=\"RENDERER\" ${diffuse_colors[$m]} />"
-            fi
-        done
-    fi
+        fi
+    done
 
     
     ## --------------------------------------- Textures ---------------------------------------
-    if [ -z "$textures_str" ]
-    then
-        textures_str=""
-        for m in "${!indices_count[@]}"
-        do
-            if [ ! -z "${textures[$m]}" ]
-            then
-                textures_str+="
-            <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
-            fi
-        done
-    fi
+    textures_str=""
+    for m in "${!indices_count[@]}"
+    do
+        if [[ ! -z "${textures[$m]}" ]]
+        then
+            textures_str+="
+        <texture name=\"tex${m}\" filename=\"${textures[$m]#$dirname[/\\]}\" mipmap=true />"
+        fi
+    done
 
     ## --------------------------------------- Shaders ---------------------------------------
-    if [ ! "${#textures[@]}" -eq 0 ] 
+    if [[ ! -z "$texcoords_count" ]]
     then
         shaders_str+="
         <shader name=\"tradTex\" 	                  vs = \"shaders/objTrad.vert\" 
@@ -364,7 +358,7 @@ configure_traditional_pipeline () {
         <material name=\"tradMat_$m\">
         "
 
-        if [ ! -z "${textures[$m]}" ] 
+        if [[ ! -z "${textures[$m]}" ]] 
         then
 
             materials_str+="
@@ -468,101 +462,99 @@ then
     echo "Illegal number of parameters" >&2
     exit 1
 
-else
-
-    source proj_helper.sh
-
-    filepath=$1
-    dirname=$(dirname $filepath)
-    basename=$(basename $filepath)
-
-    max_vertices=( 256 128 64 32 16 8 )
-    max_primitives=( 512 256 128 64 32 16 8 )
-    local_size=( 32 16 8 )
-    #max_vertices=( 32 )
-    #max_primitives=( 128 )
-    #local_size=( 32 16 )
-
-    declare vertices_count
-    declare normals_count
-    declare texcoords_count
-    declare -A indices_count
-    declare -A primitives_count
-    declare -A meshlets_count
-    declare -A meshes_count
-    declare -A material_names
-    declare -A diffuse_colors
-    declare -A textures
-
-    reset_proj
-
-    # Creating folder structure
-    [[ ! -d "$dirname/buffers" ]] && mkdir "$dirname/buffers"
-    [[ ! -d "$dirname/shaders" ]] && mkdir "$dirname/shaders"
-    [[ ! -d "$dirname/scripts" ]] && mkdir "$dirname/scripts"
-
-    for maxv in "${max_vertices[@]}"
-    do
-        for maxp in "${max_primitives[@]}" 
-        do
-            
-            # Folder for the buffers of this specific confirguration
-            folder=$(printf "buffers/%03d_%03d" $maxv $maxp)
-            [[ ! -d $dirname/$folder ]] && mkdir $dirname/$folder
-
-            # Converting .obj to buffers if necessary
-            if [[ ! -f "$dirname/$folder/$basename.vertices.buf" ]]
-            then
-                
-                # Creating buffers
-                lua obj_converter.lua -mv $maxv -mp $maxp -nm -nn $filepath 
-
-                # Copying buffers to folder
-                mv $filepath.*.buf $dirname/$folder
-
-            fi
-
-            # Getting information on the materials of the mesh
-            measure_buffers "$dirname/$folder/$basename"
-
-            # Creating mesh shader
-            for locs in "${local_size[@]}"
-            do
-                # Creating mesh shader
-                [[ ! -f "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh" ]] && create_mesh_shader > "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh"
-
-                # Creating lua script for performance measuring
-                [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
-            done
-
-            # Configure mesh pipelines
-            configure_mesh_pipelines
-            
-            # Creating project
-            create_mlib > $filepath.$maxv.$maxp.mlib
-            create_proj > $filepath.$maxv.$maxp.nau
-
-            # Clearing project settings
-            reset_proj
-        done
-    done
-
-    # Creating remainder shaders
-    [[ ! -f "$dirname/shaders/objTrad.vert" ]] && create_vert_shader > "$dirname/shaders/objTrad.vert"
-    [[ ! -f "$dirname/shaders/objTex.frag" ]] && [[ ! -z "$texcoords_count" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
-    [[ ! -f "$dirname/shaders/objDiffuse.frag" ]] && create_diffuse_frag_shader > "$dirname/shaders/objDiffuse.frag"
-
-    # Creating project for the traditional pipeline
-    locs=0
-    maxv=0
-    maxp=0
-
-    # Creating lua script for performance measuring
-    [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
-
-    configure_traditional_pipeline
-    
-    create_proj > $filepath.$maxv.$maxp.nau
-    create_mlib > $filepath.$maxv.$maxp.mlib
-
 fi
+
+source proj_helper.sh
+
+filepath=$1
+dirname=$(dirname $filepath)
+basename=$(basename $filepath)
+
+max_vertices=( 256 128 64 32 16 8 )
+max_primitives=( 512 256 128 64 32 16 8 )
+local_size=( 32 16 8 )
+#max_vertices=( 128 )
+#max_primitives=( 256 )
+#local_size=( 32 16 8 )
+
+declare vertices_count
+declare normals_count
+declare texcoords_count
+declare -A indices_count
+declare -A primitives_count
+declare -A meshlets_count
+declare -A meshes_count
+declare -A material_names
+declare -A diffuse_colors
+declare -A textures
+
+reset_proj
+
+# Creating folder structure
+[[ ! -d "$dirname/buffers" ]] && mkdir "$dirname/buffers"
+[[ ! -d "$dirname/shaders" ]] && mkdir "$dirname/shaders"
+[[ ! -d "$dirname/scripts" ]] && mkdir "$dirname/scripts"
+
+for maxv in "${max_vertices[@]}"
+do
+    for maxp in "${max_primitives[@]}" 
+    do
+        
+        # Folder for the buffers of this specific confirguration
+        folder=$(printf "buffers/%03d_%03d" $maxv $maxp)
+        [[ ! -d $dirname/$folder ]] && mkdir $dirname/$folder
+
+        # Converting .obj to buffers if necessary
+        if [[ ! -f "$dirname/$folder/$basename.vertices.buf" ]]
+        then
+            
+            # Creating buffers
+            lua obj_converter.lua -mv $maxv -mp $maxp -nm $filepath 
+
+            # Copying buffers to folder
+            mv $filepath.*.buf $dirname/$folder
+
+        fi
+
+        # Getting information on the materials of the mesh
+        measure_buffers "$dirname/$folder/$basename"
+
+        # Creating mesh shader
+        for locs in "${local_size[@]}"
+        do
+            # Creating mesh shader
+            [[ ! -f "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh" ]] && create_mesh_shader > "$dirname/shaders/obj.$locs.$maxv.$maxp.mesh"
+
+            # Creating lua script for performance measuring
+            [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
+        done
+
+        # Configure mesh pipelines
+        configure_mesh_pipelines
+        
+        # Creating project
+        create_mlib > $filepath.$maxv.$maxp.mlib
+        create_proj > $filepath.$maxv.$maxp.nau
+
+        # Clearing project settings
+        reset_proj
+    done
+done
+
+# Creating remainder shaders
+[[ ! -f "$dirname/shaders/objTrad.vert" ]] && create_vert_shader > "$dirname/shaders/objTrad.vert"
+[[ ! -f "$dirname/shaders/objTex.frag" ]] && [[ ! -z "$texcoords_count" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
+[[ ! -f "$dirname/shaders/objDiffuse.frag" ]] && create_diffuse_frag_shader > "$dirname/shaders/objDiffuse.frag"
+
+# Creating project for the traditional pipeline
+locs=0
+maxv=0
+maxp=0
+
+# Creating lua script for performance measuring
+[[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
+
+configure_traditional_pipeline
+
+create_proj > $filepath.$maxv.$maxp.nau
+create_mlib > $filepath.$maxv.$maxp.mlib

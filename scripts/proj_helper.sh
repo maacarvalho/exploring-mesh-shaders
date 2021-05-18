@@ -132,7 +132,7 @@ void main()
 
     else 
 
-    mesh_shader+="
+        mesh_shader+="
     v_out[idx].texCoord = vec2(1, 1);"
 
     fi
