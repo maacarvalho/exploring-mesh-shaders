@@ -342,7 +342,7 @@ create_proj () {
                 <TYPE value=\"PERSPECTIVE\"/>
                 <FOV value = \"90\"/>
                 <NEAR value= \"0.01\"/>
-                <FAR value= \"100\"/>
+                <FAR value= \"10000\"/>
                 <POSITION x=\"-2.75\" y=\"11\" z=\"-5\" w=\"1\" />
                 <LOOK_AT_POINT x=\"-2.5\" y=\"11\" z=\"-4\" />
             </camera>

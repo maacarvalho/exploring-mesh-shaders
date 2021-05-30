@@ -47,7 +47,7 @@ configure_mesh_pipelines () {
 
     ## --------------------------------------- Pipelines ---------------------------------------
         pipelines_str+="
-        <pipeline name=\"Mesh_${locs}_${maxv}_${maxp}\" default=\"true\" frameCount = 500>
+        <pipeline name=\"Mesh_${locs}_${maxv}_${maxp}\" default=\"true\" frameCount = 2500>
             <preScript file=\"scripts/times.$locs.$maxv.$maxp.lua\" script=\"startTimer_${locs}_${maxv}_${maxp}\" />"
         
         for m in "${!indices_count[@]}"
@@ -290,7 +290,7 @@ configure_traditional_pipeline () {
 
     ## --------------------------------------- Pipelines ---------------------------------------
     pipelines_str+="
-        <pipeline name=\"Traditional\" default=\"true\" frameCount = 500>
+        <pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
             <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
             <pass class=\"default\" name=\"traditionalPass\">
                 <scenes>

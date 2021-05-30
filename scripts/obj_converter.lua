@@ -90,14 +90,12 @@ write_primitive = function (prim)
         updated_meshlet_primitives_count / 3 > MAX_MESHLET_PRIMITIVES then -- Can't output over the max_primitives
 
         -- Writing meshlet information & adding lines to indices and primitives
-        if FD_I == nil then FD_I = io.open(OBJ_PATH..I_EXT, "w+") end
-        FD_I:write("\n")
-        if FD_P == nil then FD_P = io.open(OBJ_PATH..P_EXT, "w+") end
-        FD_P:write("\n")
-        if FD_M == nil then FD_M = io.open(OBJ_PATH..M_EXT, "w+") end
-        FD_M:write(
+        if FD_I ~= nil then FD_I:write("\n") end
+        if FD_P ~= nil then FD_P:write("\n") end
+        if FD_M ~= nil then FD_M:write(
             MESHLETS[CUR_MATERIAL].INDICES_OFFSET.." "..MESHLETS[CUR_MATERIAL].INDICES_COUNT.." "..
             MESHLETS[CUR_MATERIAL].PRIMITIVES_OFFSET.." "..MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT.."\n")
+        end
 
         -- Resetting current meshlet info
         MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
