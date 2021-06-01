@@ -1,0 +1,277 @@
+<?xml version="1.0" ?>
+<materialLib name="tessellation">
+
+	<textures>
+		<texture name="tex" filename="textures/calcada.jpg" mipmap=true/>		
+	</textures>
+	
+	<shaders>
+		<shader name="tradTessQuad" 	ps="shaders/tessDemo.frag" 
+									    tc="shaders/simpleQuad.tesc"
+									    te="shaders/simpleQuad.tese"
+									    vs="shaders/tessDemo.vert" />
+
+		<shader name="tradTessTri" 		ps="shaders/tessDemo.frag" 
+									    tc="shaders/simpleTri.tesc"
+									    te="shaders/simpleTri.tese"
+                                        vs="shaders/tessDemo.vert" />
+
+        <shader name="meshTessQuad" 	ts = "shaders/mesh_tessellation.task" 
+										ms = "shaders/mesh_tessellation.mesh" 
+										ps = "shaders/tessDemo.frag" />
+        
+        <shader name="meshTessTri"  	ts = "shaders/mesh_tessellation.task" 
+										ms = "shaders/mesh_tessellation.mesh" 
+										ps = "shaders/tessDemo.frag" />
+
+		<shader name="bezier" 		ps="shaders/lightTexture.frag" 
+									tc="shaders/bezier.tesc"
+									te="shaders/bezier.tese"
+									vs="shaders/tessDemo.vert" />
+
+		<shader name="pnTriangles" 	ps="shaders/light.frag" 
+									tc="shaders/pnTriangles.tesc"
+									te="shaders/pnTriangles.tese"
+									vs="shaders/pn.vert" />
+		<shader name="pnTrianglesGeom"
+									ps="shaders/emission.frag" 
+									gs="shaders/showNormal.geom"
+									tc="shaders/pnTriangles.tesc"
+									te="shaders/pnTrianglesNoTrans.tese"
+									vs="shaders/pn.vert" />
+									
+		<shader name="phongTess" 	ps="shaders/light.frag" 
+									tc="shaders/phongTess.tesc"
+									te="shaders/phongTess.tese"
+									vs="shaders/pn.vert" />
+	</shaders>
+
+    <buffers>
+		<buffer name="quadBuf" >
+            <file name="buffers/square.buf"/>
+            <DIM x=13 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>		
+        <buffer name="triBuf" >
+            <file name="buffers/triangle.buf"/>
+            <DIM x=10 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+		</buffer>
+    </buffers>
+	
+    <materials>
+
+        <material name="meshTessQuad">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
+            
+            <shader name="meshTessQuad" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+							 type="RENDERER" context="CURRENT" 
+							 component="quadDisp" />
+
+                    <valueof uniform="olevel" 		
+                             type="RENDERER" context="CURRENT" 
+					         component="olevel"  />
+														
+                    <valueof uniform="ilevel" 
+                             type="RENDERER" context="CURRENT" 
+							 component="ilevel"  />
+							 
+                </values>
+            </shader>
+
+        </material>
+
+        <material name="meshTessTri">
+
+            <buffers>
+                <buffer name="triBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
+            
+            <shader name="meshTessTri" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+							 type="RENDERER" context="CURRENT" 
+							 component="triDisp" />
+
+                    <valueof uniform="olevel" 		
+                             type="RENDERER" context="CURRENT" 
+					         component="olevel"  />
+														
+                    <valueof uniform="ilevel" 
+                             type="RENDERER" context="CURRENT" 
+							 component="ilevel"  />
+							 
+                </values>
+            </shader>
+
+        </material>
+	
+		<material name="tradTessQuad">
+			<shader name="tradTessQuad">
+				<values>
+					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="olevel"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="ilevel"  />
+				</values>
+			</shader>
+		</material>		
+
+		<material name="tradTessTri">
+			<shader name="tradTessTri">
+				<values>
+					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="olevel"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="ilevel"  />
+				</values>
+			</shader>
+		</material>		
+
+
+
+		<material name="bezier">
+			<shader name="bezier">
+				<values>
+					<valueof uniform="lightDir" 	type="LIGHT" context="CURRENT" 
+														id=0 component="DIRECTION" /> 
+														
+					<valueof uniform="normalMatrix" type="RENDERER" context="CURRENT" 
+														component="NORMAL" />
+					
+					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+														
+					<valueof uniform="viewMatrix" 	type="RENDERER" context="CURRENT" 
+														component="VIEW" />
+	
+					<valueof uniform="texUnit" 		type="TEXTURE_BINDING" context="CURRENT" 
+														component="UNIT" id="0" />
+
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+		</material>		
+
+		<material name="pnTrianglesGeom">
+			<shader name="pnTrianglesGeom">
+				<values>
+					<valueof uniform="diffuse" 		type="COLOR" context="CURRENT" 
+														component="DIFFUSE" /> 
+														
+					<valueof uniform="lightDir" 	type="LIGHT" context="CURRENT" 
+														id=0 component="DIRECTION" /> 
+														
+					<valueof uniform="normalMatrix" type="RENDERER" context="CURRENT" 
+														component="NORMAL" />
+					
+					<valueof uniform="viewMatrix" 	type="RENDERER" context="CURRENT" 
+														component="VIEW" />
+					
+					<valueof uniform="projViewModelMatrix"          	
+													type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+			
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+				</values>
+			</shader>
+		</material>		
+
+		<material name="pnTriangles">
+			<shader name="pnTriangles">
+				<values>
+					<valueof uniform="diffuse" 		type="COLOR" context="CURRENT" 
+														component="DIFFUSE" /> 
+														
+					<valueof uniform="lightDir" 	type="LIGHT" context="CURRENT" 
+														id=0 component="DIRECTION" /> 
+														
+					<valueof uniform="normalMatrix" type="RENDERER" context="CURRENT" 
+														component="NORMAL" />
+					
+					<valueof uniform="viewMatrix" 	type="RENDERER" context="CURRENT" 
+														component="VIEW" />
+					
+					<valueof uniform="projViewModelMatrix"          	
+													type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+			
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+				</values>
+			</shader>
+		</material>		
+		<material name="phongTess">
+			<shader name="phongTess">
+				<values>
+					<valueof uniform="diffuse" 		type="COLOR" context="CURRENT" 
+														component="DIFFUSE" /> 
+														
+					<valueof uniform="lightDir" 	type="LIGHT" context="CURRENT" 
+														id=0 component="DIRECTION" /> 
+														
+					<valueof uniform="normalMatrix" type="RENDERER" context="CURRENT" 
+														component="NORMAL" />
+					
+					<valueof uniform="viewMatrix" 	type="RENDERER" context="CURRENT" 
+														component="VIEW" />
+					
+					<valueof uniform="projViewModelMatrix"          	
+													type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+						
+					<valueof uniform="olevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+														
+					<valueof uniform="ilevel" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+				</values>
+			</shader>
+		</material>		
+	</materials>
+</materialLib>

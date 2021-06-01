@@ -1,0 +1,232 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=1) in;
+layout(triangles, max_vertices=256, max_primitives=512) out;
+
+taskNV in perTaskData {
+  uint task_id;
+} t_in;
+
+uniform mat4 m_pvm;
+
+uniform vec3 disp;
+
+uniform float ilevel;
+uniform float olevel;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+  float vertices[];
+};
+
+void main()
+{
+
+  // Inputs
+  uint local_id  = gl_LocalInvocationID.x;
+  uint global_id  = gl_GlobalInvocationID.x;
+  uint meshlet_id = t_in.task_id;
+  uint workg_id = gl_WorkGroupID.x;
+  uint workg_len = gl_WorkGroupSize.x;
+
+  // No. Primitives
+  uint prim_count = uint(vertices[0]);
+
+  if (prim_count == 3) {
+
+    for (int i=0; i < prim_count; i++) {
+        gl_MeshVerticesNV[i].gl_Position = m_pvm * 
+            vec4(disp + vec3 (vertices[i * 3 + 1], vertices[i * 3 + 2], vertices[i * 3 + 3]), 1.0);
+    }
+
+    // Primitives 
+    gl_PrimitiveIndicesNV[0] = 0;
+    gl_PrimitiveIndicesNV[1] = 1;
+    gl_PrimitiveIndicesNV[2] = 2;
+
+    gl_PrimitiveCountNV = prim_count;
+
+  } else if (prim_count == 4) {
+        
+    //int upper_odd = int(ceil(olevel));
+    //if ( upper_odd % 2 == 0 ) upper_odd += 1;
+    //int lower_odd = upper_odd - 2;
+
+    //if ( upper_odd == 1 ) {
+
+        //for (int i=0; i < prim_count; i++) {
+            //gl_MeshVerticesNV[i].gl_Position = m_pvm * 
+                //vec4(disp + vec3 (vertices[i * 3 + 1], vertices[i * 3 + 2], vertices[i * 3 + 3]), 1.0);
+        //}
+
+        //// Primitives 
+        //gl_PrimitiveIndicesNV[0] = 0;
+        //gl_PrimitiveIndicesNV[1] = 1;
+        //gl_PrimitiveIndicesNV[2] = 3;
+        //gl_PrimitiveIndicesNV[3] = 1;
+        //gl_PrimitiveIndicesNV[4] = 2;
+        //gl_PrimitiveIndicesNV[5] = 3;
+
+        //gl_PrimitiveCountNV = prim_count;
+
+    //} else {
+
+    // Vertices
+    vec4 verts[4] = {
+        vec4(disp + vec3 (vertices[0 + 1], vertices[0 + 2], vertices[0 + 3]), 1.0),
+        vec4(disp + vec3 (vertices[3 + 1], vertices[3 + 2], vertices[3 + 3]), 1.0),
+        vec4(disp + vec3 (vertices[6 + 1], vertices[6 + 2], vertices[6 + 3]), 1.0),
+        vec4(disp + vec3 (vertices[9 + 1], vertices[9 + 2], vertices[9 + 3]), 1.0)
+    };
+
+    //gl_MeshVerticesNV[0].gl_Position = m_pvm * v[0];
+    //gl_MeshVerticesNV[1].gl_Position = m_pvm * v[1];
+    //gl_MeshVerticesNV[2].gl_Position = m_pvm * v[2];
+    //gl_MeshVerticesNV[3].gl_Position = m_pvm * v[3];
+
+    //gl_MeshVerticesNV[0].gl_Position = m_pvm * 
+        //vec4(disp + vec3 (vertices[0 + 1], vertices[0 + 2], vertices[0 + 3]), 1.0);
+    //gl_MeshVerticesNV[1].gl_Position = m_pvm * 
+        //vec4(disp + vec3 (vertices[3 + 1], vertices[3 + 2], vertices[3 + 3]), 1.0);
+    //gl_MeshVerticesNV[2].gl_Position = m_pvm * 
+        //vec4(disp + vec3 (vertices[6 + 1], vertices[6 + 2], vertices[6 + 3]), 1.0);
+    //gl_MeshVerticesNV[3].gl_Position = m_pvm * 
+        //vec4(disp + vec3 (vertices[9 + 1], vertices[9 + 2], vertices[9 + 3]), 1.0);
+
+    //gl_PrimitiveIndicesNV[0] = 0;
+    //gl_PrimitiveIndicesNV[1] = 1;
+    //gl_PrimitiveIndicesNV[2] = 3;
+    //gl_PrimitiveIndicesNV[3] = 1;
+    //gl_PrimitiveIndicesNV[4] = 2;
+    //gl_PrimitiveIndicesNV[5] = 3;
+
+    //gl_PrimitiveCountNV = 2;
+
+    int i_upper_odd = int(ceil(ilevel));
+    int o_upper_odd = int(ceil(olevel));
+    if (i_upper_odd % 2 == 0) i_upper_odd += 1;
+    if (o_upper_odd % 2 == 0) o_upper_odd += 1;
+
+    float i_step = 1.0 / float (i_upper_odd);
+    float o_old_step = max (0, 1.0 / float (o_upper_odd - 2));
+    float o_new_step = 1.0 / float (o_upper_odd);
+        
+
+    // Inner
+
+    for (int i=0; i<i_upper_odd-1; i++) {
+
+        for (int j=0; j<i_upper_odd-1; j++) {
+
+            float u = (j + 1) * i_step;
+            float v = (i + 1) * i_step;
+
+            gl_MeshVerticesNV[i * (i_upper_odd - 1) + j].gl_Position = m_pvm *
+                mix( mix( verts[0], verts[1], u ), mix( verts[3], verts[2], u ), v );
+
+        }
+
+    }
+
+    for (int i=0; i<i_upper_odd - 2; i++) {
+
+        for (int j=0; j<i_upper_odd - 2; j++) {
+            
+            uint idx = i * (i_upper_odd - 2) + j;
+
+            gl_PrimitiveIndicesNV[6 * idx + 0] = i * (i_upper_odd - 1) + j;
+            gl_PrimitiveIndicesNV[6 * idx + 1] = i * (i_upper_odd - 1) + (j + 1);
+            gl_PrimitiveIndicesNV[6 * idx + 2] = (i + 1) * (i_upper_odd - 1) + j;
+            
+            gl_PrimitiveIndicesNV[6 * idx + 3] = i * (i_upper_odd - 1) + (j + 1);
+            gl_PrimitiveIndicesNV[6 * idx + 4] = (i + 1) * (i_upper_odd - 1) + (j + 1);
+            gl_PrimitiveIndicesNV[6 * idx + 5] = (i + 1) * (i_upper_odd - 1) + j;
+
+        }
+
+    }
+
+    // Outer
+    
+    int v_inner_offset = (i_upper_odd - 1) * (i_upper_odd - 1);
+    int p_inner_offset = 6 * (i_upper_odd - 2) * (i_upper_odd - 2);
+
+    int sides = int(floor (o_upper_odd / 2.0));
+    //bool even = sides % 2 == 0;
+
+    for (int i=0; i<4; i++) {
+
+        vec4 v = verts[i]; vec4 vl, vr;
+        if (i == 0) {vl = verts[3];} else {vl = verts[i-1];}
+        if (i == 3) {vr = verts[0];} else {vr = verts[i+1];}
+
+        gl_MeshVerticesNV[v_inner_offset + o_upper_odd * i].gl_Position = m_pvm * v;
+
+        for (int j=1; j <= o_upper_odd / 2; j++) {
+
+            float new_tess = o_new_step * j;
+            float old_tess, tess;
+
+            //if ( abs( o_old_step * j - new_tess ) < abs( o_old_step * (j + 1)  - new_tess ))
+                //old_tess = o_old_step * j; 
+            //else 
+                //old_tess = o_old_step * (j + 1);
+
+            //if (old_tess < new_tess) 
+                //tess = mix (old_tess, new_tess, 1 - (o_upper_odd - olevel));
+            //else tess = mix (new_tess, old_tess, 1 - (o_upper_odd - olevel) * 0.5);
+
+            gl_MeshVerticesNV[v_inner_offset + o_upper_odd * i + j].gl_Position = m_pvm * mix(v, vr, new_tess);
+            gl_MeshVerticesNV[v_inner_offset + o_upper_odd * (i + 1) - j].gl_Position = m_pvm * mix(vr, v, new_tess);
+
+        }        
+
+    }
+
+    for (int j=0; j<o_upper_odd; j++) {
+
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (0 * o_upper_odd + j) + 0] = v_inner_offset + j;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (0 * o_upper_odd + j) + 1] = v_inner_offset + j + 1;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (0 * o_upper_odd + j) + 2] = 
+            uint(round(mix (0, i_upper_odd - 2, float(j) / float (o_upper_odd - 1))));
+
+    }
+
+    for (int j=0; j<o_upper_odd; j++) {
+
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (1 * o_upper_odd + j) + 0] = 1 * o_upper_odd + v_inner_offset + j;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (1 * o_upper_odd + j) + 1] = 1 * o_upper_odd + v_inner_offset + j + 1;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (1 * o_upper_odd + j) + 2] = (i_upper_odd - 2) + (i_upper_odd - 1) * ( 
+            uint(round(mix (0, i_upper_odd - 2, float(j) / float (o_upper_odd - 1)))));
+
+    }
+
+    for (int j=0; j<o_upper_odd; j++) {
+
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (2 * o_upper_odd + j) + 0] = 2 * o_upper_odd + v_inner_offset + j;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (2 * o_upper_odd + j) + 1] = 2 * o_upper_odd + v_inner_offset + j + 1;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (2 * o_upper_odd + j) + 2] = (i_upper_odd - 1) * (i_upper_odd  - 2) +
+            uint(round(mix (i_upper_odd - 2, 0, float(j) / float (o_upper_odd - 1))));
+
+    }
+
+    for (int j=0; j<o_upper_odd -1; j++) {
+
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + j) + 0] = 3 * o_upper_odd + v_inner_offset + j;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + j) + 1] = 3 * o_upper_odd + v_inner_offset + j + 1;
+        gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + j) + 2] = (i_upper_odd - 1) * ( 
+            uint(round(mix (i_upper_odd - 2, 0, float(j) / float (o_upper_odd - 1)))));
+
+    }
+
+    gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + o_upper_odd - 1) + 0] = 3 * o_upper_odd + v_inner_offset + o_upper_odd - 1;
+    gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + o_upper_odd - 1) + 1] = v_inner_offset + 0;
+    gl_PrimitiveIndicesNV[p_inner_offset + 3 * (3 * o_upper_odd + o_upper_odd - 1) + 2] = 0;
+
+
+    // Primitives
+    gl_PrimitiveCountNV = 512;
+
+  }
+}
