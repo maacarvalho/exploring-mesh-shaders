@@ -28,7 +28,7 @@ end
 function loader.parse(line, filter)
 
     local l = string_split(line, "%s+")
-    local r = { type = l[1] }
+    local r = { type = l[1], original = line }
 
     if filter[l[1]] == nil then return { type = nil } end
 
