@@ -1,12 +1,8 @@
 #version 460
-#extension GL_NV_mesh_shader : enable
+#extension GL_NV_mesh_shader : require
  
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=256, max_primitives=512) out;
-
-taskNV in perTaskData {
-  uint task_id;
-} t_in;
+layout(triangles, max_vertices=32, max_primitives=64) out;
 
 out PerVertexData
 {
@@ -21,7 +17,6 @@ uniform mat4 m_view;
 uniform mat3 m_normal;
 
 uniform float scale;
-uniform float displacement;
 
 layout(std430, binding = 1) readonly buffer verticesBuffer
 {
@@ -53,16 +48,6 @@ layout(std430, binding = 6) readonly buffer meshletsBuffer
   uint meshlets[];
 };
 
-vec4 transform (vec4 vertex) {
-
-  vec3 transformed = vertex.xyz * scale;
-  transformed.x += displacement;
-  transformed.z -= 2.50 * float(t_in.task_id);
-
-  return vec4 (transformed, vertex.w);
-
-}
-
 void main()
 {
 
@@ -90,10 +75,10 @@ void main()
     uint nIndex = indices[(indices_start + idx) * 3 + 1];
     uint tIndex = indices[(indices_start + idx) * 3 + 2];
 
-    vec4 vertex = transform(vec4(vertices[vIndex * 4 + 0],
-                                 vertices[vIndex * 4 + 1],
-                                 vertices[vIndex * 4 + 2],
-                                 vertices[vIndex * 4 + 3]));
+    vec4 vertex = vec4(scale * vertices[vIndex * 4 + 0],
+                       scale * vertices[vIndex * 4 + 1],
+                       scale * vertices[vIndex * 4 + 2],
+                       vertices[vIndex * 4 + 3]);
 
     vec3 normal = vec3(normals[nIndex * 3 + 0],
                        normals[nIndex * 3 + 1],

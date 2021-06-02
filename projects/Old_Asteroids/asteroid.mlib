@@ -6,36 +6,9 @@
     </textures>
 
 	<shaders>
-        <shader name="a0_meshShaders" 	    ts = "shaders/mesh_asteroids_a0.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a1_meshShaders" 	    ts = "shaders/mesh_asteroids_a0.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a2_meshShaders" 	    ts = "shaders/mesh_asteroids_a2.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a3_meshShaders" 	    ts = "shaders/mesh_asteroids_a3.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a4_meshShaders" 	    ts = "shaders/mesh_asteroids_a4.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a5_meshShaders" 	    ts = "shaders/mesh_asteroids_a5.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a6_meshShaders" 	    ts = "shaders/mesh_asteroids_a6.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a7_meshShaders" 	    ts = "shaders/mesh_asteroids_a7.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a8_meshShaders" 	    ts = "shaders/mesh_asteroids_a8.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
-        <shader name="a9_meshShaders" 	    ts = "shaders/mesh_asteroids_a9.task" 
-							    			ms = "shaders/mesh_asteroids.mesh" 
-								    		ps = "shaders/asteroids.frag" />
+        <shader name="meshShaders" 	    ts = "shaders/mesh_asteroids.task" 
+										ms = "shaders/mesh_asteroids.mesh" 
+										ps = "shaders/asteroids.frag" />
 		<shader name="tradShaders" 	    vs = "shaders/trad_asteroids.vert" 
 										ps = "shaders/asteroids.frag" />
     </shaders>
@@ -511,7 +484,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a0_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -578,7 +551,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a1_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -645,7 +618,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a2_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -712,7 +685,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a3_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -779,7 +752,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a4_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -846,7 +819,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a5_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -913,7 +886,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a6_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -980,7 +953,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a7_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -1047,7 +1020,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a8_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"
@@ -1114,7 +1087,7 @@
                 <texture name="tex" UNIT=0 />
             </textures>
 	        
-            <shader name="a9_meshShaders" >
+            <shader name="meshShaders" >
 				<values>
                     <valueof uniform="tex"
                              type="TEXTURE_BINDING" context="CURRENT"

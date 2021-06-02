@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<project name="Obj Renderer" >
+    <assets>
+        <attributes>
+            <attribute name="SCALE" data="FLOAT" type="RENDERER" value="0.1" />
+            <attribute name="DIFFUSE_000" data="VEC3" type="RENDERER" x="0.8" y="0.8" z="0.8" />
+        </attributes>
+
+        <viewports>
+            <viewport name="objViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+            </viewport>
+        </viewports>		
+
+        <cameras>
+            <camera name="objCamera" >
+                <viewport name="objViewport" />
+                <TYPE value="PERSPECTIVE"/>
+                <FOV value = "90"/>
+                <NEAR value= "0.0001"/>
+                <FAR value= "10"/>
+                <POSITION x="0" y="1" z="-1.25" w="1" />
+                <LOOK_AT_POINT x="0" y="1" z="0" />
+            </camera>
+        </cameras>
+        
+        <lights>
+            <light name="objLight">
+                <DIRECTION x="-2" y="-6" z="-2" />
+                <COLOR r="1" g="1" b="1" />
+            </light>
+        </lights>
+    
+        <materialLibs>
+            <materialLib filename="lucy.obj.mlib"/>
+        </materialLibs>
+    </assets>
+    
+    <pipelines>
+        <pipeline name="Mesh Pipeline" default="true">
+            <pass class="mesh" name="meshPass">
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <material name="mat000" fromLibrary="objMatLib" count="2804519" />
+            </pass>
+            <pass class="mesh" name="meshPassNormals">
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <material name="matNormals" fromLibrary="objMatLib" count="2804519" />
+            </pass>
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="Properties" >
+            <pipelineList label="Pipeline" />
+            <var label="Scale" type="RENDERER" context="CURRENT" component="SCALE" def="min=0 max=10"/>
+        </window>
+    </interface>
+</project>

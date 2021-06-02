@@ -57,7 +57,7 @@ vec4 transform (vec4 vertex) {
 
   vec3 transformed = vertex.xyz * scale;
   transformed.x += displacement;
-  transformed.z -= 2.50 * float(t_in.task_id);
+  transformed.z -= 2.50 * float(gl_WorkGroupID.x);
 
   return vec4 (transformed, vertex.w);
 
@@ -69,7 +69,8 @@ void main()
   // Inputs
   uint local_id  = gl_LocalInvocationID.x;
   uint global_id  = gl_GlobalInvocationID.x;
-  uint meshlet_id = gl_WorkGroupID.x;
+  uint meshlet_id = t_in.task_id;
+  uint workg_id = gl_WorkGroupID.x;
   uint workg_len = gl_WorkGroupSize.x;
 
   // Meshlet Info

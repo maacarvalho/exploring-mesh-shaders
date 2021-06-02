@@ -80,81 +80,75 @@
     
     <pipelines>
         <pipeline name="Mesh Pipeline" default="true">
-            <!-- <pass class="default" name="Nothing">
-                <camera name="objCamera" />
-                <lights>
-                    <light name="objLight" />
-                </lights>
-            </pass> -->
             <pass class="mesh" name="a0_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_0" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_0" fromLibrary="objMatLib" count="1" />
             </pass>
             <pass class="mesh" name="a1_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_1" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_1" fromLibrary="objMatLib" count="1" />
             </pass>
             <pass class="mesh" name="a2_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_2" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_2" fromLibrary="objMatLib" count="1" />
             </pass>
             <pass class="mesh" name="a3_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_3" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_3" fromLibrary="objMatLib" count="4" />
             </pass>
             <pass class="mesh" name="a4_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_4" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_4" fromLibrary="objMatLib" count="12" />
             </pass>
             <pass class="mesh" name="a5_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_5" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_5" fromLibrary="objMatLib" count="49" />
             </pass>
             <pass class="mesh" name="a6_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_6" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_6" fromLibrary="objMatLib" count="191" />
             </pass>
             <pass class="mesh" name="a7_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_7" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_7" fromLibrary="objMatLib" count="749" />
             </pass>
             <pass class="mesh" name="a8_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_8" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_8" fromLibrary="objMatLib" count="3042" />
             </pass>
             <pass class="mesh" name="a9_meshPass">
                 <camera name="objCamera" />
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <material name="mesh_asteroid_9" fromLibrary="objMatLib" count="10" />
+                <material name="mesh_asteroid_9" fromLibrary="objMatLib" count="13200" />
             </pass>
         </pipeline>
         <pipeline name="Traditional Pipeline" default="true">
@@ -195,7 +189,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_1" />
                 </scenes>
                 <materialMaps>
@@ -209,7 +203,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_2" />
                 </scenes>
                 <materialMaps>
@@ -223,7 +217,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_3" />
                 </scenes>
                 <materialMaps>
@@ -237,7 +231,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_4" />
                 </scenes>
                 <materialMaps>
@@ -251,7 +245,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_5" />
                 </scenes>
                 <materialMaps>
@@ -265,7 +259,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_6" />
                 </scenes>
                 <materialMaps>
@@ -279,7 +273,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_7" />
                 </scenes>
                 <materialMaps>
@@ -293,7 +287,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_8" />
                 </scenes>
                 <materialMaps>
@@ -307,7 +301,7 @@
                 <lights>
                     <light name="objLight" />
                 </lights>
-                <scenes instances=10>
+                <scenes instances=100>
                     <scene name="asteroid_9" />
                 </scenes>
                 <materialMaps>
