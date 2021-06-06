@@ -281,6 +281,8 @@ splitObj = function ()
     if FD_O ~= nil then FD_O:close() end
     if FD_MT ~= nil then FD_MT:close() end
 
+    os.execute("rm "..OBJ_PATH..TO_EXT)
+
 end
 
 
