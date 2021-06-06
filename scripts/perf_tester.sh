@@ -282,38 +282,77 @@ configure_traditional_pipeline () {
 
 
     ## --------------------------------------- Scenes ---------------------------------------
-    scenes_str+="
-            <scene name=\"objScene\" type=\"Scene\">
-                <file name=\"$basename\"/>
+    for m in "${!material_names[@]}"
+    do
+        scenes_str+="
+            <scene name=\"objScene_$m\" type=\"Scene\">
+                <file name=\"$basename.$m.obj\"/>
             </scene>"
-
+    done
 
     ## --------------------------------------- Pipelines ---------------------------------------
+    #pipelines_str+="
+        #<pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
+            #<preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
+            #<pass class=\"default\" name=\"traditionalPass\">
+                #<scenes>
+                    #<scene name=\"objScene\" />
+                #</scenes>
+                #<camera name=\"objCamera\" />
+                #<lights>
+                    #<light name=\"objLight\" />
+                #</lights>
+                #<materialMaps>"
+
+    #for m in "${!material_names[@]}"
+    #do
+        #pipelines_str+="
+					#<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />"
+    #done
+    
+    #pipelines_str+="
+                #</materialMaps>
+            #</pass>
+            #<postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
+        #</pipeline>"
+ 
     pipelines_str+="
         <pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
-            <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
-            <pass class=\"default\" name=\"traditionalPass\">
+            <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />"
+
+    
+    first_mat=1
+    for m in "${!material_names[@]}"
+    do
+        pipelines_str+="
+            <pass class=\"default\" name=\"traditionalPass_$m\">"
+
+        if [[ $first_mat -eq 1 ]] 
+        then
+            first_mat=0
+        else
+            pipelines_str+="
+                <COLOR_CLEAR value=false />
+		    	<DEPTH_CLEAR value=false />"
+        fi
+
+        pipelines_str+="
                 <scenes>
-                    <scene name=\"objScene\" />
+                    <scene name=\"objScene_$m\" />
                 </scenes>
                 <camera name=\"objCamera\" />
                 <lights>
                     <light name=\"objLight\" />
                 </lights>
-                <materialMaps>"
-
-    for m in "${!material_names[@]}"
-    do
-        pipelines_str+="
-					<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />"
+                <materialMaps>
+    				<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />
+                </materialMaps>
+            </pass>"
     done
     
     pipelines_str+="
-                </materialMaps>
-            </pass>
             <postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
         </pipeline>"
- 
 
     ## --------------------------------------- Attributes ---------------------------------------
     attributes_str=""
@@ -470,12 +509,12 @@ filepath=$1
 dirname=$(dirname $filepath)
 basename=$(basename $filepath)
 
-max_vertices=( 256 128 64 32 16 8 )
-max_primitives=( 512 256 128 64 32 16 8 )
-local_size=( 32 16 8 )
-#max_vertices=( 128 )
-#max_primitives=( 256 )
+#max_vertices=( 256 128 64 32 16 8 )
+#max_primitives=( 512 256 128 64 32 16 8 )
 #local_size=( 32 16 8 )
+max_vertices=( 256 )
+max_primitives=( 512 )
+local_size=( 32 )
 
 declare vertices_count
 declare normals_count
@@ -509,7 +548,7 @@ do
         then
             
             # Creating buffers
-            lua obj_converter.lua -mv $maxv -mp $maxp -nm $filepath 
+            lua obj_converter.lua -mv $maxv -mp $maxp $filepath 
 
             # Copying buffers to folder
             mv $filepath.*.buf $dirname/$folder
@@ -553,6 +592,8 @@ maxp=0
 
 # Creating lua script for performance measuring
 [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
+
+lua obj_transformer.lua $filepath
 
 configure_traditional_pipeline
 
