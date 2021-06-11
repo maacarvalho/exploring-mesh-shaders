@@ -1,6 +1,7 @@
 #version 410
 
-layout(triangles, equal_spacing, ccw) in;
+//layout(triangles, equal_spacing, ccw) in;
+layout(triangles, fractional_odd_spacing, ccw) in;
 
 uniform	mat4 projViewModelMatrix;
 

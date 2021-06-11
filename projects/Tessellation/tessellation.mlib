@@ -16,13 +16,17 @@
 									    te="shaders/simpleTri.tese"
                                         vs="shaders/tessDemo.vert" />
 
-        <shader name="meshTessQuad" 	ts = "shaders/mesh_tessellation.task" 
-										ms = "shaders/mesh_tessellation.mesh" 
+        <!--<shader name="meshTessQuad" 	ts = "shaders/mesh_tessellation.task" -->
+										<!--ms = "shaders/mesh_tessellation.mesh" -->
+        <shader name="meshTessQuad" 	ts = "shaders/tessQuad.task" 
+										ms = "shaders/tessQuad.mesh" 
 										ps = "shaders/tessDemo.frag" />
         
-        <shader name="meshTessTri"  	ts = "shaders/mesh_tessellation.task" 
-										ms = "shaders/mesh_tessellation.mesh" 
-										ps = "shaders/tessDemo.frag" />
+        <!--<shader name="meshTessTri"  	ts = "shaders/mesh_tessellation.task" -->
+										<!--ms = "shaders/mesh_tessellation.mesh" -->
+        <shader name="meshTessTri"  	ts = "shaders/tessTri.task" 
+										ms = "shaders/tessTri.mesh" 
+										ps = "shaders/tessMeshDemo.frag" />
 
 		<shader name="bezier" 		ps="shaders/lightTexture.frag" 
 									tc="shaders/bezier.tesc"
@@ -81,8 +85,8 @@
 							 component="PROJECTION_VIEW_MODEL" />
                     
                     <valueof uniform="disp" 
-							 type="RENDERER" context="CURRENT" 
-							 component="quadDisp" />
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
 
                     <valueof uniform="olevel" 		
                              type="RENDERER" context="CURRENT" 
@@ -113,8 +117,8 @@
 							 component="PROJECTION_VIEW_MODEL" />
                     
                     <valueof uniform="disp" 
-							 type="RENDERER" context="CURRENT" 
-							 component="triDisp" />
+                             type="RENDERER" context="CURRENT" 
+                             component="triDisp" />
 
                     <valueof uniform="olevel" 		
                              type="RENDERER" context="CURRENT" 

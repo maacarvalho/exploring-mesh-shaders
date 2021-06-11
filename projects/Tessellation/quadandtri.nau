@@ -5,18 +5,18 @@
 			<attribute name="level" data="FLOAT" type="RENDERER" value=8 />
 			<attribute name="ilevel" data="FLOAT" type="RENDERER" value=1 />
             <attribute name="olevel" data="FLOAT" type="RENDERER" value=1 />
-            <attribute name="triDisp" data="VEC3" type="RENDERER" x="1.5" y=-1.5 z=0 />
-            <attribute name="quadDisp" data="VEC3" type="RENDERER" x="-1.5" y=-1.5 z=0 />
+            <attribute name="triDisp" data="VEC3" type="RENDERER" x="1.5" y=1.25 z=0 />
+            <attribute name="quadDisp" data="VEC3" type="RENDERER" x="1.5" y=-1.5 z=0 />
 		</attributes>
 		
 		<scenes>
 			<scene name="Triangle" type="OctreeByMat">
 				<file  name="models/triangle.patch"/>
-				<TRANSLATE x = 1.5 y = 1.5 z = 0 />
+				<TRANSLATE x = -1.5 y = 1.25 z = 0 />
 			</scene>
 			<scene name="Square" type="OctreeByMat">
 				<file  name="models/square.patch"/>
-				<TRANSLATE x = -1.5 y = 1.5 z = 0 />
+				<TRANSLATE x = -1.5 y = -1.5 z = 0 />
 			</scene>
 		</scenes>
 		
@@ -53,21 +53,21 @@
 					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessQuad" />
 				</materialMaps>
 			</pass>
-			<pass class="default" name="tradPassTri">
-				<COLOR_CLEAR value=false />
-				<DEPTH_CLEAR value=false />
-				<scenes>
-					<scene name="Triangle" />
-				</scenes>
-				<camera name="MainCamera" />
-				<materialMaps>
-					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessTri" />
-				</materialMaps>
-			</pass>
-            <pass class="mesh" name="meshPassQuad">
+            <pass class="default" name="tradPassTri">
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Triangle" />
+                </scenes>
                 <camera name="MainCamera" />
-                <material name="meshTessQuad" fromLibrary="tessellation" count="1" />
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessTri" />
+                </materialMaps>
             </pass>
+            <!--<pass class="mesh" name="meshPassQuad">-->
+                <!--<camera name="MainCamera" />-->
+                <!--<material name="meshTessQuad" fromLibrary="tessellation" count="1" />-->
+            <!--</pass>-->
             <pass class="mesh" name="meshPassTri">
                 <camera name="MainCamera" />
                 <material name="meshTessTri" fromLibrary="tessellation" count="1" />
@@ -83,17 +83,17 @@
 					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessQuad" />
 				</materialMaps>
 			</pass>
-			<pass class="default" name="tradPassTri">
-				<COLOR_CLEAR value=false />
-				<DEPTH_CLEAR value=false />
-				<scenes>
-					<scene name="Triangle" />
-				</scenes>
-				<camera name="MainCamera" />
-				<materialMaps>
-					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessTri" />
-				</materialMaps>
-			</pass>
+            <pass class="default" name="tradPassTri">
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Triangle" />
+                </scenes>
+                <camera name="MainCamera" />
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessTri" />
+                </materialMaps>
+            </pass>
 		</pipeline>
         <pipeline name="Mesh Pipeline" default="true">
             <pass class="mesh" name="meshPassQuad">
@@ -111,9 +111,9 @@
 		<window label="Tessellation">
             <pipelineList label="Pipeline" />
 			<var label="olevel" type="RENDERER" context="CURRENT" component="olevel" 
-				def="min=1 max=20"/>
+				def="min=1 max=64"/>
 			<var label="ilevel" type="RENDERER" context="CURRENT" component="ilevel" 
-				def="min=1 max=20"/>
+				def="min=1 max=64"/>
 		</window>
 	</interface>
 </project>

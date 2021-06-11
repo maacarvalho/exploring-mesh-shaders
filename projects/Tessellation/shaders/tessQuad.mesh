@@ -1,0 +1,202 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+layout(triangles, max_vertices=256, max_primitives=512) out;
+
+taskNV in perTaskData {
+    uint task_id;
+} t_in;
+
+uniform mat4 m_pvm;
+
+uniform float ilevel;
+uniform float olevel;
+
+uniform vec3 disp;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+    float vertices[];
+};
+
+void main()
+{
+
+    // Inputs
+    uint local_id  = gl_LocalInvocationID.x;
+    uint global_id  = gl_GlobalInvocationID.x;
+    uint meshlet_id = t_in.task_id;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    //if (workg_id != 3) return;
+
+    uint v0_idx = workg_id * 3;
+    uint v1_idx = ((workg_id + 1) % 4) * 3;
+    uint v2_idx = ((workg_id + 2) % 4) * 3;
+    uint v3_idx = ((workg_id + 3) % 4) * 3;
+    
+    // No. Primitives
+    //uint prim_count = uint(vertices[0]);
+
+    vec4 v0 = vec4(disp + vec3 (vertices[v0_idx + 1], 
+                                vertices[v0_idx + 2], 
+                                vertices[v0_idx + 3]), 1.0);
+    vec4 v1 = vec4(disp + vec3 (vertices[v1_idx + 1], 
+                                vertices[v1_idx + 2], 
+                                vertices[v1_idx + 3]), 1.0);
+    vec4 v2 = vec4(disp + vec3 (vertices[v2_idx + 1], 
+                                vertices[v2_idx + 2], 
+                                vertices[v2_idx + 3]), 1.0);
+    vec4 v3 = vec4(disp + vec3 (vertices[v3_idx + 1], 
+                                vertices[v3_idx + 2], 
+                                vertices[v3_idx + 3]), 1.0);
+
+    int inner_tess = int(ceil(ilevel));
+    int outer_tess = int(ceil(olevel));
+
+    float inner_step = 1.0 / float (inner_tess);
+    float o_old_step = max (0, 1.0 / float (outer_tess - 2));
+    float o_new_step = 1.0 / float (outer_tess);
+
+    // Inner Vertices
+    int no_inner_verts = int(floor(inner_tess * 0.5) * ceil(inner_tess * 0.5));
+    int no_inner_cols  = int(ceil(inner_tess * 0.5));
+    for (int i=0; i<=no_inner_verts/workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_inner_verts - 1));
+
+        int line = idx / no_inner_cols;
+        int col  = idx % no_inner_cols;
+
+        float u = (col + 1) * inner_step;
+        float v = (line + 1) * inner_step;
+
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm *
+            mix(mix(v1, v0, v), mix(v2, v3, v), u);
+
+        //gl_PrimitiveIndicesNV[idx] = idx;
+
+    }
+    
+    // Inner Triangles
+    int no_inner_prims = int((floor(inner_tess * 0.5) - 1) * (ceil(inner_tess * 0.5) - 1) * 2);
+    for (int i=0; i<=no_inner_prims/workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_inner_prims - 1));
+
+        int line = int(floor (idx * 0.5)) / (no_inner_cols - 1);
+        int col  = int(floor (idx * 0.5)) % (no_inner_cols - 1);
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = col + line * no_inner_cols;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = col + 1 + (line + idx % 2) * no_inner_cols;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = col + 1 - idx % 2 + (line + 1) * no_inner_cols;
+
+    }
+
+    //for (int i=0; i<inner_tess-1; i++) {
+
+        //for (int j=0; j<inner_tess-1; j++) {
+
+            //float u = (j + 1) * i_step;
+            //float v = (i + 1) * i_step;
+
+            //gl_MeshVerticesNV[i * (inner_tess - 1) + j].gl_Position = m_pvm *
+                //mix( mix( v0, v1, u ), mix( v3, v2, u ), v );
+
+        //}
+
+    //}
+
+    //// Inner Triangles
+
+    //for (int i=0; i<inner_tess - 2; i++) {
+
+        //for (int j=0; j<inner_tess - 2; j++) {
+            
+            //uint idx = i * (inner_tess - 2) + j;
+
+            //gl_PrimitiveIndicesNV[6 * idx + 0] = i * (inner_tess - 1) + j;
+            //gl_PrimitiveIndicesNV[6 * idx + 1] = i * (inner_tess - 1) + (j + 1);
+            //gl_PrimitiveIndicesNV[6 * idx + 2] = (i + 1) * (inner_tess - 1) + j;
+            
+            //gl_PrimitiveIndicesNV[6 * idx + 3] = i * (inner_tess - 1) + (j + 1);
+            //gl_PrimitiveIndicesNV[6 * idx + 4] = (i + 1) * (inner_tess - 1) + (j + 1);
+            //gl_PrimitiveIndicesNV[6 * idx + 5] = (i + 1) * (inner_tess - 1) + j;
+
+        //}
+
+    //}
+
+    // Outer Vertices
+
+    //int v_inner_offset = (inner_tess - 1) * (inner_tess - 1);
+    //int p_inner_offset = 6 * (inner_tess - 2) * (inner_tess - 2);
+
+    //int sides = int(floor (outer_tess / 2.0));
+
+    //for (int i=0; i<4; i++) {
+
+        //vec4 v = verts[i]; vec4 vl, vr;
+        //if (i == 0) {vl = v3;} else {vl = verts[i-1];}
+        //if (i == 3) {vr = v0;} else {vr = verts[i+1];}
+
+        //gl_MeshVerticesNV[v_inner_offset + outer_tess * i].gl_Position = m_pvm * v;
+
+        //for (int j=1; j <= outer_tess / 2; j++) {
+
+            //float new_tess = o_new_step * j;
+            //float old_tess, tess;
+
+            //if ( abs( o_old_step * j - new_tess ) < abs( o_old_step * (j + 1)  - new_tess ))
+                //old_tess = o_old_step * j; 
+            //else 
+                //old_tess = o_old_step * (j + 1);
+
+            //if (old_tess < new_tess) 
+                //tess = mix (old_tess, new_tess, 1 - (outer_tess - olevel));
+            //else tess = mix (new_tess, old_tess, 1 - (outer_tess - olevel) * 0.5);
+
+            //gl_MeshVerticesNV[v_inner_offset + outer_tess * i + j].gl_Position = m_pvm * mix(v, vr, new_tess);
+            //gl_MeshVerticesNV[v_inner_offset + outer_tess * (i + 1) - j].gl_Position = m_pvm * mix(vr, v, new_tess);
+
+        //}        
+
+    //}
+
+    // Outer Triangles
+
+    //uint p_outer_offset = 3 * outer_tess + 3 * (inner_tess - 2);
+
+    //for (int j=0; j<outer_tess; j++) {
+
+        //uint prim_idx = p_inner_offset + 0 * p_outer_offset + 3 * j; 
+        //uint inner_idx = uint(round(mix (0, inner_tess - 2, float(j) / float (outer_tess - 1))));
+
+        //gl_PrimitiveIndicesNV[prim_idx + 0] = v_inner_offset + j;
+        //gl_PrimitiveIndicesNV[prim_idx + 1] = v_inner_offset + j + 1;
+        //gl_PrimitiveIndicesNV[prim_idx + 2] = inner_idx;
+
+        //if (j != outer_tess - 1) {
+
+            //uint next_inner_idx = uint(round(mix (0, inner_tess - 2, float(j+1) / float (outer_tess - 1))));
+            //for (uint i=inner_idx; i<next_inner_idx; i++) {
+
+                //prim_idx = p_inner_offset + 0 * p_outer_offset + 3 * outer_tess + 3 * i;
+
+                //gl_PrimitiveIndicesNV[prim_idx + 0] = i;
+                //gl_PrimitiveIndicesNV[prim_idx + 1] = v_inner_offset + j + 1;
+                //gl_PrimitiveIndicesNV[prim_idx + 2] = i + 1;
+
+            //}
+
+        //}
+    //}
+
+
+
+    // Primitives
+    gl_PrimitiveCountNV = 512;
+
+}
