@@ -1,8 +1,8 @@
 #version 460
 #extension GL_NV_mesh_shader : enable
  
-layout(local_size_x=1) in;
-layout(lines, max_vertices=256, max_primitives=512) out;
+layout(local_size_x=32) in;
+layout(points, max_vertices=256, max_primitives=512) out;
 
 uniform mat4 m_pvm;
 
@@ -79,11 +79,47 @@ void main()
     //gl_MeshVerticesNV[0].gl_Position = m_pvm * mix(v0, center, prev_v);
     //gl_MeshVerticesNV[1].gl_Position = m_pvm * mix(v1, center, prev_v);
 
-    gl_MeshVerticesNV[0].gl_Position = m_pvm * mix(v0, center, inter_v);
-    gl_MeshVerticesNV[1].gl_Position = m_pvm * mix(v1, center, inter_v);
+    //gl_MeshVerticesNV[0].gl_Position = m_pvm * mix(v0, center, inter_v);
+    //gl_MeshVerticesNV[1].gl_Position = m_pvm * mix(v1, center, inter_v);
             
+    //gl_PrimitiveIndicesNV[0] = 0;
+    //gl_PrimitiveIndicesNV[1] = 1;
+
+    //int u_lvls[v_lvls];
+
+    int u_lvls = int(line_idx == 0) * o_u_lvls + int(line_idx != 0) * (i_u_lvls - 2 * (line_idx - 1));
+    //u_lvls[0] = o_u_lvls;
+    //for (int i=1; i<v_lvls; i++) u_lvls[i] = i_u_lvls - 2 * (i - 1);
+    //u_lvls[v_lvls] = 1;
+
+    vec4 inter_v_v0 = mix (v0, center, inter_v);
+    vec4 inter_v_v1 = mix (v1, center, inter_v);
+
+    //int no_verts = u_lvls[line_idx] + u_lvls[line_idx + 1];
+    //int no_verts = u_lvls;
+    for (int i=0; i<=u_lvls/workg_len; i++) {
+
+        uint idx = min (i * workg_len + local_id, u_lvls);
+        float middle_idx = u_lvls * 0.5;
+        uint prev_idx = idx - (1 * int(abs(idx - middle_idx) < 1) + 2 * int(idx - middle_idx > 1));
+
+        float u = float(idx) / float(u_lvls);
+        float prev_u = float(prev_idx) / float(u_lvls - 2);
+
+        float inter_u = mix (prev_u, u, 1 - 0.5 * 
+                (int(line_idx == 0) * (o_ceil_odd - olevel) + int(line_idx != 0) * (i_ceil_odd - ilevel)));
+        //float inter_u = mix (prev_u, u, 1 - 0.5);
+
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, u);
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, prev_u);
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, inter_u);
+        gl_PrimitiveIndicesNV[idx] = idx;
+
+    }
+    gl_MeshVerticesNV[0].gl_Position = m_pvm * inter_v_v0;
     gl_PrimitiveIndicesNV[0] = 0;
-    gl_PrimitiveIndicesNV[1] = 1;
+    gl_MeshVerticesNV[u_lvls].gl_Position = m_pvm * inter_v_v1;
+    gl_PrimitiveIndicesNV[u_lvls] = u_lvls;
 
     // Primitives
     gl_PrimitiveCountNV = 512;
