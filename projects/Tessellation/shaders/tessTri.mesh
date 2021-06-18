@@ -64,11 +64,11 @@ void main()
     float v_step = 1.0 / (max(v_lvls, 2) - 1);
     float prev_v_step = 1.0 / (max(v_lvls - 1, 2) - 1);
 
+    // Bottom Line 
     int line_idx = int(workg_id) % v_lvls;
-
+    
     //if (line_idx != 0) return;
 
-    // Bottom Line
     float v = line_idx * mix (0, max_v_tess, v_step);
     float prev_v = min(line_idx, max(0, v_lvls - 2)) * mix(0, prev_max_v_tess, prev_v_step);
 
@@ -105,8 +105,7 @@ void main()
     //gl_PrimitiveIndicesNV[u_lvls] = u_lvls;
 
     // Top Line
-    //int vert_offset = 0;
-    int vert_offset = u_lvls + 1;
+    int bottom_u_lvls = u_lvls, bottom_line_idx = line_idx;
 
     line_idx = min(line_idx + 1, v_lvls - 1);
     v = line_idx * mix (0, max_v_tess, v_step);
@@ -133,23 +132,23 @@ void main()
 
         //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, u);
         //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, prev_u);
-        gl_MeshVerticesNV[vert_offset + idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, inter_u);
-        //gl_PrimitiveIndicesNV[vert_offset + idx] = idx;
+        gl_MeshVerticesNV[bottom_u_lvls + 1 + idx].gl_Position = m_pvm * mix(inter_v_v0, inter_v_v1, inter_u);
+        //gl_PrimitiveIndicesNV[bottom_u_lvls + 1 + idx] = idx;
 
     }
 
-    bool inside_triangle = vert_offset == 2 && line_idx == v_lvls - 1;
+    bool inside_triangle = bottom_line_idx == line_idx; 
 
-    gl_MeshVerticesNV[vert_offset + 0].gl_Position = m_pvm * (
+    gl_MeshVerticesNV[bottom_u_lvls + 1 + 0].gl_Position = m_pvm * (
         int(inside_triangle) * inter_v_v2 + int(!inside_triangle) * inter_v_v0);
-    gl_MeshVerticesNV[vert_offset + u_lvls].gl_Position = m_pvm * (
+    gl_MeshVerticesNV[bottom_u_lvls + 1 + u_lvls].gl_Position = m_pvm * (
         int(inside_triangle) * inter_v_v2 + int(!inside_triangle) * inter_v_v1);
 
 
     // Primitives
     gl_PrimitiveIndicesNV[0] = 0;
     gl_PrimitiveIndicesNV[1] = 1;
-    gl_PrimitiveIndicesNV[2] = vert_offset;
+    gl_PrimitiveIndicesNV[2] = bottom_u_lvls + 1;
 
     for (int i=0; i<= (u_lvls - 1) / workg_len; i++) {
 
@@ -157,17 +156,39 @@ void main()
 
         gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 0] = idx;
         gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 1] = idx + 1;
-        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 2] = vert_offset + idx;
+        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 2] = bottom_u_lvls + 1 + idx;
         
         gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 3] = idx;
-        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 4] = vert_offset + idx;
-        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 5] = vert_offset + idx - 1;
+        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 4] = bottom_u_lvls + 1 + idx;
+        gl_PrimitiveIndicesNV[3 + (idx - 1) * 6 + 5] = bottom_u_lvls + 1 + idx - 1;
 
     }
 
-    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 0] = vert_offset - 2;
-    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 1] = vert_offset - 1;
-    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 2] = vert_offset + u_lvls;
+    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 0] = bottom_u_lvls + 1 - 2;
+    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 1] = bottom_u_lvls + 1 - 1;
+    gl_PrimitiveIndicesNV[3 + u_lvls * 6 + 2] = bottom_u_lvls + 1 + u_lvls;
+    
+    //for (int i=0; i<= (bottom_u_lvls) / workg_len; i++) {
+
+        //uint idx = min (i * workg_len + local_id, bottom_u_lvls - 1);
+        //uint top_idx = int(round(mix(0, float(u_lvls), float(idx) / float(bottom_u_lvls))));
+
+        //gl_PrimitiveIndicesNV[idx * 3 + 0] = idx;
+        //gl_PrimitiveIndicesNV[idx * 3 + 1] = idx + 1;
+        //gl_PrimitiveIndicesNV[idx * 3 + 2] = bottom_u_lvls + 1 + top_idx;
+
+    //}
+
+    //for (int i=0; i<= (u_lvls) / workg_len; i++) {
+
+        //uint idx = u_lvls - min (i * workg_len + local_id + 1, u_lvls);
+        //uint bottom_idx = int(round((2 * float(idx) + 1) * 0.5 * float(bottom_u_lvls) / float(u_lvls)));
+
+        //gl_PrimitiveIndicesNV[(bottom_u_lvls + idx) * 3 + 0] = bottom_u_lvls + 1 + idx + 1;
+        //gl_PrimitiveIndicesNV[(bottom_u_lvls + idx) * 3 + 1] = bottom_u_lvls + 1 + idx;
+        //gl_PrimitiveIndicesNV[(bottom_u_lvls + idx) * 3 + 2] = bottom_idx;
+
+    //}
 
     // No. Primitives
     gl_PrimitiveCountNV = 512;
