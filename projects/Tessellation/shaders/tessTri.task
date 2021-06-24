@@ -8,16 +8,16 @@ uniform float olevel;
 
 void main()
 {
-    int i_u_lvls = int(ceil(ilevel));
-    i_u_lvls -= i_u_lvls % 2;
+    //int i_u_lvls = int(ceil(ilevel));
+    //i_u_lvls -= i_u_lvls % 2;
 
-    int o_u_lvls = int(ceil(olevel));
-    o_u_lvls += 1 - o_u_lvls % 2;
+    //int o_u_lvls = int(ceil(olevel));
+    //o_u_lvls += 1 - o_u_lvls % 2;
 
-    int v_lvls = int(ceil(ilevel));
-    v_lvls += 1 - v_lvls % 2;
-    v_lvls = int(ceil(v_lvls * 0.5));
+    //int v_lvls = int(ceil(ilevel));
+    //v_lvls += 1 - v_lvls % 2;
+    //v_lvls = int(ceil(v_lvls * 0.5));
 
-    gl_TaskCountNV = 3 * v_lvls;
-    //gl_TaskCountNV = 3;
+    //gl_TaskCountNV = 3 * v_lvls;
+    gl_TaskCountNV = 3;
 }

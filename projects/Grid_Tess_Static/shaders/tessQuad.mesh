@@ -1,0 +1,100 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+layout(triangles, max_vertices=256, max_primitives=512) out;
+
+uniform mat4 m_pvm;
+
+uniform vec3 disp;
+
+uniform float level;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+    float vertices[];
+};
+
+void main()
+{
+    // Inputs
+    uint local_id  = gl_LocalInvocationID.x;
+    uint global_id  = gl_GlobalInvocationID.x;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    // Tessellation Levels
+    int ceil_even = int(ceil(level));
+    ceil_even += ceil_even % 2;
+    ceil_even = int(ceil_even * 0.25);
+
+    float level = max(1.0, 0.25 * level);
+
+    // Quad vertices
+    int v0_idx = 0 * 3;
+    int v1_idx = 1 * 3;
+    int v2_idx = 2 * 3;
+    int v3_idx = 3 * 3;
+    
+    vec4 verts[4] = { vec4(disp + vec3 (vertices[v0_idx + 1], 
+                                        vertices[v0_idx + 2], 
+                                        vertices[v0_idx + 3]), 1.0),
+                      vec4(disp + vec3 (vertices[v1_idx + 1], 
+                                        vertices[v1_idx + 2], 
+                                        vertices[v1_idx + 3]), 1.0),
+                      vec4(disp + vec3 (vertices[v2_idx + 1], 
+                                        vertices[v2_idx + 2], 
+                                        vertices[v2_idx + 3]), 1.0),
+                      vec4(disp + vec3 (vertices[v3_idx + 1], 
+                                        vertices[v3_idx + 2], 
+                                        vertices[v3_idx + 3]), 1.0) };
+
+    int upper = int(workg_id % 4);
+    int right = int(workg_id / 4);
+    //int upper = 0;
+    //int right = 0;
+
+    vec4 v0 = 
+        mix (mix (verts[0], verts[1], 0.25 * right), mix (verts[3], verts[2], 0.25 * right), 0.25 * upper);
+    vec4 v1 = 
+        mix (mix (verts[0], verts[1], 0.25 * (right + 1)), mix (verts[3], verts[2], 0.25 * (right + 1)), 0.25 * upper);
+    vec4 v2 = 
+        mix (mix (verts[0], verts[1], 0.25 * (right + 1)), mix (verts[3], verts[2], 0.25 * (right + 1)), 0.25 * (upper + 1));
+    vec4 v3 = 
+        mix (mix (verts[0], verts[1], 0.25 * right), mix (verts[3], verts[2], 0.25 * right), 0.25 * (upper + 1));
+
+    int no_verts = (ceil_even + 1) * (ceil_even + 1);
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        int u_idx = idx % int(ceil_even + 1);
+        int v_idx = idx / int(ceil_even + 1);
+
+        float u = float(u_idx) / float(ceil_even);
+        float v = float(v_idx) / float(ceil_even);
+
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
+
+    }
+
+    int no_prims = ceil_even * ceil_even * 2;
+
+    for (int i=0; i <= no_prims / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_prims - 1));
+
+        int u_idx = (idx / 2) % ceil_even;
+        int v_idx = (idx / 2) / ceil_even;
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = v_idx * (ceil_even + 1) + u_idx;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = (v_idx + 1 * idx % 2) * (ceil_even + 1) + u_idx + 1;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = (v_idx + 1) * (ceil_even + 1) + u_idx + 1 * (1 - idx % 2);
+
+    }
+
+    // No. Primitives
+    gl_PrimitiveCountNV = 512;
+
+}

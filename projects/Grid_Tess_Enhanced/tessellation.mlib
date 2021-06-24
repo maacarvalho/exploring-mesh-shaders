@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<materialLib name="tessellation">
+
+	<shaders>
+		<shader name="tradTessQuad" 	ps="shaders/tessDemo.frag" 
+									    tc="shaders/simpleQuad.tesc"
+									    te="shaders/simpleQuad.tese"
+									    vs="shaders/tessDemo.vert" />
+
+        <shader name="meshTessQuad" 	ts = "shaders/tessQuad.task" 
+                                        ms = "shaders/tessQuad.mesh" 
+										ps = "shaders/tessMeshDemo.frag" />
+                                                
+	</shaders>
+
+    <buffers>
+		<buffer name="quadBuf" >
+            <file name="buffers/square.buf"/>
+            <DIM x=13 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>		
+    </buffers>
+	
+    <materials>
+
+        <material name="meshTessQuad">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
+            
+            <shader name="meshTessQuad" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="level" 
+                             type="RENDERER" context="CURRENT" 
+							 component="level"  />
+							 
+                </values>
+            </shader>
+
+        </material>
+
+		<material name="tradTessQuad">
+			<shader name="tradTessQuad">
+				<values>
+					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+
+					<valueof uniform="level" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+				</values>
+			</shader>
+		</material>		
+    </materials>
+</materialLib>

@@ -2,7 +2,7 @@
 <project name="Tessellation Partition" width="1024" height="512">
 	<assets>
 		<attributes>
-			<attribute name="level" data="FLOAT" type="RENDERER" value=14.999 />
+			<attribute name="level" data="FLOAT" type="RENDERER" value=59.999 />
 			<attribute name="ilevel" data="FLOAT" type="RENDERER" value=1 />
             <attribute name="olevel" data="FLOAT" type="RENDERER" value=1 />
             <attribute name="quadDisp" data="VEC3" type="RENDERER" x="1.5" y=0 z=0 />
@@ -37,7 +37,7 @@
 		
 	</assets>
 	
-	<!--<pipelines mode=RUN_ALL>-->
+    <!--<pipelines mode=RUN_ALL>-->
     <pipelines>
         <pipeline name="Combined Pipeline" default="true" frameCount=2500>
             <preScript file="scripts/times.1.1.1.lua" script="startTimer_1_1_1" />
@@ -56,7 +56,8 @@
             </pass>
             <postScript file="scripts/times.1.1.1.lua" script="stopTimer_1_1_1" />
         </pipeline>
-		<pipeline name="Traditional Pipeline" default="true" frameCount=2500>
+
+        <pipeline name="Traditional Pipeline" default="true" frameCount=2500>
             <preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" />
             <pass class="default" name="tradPassQuad">
                 <scenes>
