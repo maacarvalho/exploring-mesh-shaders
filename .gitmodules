@@ -1,0 +1,3 @@
+[submodule "nau"]
+	path = nau
+	url = git@github.com:Nau3D/nau.git
