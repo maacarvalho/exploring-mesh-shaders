@@ -3,6 +3,7 @@
  
 layout(local_size_x=32) in;
 layout(triangles, max_vertices=256, max_primitives=512) out;
+//layout(points, max_vertices=256, max_primitives=512) out;
 
 taskNV in perTaskData {
   uint divs;
@@ -82,46 +83,14 @@ void main()
         float inter_u = mix (prev_u, u, 1 - int(level >= 2) * 0.5 * (ceil_odd - level));
         float inter_v = mix (prev_v, v, 1 - int(level >= 2) * 0.5 * (ceil_odd - level));
 
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
         //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
-        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
         //gl_PrimitiveIndicesNV[idx] = idx;
 
         //p_out[idx].mesh_id = workg_id;
         //p_out[idx].divs = divs;
     }
-
-    //gl_MeshVerticesNV[0].gl_Position = m_pvm * mix( 
-            //mix (v0, v1, float(min_u_idx) / float(ceil_odd)),
-            //mix (v3, v2, float(min_u_idx) / float(ceil_odd)),
-            //float(min_v_idx) / float(ceil_odd));
-
-    //gl_MeshVerticesNV[1].gl_Position = m_pvm * mix( 
-            //mix (v0, v1, float(max_u_idx) / float(ceil_odd)),
-            //mix (v3, v2, float(max_u_idx) / float(ceil_odd)),
-            //float(min_v_idx) / float(ceil_odd));
-
-    //gl_MeshVerticesNV[2].gl_Position = m_pvm * mix( 
-            //mix (v0, v1, float(max_u_idx) / float(ceil_odd)),
-            //mix (v3, v2, float(max_u_idx) / float(ceil_odd)),
-            //float(max_v_idx) / float(ceil_odd));
-
-    //gl_MeshVerticesNV[3].gl_Position = m_pvm * mix( 
-            //mix (v0, v1, float(min_u_idx) / float(ceil_odd)),
-            //mix (v3, v2, float(min_u_idx) / float(ceil_odd)),
-            //float(max_v_idx) / float(ceil_odd));
-
-    //gl_PrimitiveIndicesNV[0] = 0;
-    //gl_PrimitiveIndicesNV[1] = 1;
-    //gl_PrimitiveIndicesNV[2] = 2;
-    //gl_PrimitiveIndicesNV[3] = 0;
-    //gl_PrimitiveIndicesNV[4] = 2;
-    //gl_PrimitiveIndicesNV[5] = 3;
-
-    //p_out[0].mesh_id = workg_id;
-    //p_out[0].divs = divs;
-    //p_out[1].mesh_id = workg_id;
-    //p_out[1].divs = divs;
 
     int no_prims = (no_cols) * (no_lines) * 2;
 
@@ -142,6 +111,6 @@ void main()
     }
 
     // No. Primitives
-    gl_PrimitiveCountNV = 512;
+    gl_PrimitiveCountNV = no_prims;
 
 }

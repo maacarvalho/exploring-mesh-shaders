@@ -24,7 +24,7 @@
 		<cameras>
 			<camera name="MainCamera" >
 				<viewport name="MainViewport" />
-				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=1 FAR=100.0 />
+				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=0.01 FAR=100.0 />
 				<POSITION x=0 y=0.0 z=5 />
 				<VIEW x=0.0 y=0.0 z=-1.0 />
 				<UP x=0 y=1 z=0 />
