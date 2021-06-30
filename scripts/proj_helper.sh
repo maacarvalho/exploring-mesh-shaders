@@ -320,8 +320,16 @@ end
 ## Creates a project 
 create_proj () {
     
+#<project name=\"Obj Renderer\">
+#<project name=\"Obj Renderer\" width=1280 height=720>
+                #<POSITION x="-20" y="450" z="-25" />
+                #<VIEW x="1.0" y="0.1" z="0" />
+                #<POSITION x="8" y="8" z="4" />
+                #<VIEW x="1.0" y="-1.0" z="-0.5" />
+                #<POSITION x="-2.75" y="11" z="-5" />
+                #<VIEW x="0.75" y="0.0" z="0.75" />
     echo "<?xml version=\"1.0\" ?>
-<project name=\"Obj Renderer\" >
+<project name=\"Obj Renderer\">
     <assets>
         <attributes>
             <attribute name=\"SCALE\" data=\"FLOAT\" type=\"RENDERER\" value=\"1\" />$attributes_str
@@ -338,13 +346,13 @@ create_proj () {
 
         <cameras>
             <camera name=\"objCamera\" >
-                <viewport name=\"objViewport\" />
-                <TYPE value=\"PERSPECTIVE\"/>
-                <FOV value = \"90\"/>
-                <NEAR value= \"0.01\"/>
-                <FAR value= \"10000\"/>
-                <POSITION x=\"-2.75\" y=\"11\" z=\"-5\" w=\"1\" />
-                <LOOK_AT_POINT x=\"-2.5\" y=\"11\" z=\"-4\" />
+                <viewport name="objViewport" />
+                <TYPE value="PERSPECTIVE"/>
+                <FOV value = "90"/>
+                <NEAR value= "0.01"/>
+                <FAR value= "10000"/>
+                <POSITION x="0" y="500" z="0" />
+                <VIEW x="-0.001" y="-1.0" z="0.00" />
             </camera>
         </cameras>
         
@@ -363,12 +371,12 @@ create_proj () {
     <pipelines mode="RUN_ALL">$pipelines_str
     </pipelines>
 
-    <interface>
-        <window label=\"Properties\" >
-            <pipelineList label=\"Pipeline\" />
-            <var label=\"Scale\" type=\"RENDERER\" context=\"CURRENT\" component=\"SCALE\" def=\"min=0 max=100\"/>
-        </window>
-    </interface>
+    <!--<interface>-->
+        <!--<window label="Properties" >-->
+            <!--<pipelineList label="Pipeline" />-->
+            <!--<var label="Scale" type="RENDERER" context="CURRENT" component="SCALE" def="min=0 max=100"/>-->
+        <!--</window>-->
+    <!--</interface>-->
 </project>"
 
 }

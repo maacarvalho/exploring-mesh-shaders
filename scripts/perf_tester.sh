@@ -48,21 +48,23 @@ configure_mesh_pipelines () {
     ## --------------------------------------- Pipelines ---------------------------------------
         pipelines_str+="
         <pipeline name=\"Mesh_${locs}_${maxv}_${maxp}\" default=\"true\" frameCount = 2500>
-            <preScript file=\"scripts/times.$locs.$maxv.$maxp.lua\" script=\"startTimer_${locs}_${maxv}_${maxp}\" />"
-        
-        for m in "${!indices_count[@]}"
-        do
-            pipelines_str+="
+            <preScript file=\"scripts/times.$locs.$maxv.$maxp.lua\" script=\"startTimer_${locs}_${maxv}_${maxp}\" />
             <pass class=\"mesh\" name=\"meshPass_${locs}_${maxv}_${maxp}_$m\">
                 <camera name=\"objCamera\" />
                 <lights>
                     <light name=\"objLight\" />
                 </lights>
-                <material name=\"meshMat_${locs}_${maxv}_${maxp}_$m\" fromLibrary=\"objMatLib\" count=\"${meshes_count[$m]}\" />
-            </pass>"
+                <materials>"
+        
+        for m in "${!indices_count[@]}"
+        do
+            pipelines_str+="
+                    <material name=\"meshMat_${locs}_${maxv}_${maxp}_$m\" fromLibrary=\"objMatLib\" count=\"${meshes_count[$m]}\" />"
         done
 
         pipelines_str+="
+                </materials>
+            </pass>
             <postScript file=\"scripts/times.$locs.$maxv.$maxp.lua\" script=\"stopTimer_${locs}_${maxv}_${maxp}\" />
         </pipeline>"
 
@@ -282,77 +284,92 @@ configure_traditional_pipeline () {
 
 
     ## --------------------------------------- Scenes ---------------------------------------
-    for m in "${!material_names[@]}"
-    do
-        scenes_str+="
-            <scene name=\"objScene_$m\" type=\"Scene\">
-                <file name=\"$basename.$m.obj\"/>
+    scenes_str+="
+            <scene name=\"objScene\" type=\"Scene\">
+                <file name=\"$basename\"/>
             </scene>"
-    done
-
-    ## --------------------------------------- Pipelines ---------------------------------------
-    #pipelines_str+="
-        #<pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
-            #<preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
-            #<pass class=\"default\" name=\"traditionalPass\">
-                #<scenes>
-                    #<scene name=\"objScene\" />
-                #</scenes>
-                #<camera name=\"objCamera\" />
-                #<lights>
-                    #<light name=\"objLight\" />
-                #</lights>
-                #<materialMaps>"
-
     #for m in "${!material_names[@]}"
     #do
-        #pipelines_str+="
-					#<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />"
+        #scenes_str+="
+            #<scene name=\"objScene_$m\" type=\"Scene\">
+                #<file name=\"$basename.$m.obj\"/>
+            #</scene>"
     #done
-    
-    #pipelines_str+="
-                #</materialMaps>
-            #</pass>
-            #<postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
-        #</pipeline>"
- 
+
+    ## --------------------------------------- Pipelines ---------------------------------------
     pipelines_str+="
-        <pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
-            <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />"
-
-    
-    first_mat=1
-    for m in "${!material_names[@]}"
-    do
-        pipelines_str+="
-            <pass class=\"default\" name=\"traditionalPass_$m\">"
-
-        if [[ $first_mat -eq 1 ]] 
-        then
-            first_mat=0
-        else
-            pipelines_str+="
-                <COLOR_CLEAR value=false />
-		    	<DEPTH_CLEAR value=false />"
-        fi
-
-        pipelines_str+="
+        <pipeline name=\"Bogus Traditional\" default=\"true\" frameCount = 500>
+            <pass class=\"default\" name=\"traditionalPass\">
                 <scenes>
-                    <scene name=\"objScene_$m\" />
+                    <scene name=\"objScene\" />
                 </scenes>
                 <camera name=\"objCamera\" />
                 <lights>
                     <light name=\"objLight\" />
                 </lights>
-                <materialMaps>
-    				<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />
-                </materialMaps>
-            </pass>"
+            </pass>
+        </pipeline>
+        <pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
+            <preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />
+            <pass class=\"default\" name=\"traditionalPass\">
+                <scenes>
+                    <scene name=\"objScene\" />
+                </scenes>
+                <camera name=\"objCamera\" />
+                <lights>
+                    <light name=\"objLight\" />
+                </lights>
+                <materialMaps>"
+
+    for m in "${!material_names[@]}"
+    do
+        pipelines_str+="
+                    <map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />"
     done
     
     pipelines_str+="
+                </materialMaps>
+            </pass>
             <postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
         </pipeline>"
+ 
+    #pipelines_str+="
+        #<pipeline name=\"Traditional\" default=\"true\" frameCount = 2500>
+            #<preScript file=\"scripts/times.0.0.0.lua\" script=\"startTimer_0_0_0\" />"
+
+    
+    #first_mat=1
+    #for m in "${!material_names[@]}"
+    #do
+        #pipelines_str+="
+            #<pass class=\"default\" name=\"traditionalPass_$m\">"
+
+        #if [[ $first_mat -eq 1 ]] 
+        #then
+            #first_mat=0
+        #else
+            #pipelines_str+="
+                #<COLOR_CLEAR value=false />
+				#<DEPTH_CLEAR value=false />"
+        #fi
+
+        #pipelines_str+="
+                #<scenes>
+                    #<scene name=\"objScene_$m\" />
+                #</scenes>
+                #<camera name=\"objCamera\" />
+                #<lights>
+                    #<light name=\"objLight\" />
+                #</lights>
+                #<materialMaps>
+                    #<map fromMaterial=\"${material_names[$m]}\"  	toLibrary=\"objMatLib\" 	toMaterial=\"tradMat_$m\" />
+                #</materialMaps>
+            #</pass>"
+    #done
+    
+    #pipelines_str+="
+            #<postScript file=\"scripts/times.0.0.0.lua\" script=\"stopTimer_0_0_0\" />
+        #</pipeline>"
 
     ## --------------------------------------- Attributes ---------------------------------------
     attributes_str=""
@@ -458,7 +475,7 @@ create_runner_script () {
 
     echo "#!/usr/bin/bash
 
-project_files=\$(ls | awk '/.nau/ {print \$0}')
+project_files=\$(ls | awk '/.nau/ {print \$0}' | shuf)
 
 for proj in \$project_files
 do 
@@ -509,12 +526,15 @@ filepath=$1
 dirname=$(dirname $filepath)
 basename=$(basename $filepath)
 
-#max_vertices=( 256 128 64 32 16 8 )
-#max_primitives=( 512 256 128 64 32 16 8 )
-#local_size=( 32 16 8 )
-max_vertices=( 256 )
-max_primitives=( 512 )
-local_size=( 32 )
+max_vertices=( 256 128 64 32 16 8 )
+max_primitives=( 512 256 128 64 32 16 8 )
+local_size=( 32 16 8 )
+#max_vertices=( 256 )
+#max_primitives=( 512 )
+#local_size=( 32 )
+#max_vertices=()
+#max_primitives=()
+#local_size=()
 
 declare vertices_count
 declare normals_count
@@ -593,9 +613,12 @@ maxp=0
 # Creating lua script for performance measuring
 [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
 
-lua obj_transformer.lua $filepath
+#lua obj_transformer.lua $filepath
 
 configure_traditional_pipeline
 
 create_proj > $filepath.$maxv.$maxp.nau
 create_mlib > $filepath.$maxv.$maxp.mlib
+
+# Creating script for running all the projects
+[[ ! -f "$dirname/proj_runner.sh" ]] && create_runner_script > "$dirname/proj_runner.sh"
