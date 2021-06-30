@@ -1,3 +1,4 @@
 [submodule "nau"]
 	path = renderer
 	url = git@github.com:Nau3D/nau.git
+    ignore = dirty
