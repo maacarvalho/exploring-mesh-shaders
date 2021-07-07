@@ -1,0 +1,118 @@
+<?xml version="1.0" ?>
+<materialLib name="tessellation">
+
+	<textures>
+		<texture name="tex" filename="textures/calcada.jpg" mipmap=true/>		
+	</textures>
+	
+	<shaders>
+        <shader name="meshBezier" 	ts = "shaders/bezierQuad.task" 
+                                    ms = "shaders/bezierQuad.mesh" 
+                                    ps = "shaders/tessMeshDemo.frag" />
+        
+		<shader name="tradBezier" 	ps="shaders/lightTexture.frag" 
+									tc="shaders/bezier.tesc"
+									te="shaders/bezier.tese"
+									vs="shaders/tessDemo.vert" />
+
+	</shaders>
+
+    <buffers>
+        <buffer name="patchesBuf" >
+            <file name="buffers/teapot.patches.buf"/>
+            <DIM x=512 y=1 z=1 />
+            <structure>
+                <field value="UINT" />
+            </structure>
+        </buffer>		
+        <buffer name="verticesBuf" >
+            <file name="buffers/teapot.vertices.buf"/>
+            <DIM x=307 y=1 z=1 />
+            <structure>
+                <field value="VEC4" />
+            </structure>
+        </buffer>		
+    </buffers>
+	
+    <materials>
+
+        <material name="meshBezierMat">
+
+            <buffers>
+                <buffer name="patchesBuf">
+                    <TYPE value="SHADER_STORAGE" />
+                    <BINDING_POINT value="1" />
+                </buffer>
+                <buffer name="verticesBuf">
+                    <TYPE value="SHADER_STORAGE" />
+                    <BINDING_POINT value="2" />
+                </buffer>
+            </buffers>
+            
+            <shader name="meshBezier" >
+                <values>
+                    <valueof uniform="m_pvm" 
+                             type="RENDERER" context="CURRENT" 
+                             component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="level" 		
+                             type="RENDERER" context="CURRENT" 
+                             component="level"  />
+                    
+                    <valueof uniform="normalMatrix" 
+                             type="RENDERER" context="CURRENT" 
+                            component="NORMAL" />
+
+                    <valueof uniform="lightDir" 	
+                             type="LIGHT" context="CURRENT" 
+							 id=0 component="DIRECTION" /> 
+														
+                    <valueof uniform="viewMatrix" 	
+                             type="RENDERER" context="CURRENT" 
+							 component="VIEW" />
+	
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							component="UNIT" id="0" />
+                                                        
+                </values>
+            </shader>
+            <textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+		<material name="tradBezierMat">
+			<shader name="tradBezier">
+				<values>
+					<valueof uniform="lightDir" 	type="LIGHT" context="CURRENT" 
+														id=0 component="DIRECTION" /> 
+														
+					<valueof uniform="normalMatrix" type="RENDERER" context="CURRENT" 
+														component="NORMAL" />
+					
+					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
+														component="PROJECTION_VIEW_MODEL" />
+														
+					<valueof uniform="viewMatrix" 	type="RENDERER" context="CURRENT" 
+														component="VIEW" />
+	
+					<valueof uniform="texUnit" 		type="TEXTURE_BINDING" context="CURRENT" 
+														component="UNIT" id="0" />
+
+					<valueof uniform="level" 		type="RENDERER" context="CURRENT" 
+														component="level"  />
+
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+		</material>		
+
+	</materials>
+</materialLib>

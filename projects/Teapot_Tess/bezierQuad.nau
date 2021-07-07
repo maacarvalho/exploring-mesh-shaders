@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<project name="Bezier Tessellation" width="1024" height="512">
+	<assets>
+		<attributes>
+			<attribute name="level" data="FLOAT" type="RENDERER" value=64 />
+            <attribute name="quadDisp" data="VEC3" type="RENDERER" x="3" y=0 z=0 />
+		</attributes>
+		
+		<scenes>
+			<scene name="Teapot" >
+                <file  name="models/teapot.patch"/>
+                <ROTATE x = 0 y = 1 z = 0 w = 180 />
+				<TRANSLATE x = -3 y = 0 z = 0 />
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=0.001 FAR=100.0 />
+				<POSITION x=0 y=1.0 z=7.5 />
+				<VIEW x=0.0 y=0.0 z=-1.0 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun">
+				<DIRECTION x="1.0" y="-0.5" z="-2" />
+			</light>
+		</lights>
+		
+		<materialLibs>
+			<materialLib filename="tessellation.mlib"/>
+		</materialLibs>
+		
+	</assets>
+	
+    <pipelines>
+    <!--<pipelines mode=RUN_ALL>-->
+        <pipeline name="Combined Pipeline" default="true" frameCount=2500>
+            <preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" />
+			<pass class="default" name="tradPass">
+				<scenes>
+					<scene name="Teapot" />
+				</scenes>
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradBezierMat" />
+				</materialMaps>
+			</pass>
+            <pass class="mesh" name="meshPassQuad">
+                <camera name="MainCamera" />
+                <material name="meshBezierMat" fromLibrary="tessellation" count="32" />
+            </pass>
+            <postScript file="scripts/times.0.0.0.lua" script="stopTimer_0_0_0" />
+		</pipeline>
+        <pipeline name="Mesh Pipeline" default="true" frameCount=2500>
+            <preScript file="scripts/times.32.256.512.lua" script="startTimer_32_256_512" />
+            <pass class="mesh" name="meshPassQuad">
+                <camera name="MainCamera" />
+                <material name="meshBezierMat" fromLibrary="tessellation" count="32" />
+            </pass>
+            <postScript file="scripts/times.32.256.512.lua" script="stopTimer_32_256_512" />
+        </pipeline>
+		<pipeline name="Traditional Pipeline" default="true" frameCount=2500>
+            <preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" />
+			<pass class="default" name="tradPass">
+				<scenes>
+					<scene name="Teapot" />
+				</scenes>
+				<camera name="MainCamera" />
+				<lights>
+					<light name="Sun" />
+				</lights>
+				<materialMaps>
+					<map fromMaterial="*" toLibrary="tessellation" toMaterial="tradBezierMat" />
+				</materialMaps>
+				
+			</pass>
+            <postScript file="scripts/times.0.0.0.lua" script="stopTimer_0_0_0" />
+		</pipeline>
+	</pipelines>
+	
+	<interface>
+		<window label="Main Window">
+            <pipelineList label="Pipeline" />
+			<var label="level" type="RENDERER" context="CURRENT" component="level" 
+				def="min=1 max=256 step=0.01"/>
+		</window>
+	</interface>
+</project>
