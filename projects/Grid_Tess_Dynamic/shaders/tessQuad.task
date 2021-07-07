@@ -7,23 +7,26 @@ taskNV out perTaskData {
   uint divs;
 };
 
-uniform float level;
+uniform float icols;
+uniform float irows;
 
 void main() {
 
     // Tessellation Levels
-    int ceil_odd = int(ceil(level));
-    ceil_odd += ceil_odd % 2;
+    int ceil_cols = int(ceil(icols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(irows));
+    ceil_rows += ceil_rows % 2;
 
     // Number of Vertices of the Quad
-    int no_verts = (ceil_odd + 1) * (ceil_odd + 1);
+    int no_verts = (ceil_cols + 1) * (ceil_rows + 1);
 
     // Number of Mesh Shader WorkGroups to launch
     int mesh_wg_needed = int(ceil(no_verts / 256.0));
     for (int i=1; i<256; i++) {
 
-
-        if ( pow(int(ceil(float(ceil_odd + 1) / float(i) + 1)), 2) <= 256 ) {
+        if (int(ceil(float(ceil_cols + 1) / float(i) + 1)) * 
+            int(ceil(float(ceil_rows + 1) / float(i) + 1)) <= 256) {
         //if ( i*i >= mesh_wg_needed * 2 ) {
 
             divs = i;

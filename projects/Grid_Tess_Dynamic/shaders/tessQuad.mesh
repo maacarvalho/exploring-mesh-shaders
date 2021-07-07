@@ -19,7 +19,8 @@ uniform mat4 m_pvm;
 
 uniform vec3 disp;
 
-uniform float level;
+uniform float irows;
+uniform float icols;
 
 layout(std430, binding = 1) readonly buffer verticesBuffer
 {
@@ -33,11 +34,6 @@ void main()
     uint global_id  = gl_GlobalInvocationID.x;
     uint workg_id = gl_WorkGroupID.x;
     uint workg_len = gl_WorkGroupSize.x;
-
-
-    // Tessellation Levels
-    int ceil_odd = int(ceil(level));
-    ceil_odd += ceil_odd % 2;
 
     // Quad vertices
     vec4 v0 = vec4(disp + vec3 (vertices[0 * 3 + 1], 
@@ -53,13 +49,19 @@ void main()
                                 vertices[3 * 3 + 2], 
                                 vertices[3 * 3 + 3]), 1.0);
 
+    // Tessellation Levels
+    int ceil_cols = int(ceil(icols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(irows));
+    ceil_rows += ceil_rows % 2;
+
     int workg_u_id = int(workg_id % divs);
     int workg_v_id = int(workg_id / divs);
 
-    int min_u_idx = int(max( 0.0, round( mix( 0.0, float(ceil_odd), float(workg_u_id) / float(divs)))));
-    int max_u_idx = int(min( ceil_odd, round( mix( 0.0, float(ceil_odd), float(workg_u_id + 1) / float(divs)))));
-    int min_v_idx = int(max( 0.0, round( mix( 0.0, float(ceil_odd), float(workg_v_id) / float(divs)))));
-    int max_v_idx = int(min( ceil_odd, round( mix( 0.0, float(ceil_odd), float(workg_v_id + 1) / float(divs)))));
+    int min_u_idx = int(max( 0.0, round( mix( 0.0, float(ceil_cols), float(workg_u_id) / float(divs)))));
+    int max_u_idx = int(min( ceil_cols, round( mix( 0.0, float(ceil_cols), float(workg_u_id + 1) / float(divs)))));
+    int min_v_idx = int(max( 0.0, round( mix( 0.0, float(ceil_rows), float(workg_v_id) / float(divs)))));
+    int max_v_idx = int(min( ceil_rows, round( mix( 0.0, float(ceil_rows), float(workg_v_id + 1) / float(divs)))));
 
     int no_cols = max_u_idx - min_u_idx;
     int no_lines = max_v_idx - min_v_idx;
@@ -72,20 +74,20 @@ void main()
         int u_idx = min_u_idx + idx % int(no_cols + 1);
         int v_idx = min_v_idx + idx / int(no_cols + 1);
 
-        uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_odd) * 1 + int(u_idx == 0) * 1;
-        uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_odd) * 1 + int(v_idx == 0) * 1;
+        uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols) * 1 + int(u_idx == 0) * 1;
+        uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows) * 1 + int(v_idx == 0) * 1;
 
-        float u = float(u_idx) / float(ceil_odd);
-        float prev_u = float(prev_u_idx) / float(max(1, ceil_odd - 2));
-        float v = float(v_idx) / float(ceil_odd);
-        float prev_v = float(prev_v_idx) / float(max(1, ceil_odd - 2));
+        float u = float(u_idx) / float(ceil_cols);
+        float prev_u = float(prev_u_idx) / float(max(1, ceil_cols - 2));
+        float v = float(v_idx) / float(ceil_rows);
+        float prev_v = float(prev_v_idx) / float(max(1, ceil_rows - 2));
 
-        float inter_u = mix (prev_u, u, 1 - int(level >= 2) * 0.5 * (ceil_odd - level));
-        float inter_v = mix (prev_v, v, 1 - int(level >= 2) * 0.5 * (ceil_odd - level));
+        float inter_u = mix (prev_u, u, 1 - int(icols >= 2) * 0.5 * (ceil_cols - icols));
+        float inter_v = mix (prev_v, v, 1 - int(irows >= 2) * 0.5 * (ceil_rows - irows));
 
-        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
         //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
         //gl_PrimitiveIndicesNV[idx] = idx;
 
         //p_out[idx].mesh_id = workg_id;

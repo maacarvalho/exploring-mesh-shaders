@@ -47,6 +47,18 @@
                     <valueof uniform="level" 
                              type="RENDERER" context="CURRENT" 
 							 component="level"  />
+                    
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                            component="irows"  />
+
+                     <valueof uniform="olevel" 
+                             type="RENDERER" context="CURRENT" 
+							 component="olevel"  />
 							 
                 </values>
             </shader>
@@ -60,7 +72,20 @@
 														component="PROJECTION_VIEW_MODEL" />
 
 					<valueof uniform="level" 		type="RENDERER" context="CURRENT" 
-														component="level"  />
+                        component="level"  />
+                    
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                            component="irows"  />
+
+
+                     <valueof uniform="olevel" 
+                             type="RENDERER" context="CURRENT" 
+							 component="olevel"  />
 				</values>
 			</shader>
 		</material>		
