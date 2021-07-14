@@ -7,10 +7,14 @@
 									    te="shaders/simpleQuad.tese"
 									    vs="shaders/tessDemo.vert" />
 
-        <shader name="meshTessQuad" 	ts = "shaders/tessQuad.task" 
-                                        ms = "shaders/tessQuad.mesh" 
-										ps = "shaders/tessMeshDemo.frag" />
-                                                
+        <shader name="meshInnerTessQuad" 	ts = "shaders/innerTessQuad.task" 
+                                            ms = "shaders/innerTessQuad.mesh" 
+                                            ps = "shaders/tessMeshDemo.frag" />
+        
+        <shader name="meshOuterTessQuad" 	ts = "shaders/outerTessQuad.task" 
+                                            ms = "shaders/outerTessQuad.mesh" 
+                                            ps = "shaders/tessMeshDemo.frag" />
+
 	</shaders>
 
     <buffers>
@@ -25,7 +29,7 @@
 	
     <materials>
 
-        <material name="meshTessQuad">
+        <material name="meshOuterTessQuad">
 
             <buffers>
                 <buffer name="quadBuf">
@@ -34,7 +38,53 @@
                 </buffer>
             </buffers>
             
-            <shader name="meshTessQuad" >
+            <shader name="meshOuterTessQuad" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+                    
+                    <valueof uniform="iCols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="iRows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="oLeft" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="oBottom" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="oRight" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="oTop" 
+                             type="RENDERER" context="CURRENT" 
+							 component="olevel3"  />
+                </values>
+            </shader>
+        </material>
+
+        <material name="meshInnerTessQuad">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+            </buffers>
+            
+            <shader name="meshInnerTessQuad" >
 				<values>
 					<valueof uniform="m_pvm" 
 							 type="RENDERER" context="CURRENT" 
@@ -44,22 +94,14 @@
                              type="RENDERER" context="CURRENT" 
                              component="quadDisp" />
 
-                    <valueof uniform="level" 
-                             type="RENDERER" context="CURRENT" 
-							 component="level"  />
-                    
                     <valueof uniform="icols" 
                              type="RENDERER" context="CURRENT" 
                              component="icols"  />
 
                     <valueof uniform="irows" 
                              type="RENDERER" context="CURRENT" 
-                            component="irows"  />
+                             component="irows"  />
 
-                     <valueof uniform="olevel" 
-                             type="RENDERER" context="CURRENT" 
-							 component="olevel"  />
-							 
                 </values>
             </shader>
 
@@ -68,24 +110,34 @@
 		<material name="tradTessQuad">
 			<shader name="tradTessQuad">
 				<values>
-					<valueof uniform="projViewModelMatrix"  type="RENDERER" context="CURRENT" 
-														component="PROJECTION_VIEW_MODEL" />
+                    <valueof uniform="projViewModelMatrix"  
+                             type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
 
-					<valueof uniform="level" 		type="RENDERER" context="CURRENT" 
-                        component="level"  />
-                    
                     <valueof uniform="icols" 
                              type="RENDERER" context="CURRENT" 
                              component="icols"  />
 
                     <valueof uniform="irows" 
                              type="RENDERER" context="CURRENT" 
-                            component="irows"  />
+                             component="irows"  />
 
-
-                     <valueof uniform="olevel" 
+                     <valueof uniform="olevel0" 
                              type="RENDERER" context="CURRENT" 
-							 component="olevel"  />
+                             component="olevel0"  />
+
+		            <valueof uniform="olevel1" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="olevel2" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="olevel3" 
+                             type="RENDERER" context="CURRENT" 
+							 component="olevel3"  />
+
 				</values>
 			</shader>
 		</material>		

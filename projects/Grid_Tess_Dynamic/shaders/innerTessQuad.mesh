@@ -58,10 +58,10 @@ void main()
     int workg_u_id = int(workg_id % divs);
     int workg_v_id = int(workg_id / divs);
 
-    int min_u_idx = int(max( 0.0, round( mix( 0.0, float(ceil_cols), float(workg_u_id) / float(divs)))));
-    int max_u_idx = int(min( ceil_cols, round( mix( 0.0, float(ceil_cols), float(workg_u_id + 1) / float(divs)))));
-    int min_v_idx = int(max( 0.0, round( mix( 0.0, float(ceil_rows), float(workg_v_id) / float(divs)))));
-    int max_v_idx = int(min( ceil_rows, round( mix( 0.0, float(ceil_rows), float(workg_v_id + 1) / float(divs)))));
+    int min_u_idx = int(max( 1.0, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id) / float(divs)))));
+    int max_u_idx = int(min( ceil_cols - 1, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id + 1) / float(divs)))));
+    int min_v_idx = int(max( 1.0, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id) / float(divs)))));
+    int max_v_idx = int(min( ceil_rows - 1, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id + 1) / float(divs)))));
 
     int no_cols = max_u_idx - min_u_idx;
     int no_lines = max_v_idx - min_v_idx;
@@ -74,14 +74,18 @@ void main()
         int u_idx = min_u_idx + idx % int(no_cols + 1);
         int v_idx = min_v_idx + idx / int(no_cols + 1);
 
-        uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols) * 1 + int(u_idx == 0) * 1;
-        uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows) * 1 + int(v_idx == 0) * 1;
+        //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols - 1) * 1 + int(u_idx == 1) * 1;
+        //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows - 1) * 1 + int(v_idx == 1) * 1;
+        uint prev_u_idx = max(1, min(ceil_cols - 3, int(round(mix(0, ceil_cols - 2, float(u_idx) / float(ceil_cols))))));
+        uint prev_v_idx = max(1, min(ceil_rows - 3, int(round(mix(0, ceil_rows - 2, float(v_idx) / float(ceil_rows))))));
 
         float u = float(u_idx) / float(ceil_cols);
         float prev_u = float(prev_u_idx) / float(max(1, ceil_cols - 2));
         float v = float(v_idx) / float(ceil_rows);
         float prev_v = float(prev_v_idx) / float(max(1, ceil_rows - 2));
 
+        //float inter_u = mix (prev_u, u, 1 - int(icols >= 2) * 0.5 * (ceil_cols - icols));
+        //float inter_v = mix (prev_v, v, 1 - int(irows >= 2) * 0.5 * (ceil_rows - irows));
         float inter_u = mix (prev_u, u, 1 - int(icols >= 2) * 0.5 * (ceil_cols - icols));
         float inter_v = mix (prev_v, v, 1 - int(irows >= 2) * 0.5 * (ceil_rows - irows));
 
@@ -91,7 +95,7 @@ void main()
         //gl_PrimitiveIndicesNV[idx] = idx;
 
         //p_out[idx].mesh_id = workg_id;
-        //p_out[idx].divs = divs;
+        //p_out[idx].divs = divs * divs;
     }
 
     int no_prims = (no_cols) * (no_lines) * 2;
@@ -108,7 +112,7 @@ void main()
         gl_PrimitiveIndicesNV[idx * 3 + 2] = (v_idx + 1) * (no_cols + 1) + u_idx + 1 * (1 - idx % 2);
 
         p_out[idx].mesh_id = workg_id;
-        p_out[idx].divs = divs;
+        p_out[idx].divs = divs * divs;
 
     }
 

@@ -1,0 +1,171 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+//layout(triangles, max_vertices=256, max_primitives=512) out;
+layout(points, max_vertices=4, max_primitives=4) out;
+
+taskNV in perTaskData {
+  uint left_divs;
+  uint bottom_divs;
+  uint right_divs;
+  uint top_divs;
+};
+
+perprimitiveNV out PerPrimitiveData 
+{
+  uint divs;
+  uint mesh_id;
+} p_out[]; 
+
+uniform mat4 m_pvm;
+
+uniform vec3 disp;
+
+uniform float iRows;
+uniform float iCols;
+
+uniform float oLeft;
+uniform float oBottom;
+uniform float oRight;
+uniform float oTop;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+    float vertices[];
+};
+
+void main()
+{
+    // Inputs
+    uint local_id  = gl_LocalInvocationID.x;
+    uint global_id  = gl_GlobalInvocationID.x;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    uint divs[] =  {bottom_divs, right_divs,top_divs, left_divs};
+
+    uint side_wg_id = workg_id, side_id = 0;
+    for(; side_wg_id >= divs[side_id]; side_id++) side_wg_id -= divs[side_id];
+
+    if (side_id != 0) return;
+    
+    // Quad vertices
+    vec4 v0 = vec4(disp + vec3 (vertices[((side_id + 0) % 4) * 3 + 1], 
+                                vertices[((side_id + 0) % 4) * 3 + 2], 
+                                vertices[((side_id + 0) % 4) * 3 + 3]), 1.0);
+    vec4 v1 = vec4(disp + vec3 (vertices[((side_id + 1) % 4) * 3 + 1], 
+                                vertices[((side_id + 1) % 4) * 3 + 2], 
+                                vertices[((side_id + 1) % 4) * 3 + 3]), 1.0);
+    vec4 v2 = vec4(disp + vec3 (vertices[((side_id + 2) % 4) * 3 + 1], 
+                                vertices[((side_id + 2) % 4) * 3 + 2], 
+                                vertices[((side_id + 2) % 4) * 3 + 3]), 1.0);
+    vec4 v3 = vec4(disp + vec3 (vertices[((side_id + 3) % 4) * 3 + 1], 
+                                vertices[((side_id + 3) % 4) * 3 + 2], 
+                                vertices[((side_id + 3) % 4) * 3 + 3]), 1.0);
+
+    // Side Tessellation Levels and Divisions
+    float oLvls[] = {oBottom, oRight, oTop, oLeft};
+    float iLvls[] = {iCols, iRows, iCols, iRows};
+
+    // Current side Tessellation Levels
+    float oLvl = oLvls[side_id];
+    float iuLvl = iLvls[side_id];
+    float ivLvl = iLvls[(side_id + 1) % 4];
+
+    int ceil_oLvl = int(ceil(oLvl));
+    ceil_oLvl += ceil_oLvl % 2;
+    int ceil_iuLvl = int(ceil(iuLvl));
+    ceil_iuLvl += ceil_iuLvl % 2;
+    int ceil_ivLvl = int(ceil(ivLvl));
+    ceil_ivLvl += ceil_ivLvl % 2;
+
+    int min_u_down = int(max( 0.0, 
+                round( mix( 0.0, float(ceil_oLvl), float(side_wg_id) / float(divs[side_id])))));
+    int max_u_down = int(min( ceil_oLvl, 
+                round( mix( 0.0, float(ceil_oLvl), float(side_wg_id + 1) / float(divs[side_id])))));
+    int min_u_top = int(max( 1.0, 
+                round( mix( 0.0, float(ceil_iuLvl), float(side_wg_id) / float(divs[side_id])))));
+    int max_u_top = int(min( ceil_iuLvl - 1, 
+                round( mix( 0.0, float(ceil_iuLvl), float(side_wg_id + 1) / float(divs[side_id])))));
+
+    int no_bottom_verts = max_u_down - min_u_down + 1;
+    int no_top_verts = max_u_top - min_u_top + 1;
+    int no_verts = no_bottom_verts + no_top_verts;
+
+    if (side_wg_id != 0) return;
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        int is_down = int(idx < no_bottom_verts), is_up = int(idx >= no_bottom_verts);
+
+        int min_u_idx = is_down * min_u_down + is_up * min_u_top;
+
+        int u_idx = min_u_idx + idx - is_up * no_bottom_verts; 
+        int v_idx = is_down * 0 + is_up * 1;
+
+        float lvl = is_down * oLvl + is_up * iuLvl;
+        int ceil_lvl = is_down * ceil_oLvl + is_up * ceil_iuLvl;
+
+        uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, int(round(mix(0, ceil_lvl - 2, float(u_idx) / float(ceil_lvl))))));
+        uint prev_v_idx = max(is_up, min(ceil_ivLvl - 2 - is_up, int(round(mix(0, ceil_ivLvl - 2, float(v_idx) / float(ceil_ivLvl))))));
+        //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_lvl - is_up) * 1 + int(u_idx == is_up) * 1;
+        //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_ivLvl - 1) * 1 + int(v_idx == 1) * 1;
+
+        float u = float(u_idx) / float(ceil_lvl);
+        float prev_u = float(prev_u_idx) / float(max(1, ceil_lvl - 2));
+        float v = float(v_idx) / float(ceil_ivLvl);
+        float prev_v = float(prev_v_idx) / float(max(1, ceil_ivLvl - 2));
+
+        float inter_u = mix (prev_u, u, 1 - int(lvl >= 2) * 0.5 * (ceil_lvl - lvl));
+        float inter_v = mix (prev_v, v, 1 - is_up * (int(ivLvl >= 2) * 0.5 * (ceil_ivLvl - ivLvl)));
+
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        gl_PrimitiveIndicesNV[idx] = idx;
+
+        p_out[idx].mesh_id = side_wg_id;
+        p_out[idx].divs = divs[side_id];
+        //p_out[idx].mesh_id = 1;
+        //p_out[idx].divs = 2;
+        //p_out[idx].mesh_id = idx;
+        //p_out[idx].divs = no_verts;
+
+    }
+
+    //int no_prims = no_bottom_verts + no_top_verts - 1;
+    int no_prims = no_verts;
+
+    //for (int i=0; i <= no_prims / workg_len; i++) {
+
+        //int idx = int(min(i * workg_len + local_id, no_prims - 1));
+
+        //int is_down = int(idx < no_bottom_verts), is_up = int(idx >= no_bottom_verts);
+
+        ////if (is_up == 1) continue;
+
+        //int inter_idx = is_down * int(round(mix (no_bottom_verts, no_verts - 1, 
+                                        //float(idx + 1) / float(no_bottom_verts)))) + 
+                        //is_up * int(round(mix (1, no_bottom_verts - 2, 
+                                        //float(idx + 1 - no_bottom_verts) / float(no_top_verts)))); 
+
+        //gl_PrimitiveIndicesNV[idx * 3 + 0] = idx + is_up;
+        //gl_PrimitiveIndicesNV[idx * 3 + 1] = idx + is_down;
+        ////gl_PrimitiveIndicesNV[idx * 3 + 2] = inter_idx;
+        //gl_PrimitiveIndicesNV[idx * 3 + 2] = is_down * no_bottom_verts + 
+                                             //is_up * (no_bottom_verts - 1);
+
+        ////p_out[idx].mesh_id = 1;
+        ////p_out[idx].divs = 2;
+        //p_out[idx].mesh_id = side_wg_id;
+        //p_out[idx].divs = divs[side_id];
+
+    //}
+
+    // No. Primitives
+    gl_PrimitiveCountNV = no_prims;
+
+}

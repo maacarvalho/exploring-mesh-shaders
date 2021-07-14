@@ -5,7 +5,10 @@
 			<attribute name="level" data="FLOAT" type="RENDERER" value=29.999 />
 			<attribute name="icols" data="FLOAT" type="RENDERER" value=1 />
 			<attribute name="irows" data="FLOAT" type="RENDERER" value=1 />
-            <attribute name="olevel" data="FLOAT" type="RENDERER" value=1 />
+            <attribute name="olevel0" data="FLOAT" type="RENDERER" value=1 />
+            <attribute name="olevel1" data="FLOAT" type="RENDERER" value=1 />
+            <attribute name="olevel2" data="FLOAT" type="RENDERER" value=1 />
+            <attribute name="olevel3" data="FLOAT" type="RENDERER" value=1 />
             <attribute name="quadDisp" data="VEC3" type="RENDERER" x="1.5" y=0 z=0 />
 		</attributes>
 		
@@ -26,7 +29,7 @@
 			<camera name="MainCamera" >
 				<viewport name="MainViewport" />
 				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=0.01 FAR=100.0 />
-				<POSITION x=0 y=0.0 z=5 />
+				<POSITION x=0 y=0.0 z=2.25 />
 				<VIEW x=0.0 y=0.0 z=-1.0 />
 				<UP x=0 y=1 z=0 />
 			</camera>
@@ -53,13 +56,16 @@
             </pass>
             <pass class="mesh" name="meshPassQuad">
                 <camera name="MainCamera" />
-                <material name="meshTessQuad" fromLibrary="tessellation" count="1" />
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="tessellation" count="1" />
+                    <material name="meshOuterTessQuad" fromLibrary="tessellation" count="1" />
+                </materials>
             </pass>
             <!--<postScript file="scripts/times.1.1.1.lua" script="stopTimer_1_1_1" />-->
         </pipeline>
 
         <pipeline name="Traditional Pipeline" default="true" frameCount=2500>
-            <!--<preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" />-->
+            <!--[><preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" /><]-->
             <pass class="default" name="tradPassQuad">
                 <scenes>
                     <scene name="Square" />
@@ -69,15 +75,16 @@
                     <map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessQuad" />
                 </materialMaps>
             </pass>
-            <!--<postScript file="scripts/times.0.0.0.lua" script="stopTimer_0_0_0" />-->
+            <!--[><postScript file="scripts/times.0.0.0.lua" script="stopTimer_0_0_0" /><]-->
         </pipeline>
         <pipeline name="Mesh Pipeline" default="true" frameCount=2500>
-            <!--<preScript file="scripts/times.32.256.512.lua" script="startTimer_32_256_512" />-->
+            <!--[><preScript file="scripts/times.32.256.512.lua" script="startTimer_32_256_512" /><]-->
             <pass class="mesh" name="meshPassQuad">
                 <camera name="MainCamera" />
-                <material name="meshTessQuad" fromLibrary="tessellation" count="1" />
+                <material name="meshInnerTessQuad" fromLibrary="tessellation" count="1" />
+                <material name="meshOuterTessQuad" fromLibrary="tessellation" count="1" />
             </pass>
-            <!--<postScript file="scripts/times.32.256.512.lua" script="stopTimer_32_256_512" />-->
+            <!--[><postScript file="scripts/times.32.256.512.lua" script="stopTimer_32_256_512" /><]-->
         </pipeline>
 	</pipelines>
 	
@@ -86,7 +93,13 @@
             <pipelineList label="Pipeline" />
             <!--<var label="level" type="RENDERER" context="CURRENT" component="level" -->
                 <!--def="min=1 max=1024"/>-->
-            <var label="olevel" type="RENDERER" context="CURRENT" component="olevel" 
+            <var label="olevel0" type="RENDERER" context="CURRENT" component="olevel0" 
+                def="min=1 max=128"/>
+            <var label="olevel1" type="RENDERER" context="CURRENT" component="olevel1" 
+                def="min=1 max=128"/>
+            <var label="olevel2" type="RENDERER" context="CURRENT" component="olevel2" 
+                def="min=1 max=128"/>
+            <var label="olevel3" type="RENDERER" context="CURRENT" component="olevel3" 
                 def="min=1 max=128"/>
             <var label="icols" type="RENDERER" context="CURRENT" component="icols" 
                 def="min=1 max=128"/>

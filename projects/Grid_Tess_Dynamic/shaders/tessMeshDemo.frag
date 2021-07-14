@@ -16,7 +16,7 @@ vec3 hsv2rgb(vec3 c) {
 
 void main()
 {
-    float hue = float(mesh_id) / float(divs * divs);
+    float hue = float(mesh_id) / float(divs);
     //float hue = 0;
     color = vec4(hsv2rgb(vec3(hue, 1.0, 1.0)), 1.0);
 }

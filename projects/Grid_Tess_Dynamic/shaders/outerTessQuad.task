@@ -1,0 +1,60 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+ 
+layout(local_size_x = 1) in;
+
+taskNV out perTaskData {
+  uint left_divs;
+  uint bottom_divs;
+  uint right_divs;
+  uint top_divs;
+};
+
+uniform float iRows;
+uniform float iCols;
+
+uniform float oLeft;
+uniform float oBottom;
+uniform float oRight;
+uniform float oTop;
+
+void main() {
+
+    // Tessellation Levels
+    int ceil_left = int(ceil(oLeft));
+    ceil_left += ceil_left % 2;
+    int ceil_bottom = int(ceil(oBottom));
+    ceil_bottom += ceil_bottom % 2;
+    int ceil_right = int(ceil(oRight));
+    ceil_right += ceil_right % 2;
+    int ceil_top = int(ceil(oTop));
+    ceil_top += ceil_top % 2;
+    
+    int ceil_cols = int(ceil(iCols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(iRows));
+    ceil_rows += ceil_rows % 2;
+
+    // Number of Vertices of the Quad
+    int no_verts_left = (ceil_left + 1) + (max(1, ceil_rows - 1));
+    int no_verts_bottom = (ceil_bottom + 1) + (max(1, ceil_cols - 1));
+    int no_verts_right = (ceil_right + 1) + (max(1, ceil_rows - 1));
+    int no_verts_top = (ceil_top + 1) + (max(1, ceil_cols - 1));
+
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 4;
+
+    // Number of Mesh Shader WorkGroups to launch
+    left_divs = 1;
+    for (; no_verts_left / mesh_max_verts <= left_divs; left_divs++) no_verts_left += 2;
+    bottom_divs = 1;
+    for (; no_verts_bottom / mesh_max_verts <= bottom_divs; bottom_divs++) no_verts_bottom += 2;
+    right_divs = 1;
+    for (; no_verts_right / mesh_max_verts <= right_divs; right_divs++) no_verts_right += 2;
+    top_divs = 1;
+    for (; no_verts_top / mesh_max_verts <= top_divs; top_divs++) no_verts_top += 2;
+
+    // Number of Mesh Workgroups to emit
+    gl_TaskCountNV = left_divs + bottom_divs + right_divs + top_divs;
+
+}

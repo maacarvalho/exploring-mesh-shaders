@@ -19,10 +19,11 @@ void main() {
     ceil_rows += ceil_rows % 2;
 
     // Number of Vertices of the Quad
-    int no_verts = (ceil_cols + 1) * (ceil_rows + 1);
+    int no_verts = (ceil_cols - 1) * (ceil_rows - 1);
 
     // Number of Mesh Shader WorkGroups to launch
     int mesh_wg_needed = int(ceil(no_verts / 256.0));
+    divs = 1;
     for (int i=1; i<256; i++) {
 
         if (int(ceil(float(ceil_cols + 1) / float(i) + 1)) * 
