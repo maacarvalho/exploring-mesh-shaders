@@ -9,11 +9,16 @@ taskNV in perTaskData {
   uint divs;
 };
 
-perprimitiveNV out PerPrimitiveData 
+//perprimitiveNV out PerPrimitiveData 
+//{
+  //uint divs;
+  //uint mesh_id;
+//} p_out[]; 
+
+out perVertexData
 {
-  uint divs;
-  uint mesh_id;
-} p_out[]; 
+    vec2 texCoordTE;
+} v_out[];
 
 uniform mat4 m_pvm;
 
@@ -94,6 +99,7 @@ void main()
         gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
         //gl_PrimitiveIndicesNV[idx] = idx;
 
+        v_out[idx].texCoordTE = vec2(inter_u, inter_v);
         //p_out[idx].mesh_id = workg_id;
         //p_out[idx].divs = divs * divs;
     }
@@ -111,8 +117,8 @@ void main()
         gl_PrimitiveIndicesNV[idx * 3 + 1] = (v_idx + 1 * idx % 2) * (no_cols + 1) + u_idx + 1;
         gl_PrimitiveIndicesNV[idx * 3 + 2] = (v_idx + 1) * (no_cols + 1) + u_idx + 1 * (1 - idx % 2);
 
-        p_out[idx].mesh_id = workg_id;
-        p_out[idx].divs = divs * divs;
+        //p_out[idx].mesh_id = workg_id;
+        //p_out[idx].divs = divs * divs;
 
     }
 

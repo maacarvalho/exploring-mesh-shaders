@@ -1,19 +1,24 @@
 <?xml version="1.0" ?>
 <materialLib name="tessellation">
 
+	<textures>
+		<texture name="tex" filename="textures/calcada.jpg" mipmap=true/>		
+	</textures>
+
 	<shaders>
-		<shader name="tradTessQuad" 	ps="shaders/tessDemo.frag" 
+        <shader name="tradTessQuad" 	ps="shaders/lightTexture.frag" 
 									    tc="shaders/simpleQuad.tesc"
 									    te="shaders/simpleQuad.tese"
 									    vs="shaders/tessDemo.vert" />
 
         <shader name="meshInnerTessQuad" 	ts = "shaders/innerTessQuad.task" 
                                             ms = "shaders/innerTessQuad.mesh" 
-                                            ps = "shaders/tessMeshDemo.frag" />
+                                            ps = "shaders/lightTexture.frag" />
         
         <shader name="meshOuterTessQuad" 	ts = "shaders/outerTessQuad.task" 
                                             ms = "shaders/outerTessQuad.mesh" 
                                             ps = "shaders/tessMeshDemo.frag" />
+                                            <!--ps = "shaders/lightTexture.frag" />-->
 
 	</shaders>
 
@@ -70,9 +75,16 @@
 
                      <valueof uniform="oTop" 
                              type="RENDERER" context="CURRENT" 
-							 component="olevel3"  />
-                </values>
-            </shader>
+                             component="olevel3"  />
+
+                     <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
         </material>
 
         <material name="meshInnerTessQuad">
@@ -102,9 +114,14 @@
                              type="RENDERER" context="CURRENT" 
                              component="irows"  />
 
-                </values>
-            </shader>
-
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
         </material>
 
 		<material name="tradTessQuad">
@@ -138,8 +155,14 @@
                              type="RENDERER" context="CURRENT" 
 							 component="olevel3"  />
 
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
 				</values>
 			</shader>
-		</material>		
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
     </materials>
 </materialLib>
