@@ -2,7 +2,7 @@
 #extension GL_NV_mesh_shader : enable
  
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=256, max_primitives=256) out;
+layout(triangles, max_vertices=16, max_primitives=16) out;
 //layout(lines, max_vertices=4, max_primitives=4) out;
 //layout(points, max_vertices=4, max_primitives=4) out;
 
@@ -190,8 +190,8 @@ void main()
         //int inter_idx = is_down * inter_up + 
                         //is_up * inter_down;
         //int inter_idx = no_bottom_verts - is_up;
-        int inter_idx = is_down * (no_bottom_verts + int(inter_up)) + 
-                        is_up * int(inter_down); 
+        int inter_idx = is_down * (no_bottom_verts + int(inter_up) - min_u_top + 1) + 
+                        is_up * (int(inter_down) - min_u_down); 
         //int inter_idx = no_bottom_verts + min(max_u_top, max(min_u_top, int(inter_up))) - min_u_top; 
                      //+ is_up * int( int( side_wg_id >= double(divs[side_id]) * 0.5 ) * ceil( inter_down  ) + 
                                     //int( side_wg_id < double(divs[side_id]) * 0.5 ) * ceil( inter_down ));
@@ -205,16 +205,16 @@ void main()
             //p_out[idx].mesh_id = 1;
         //else
         //
-        if (is_up == 1) p_out[idx].mesh_id = 1;
-        else p_out[idx].mesh_id = 0;
+        //if (is_up == 1) p_out[idx].mesh_id = 1;
+        //else p_out[idx].mesh_id = 0;
 
 
-        p_out[idx].divs = 2;
+        //p_out[idx].divs = 2;
 
         //v_out[idx].texCoordTE = uvs[side_id];
 
-        //p_out[idx].mesh_id = side_wg_id;
-        //p_out[idx].divs = divs[side_id];
+        p_out[idx].mesh_id = side_wg_id;
+        p_out[idx].divs = divs[side_id];
         //p_out[idx].mesh_id = 1;
         //p_out[idx].divs = 2;
         //p_out[idx].mesh_id = idx;

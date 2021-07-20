@@ -42,7 +42,7 @@ void main() {
     int no_verts_top = (ceil_top + 1) + max(1, ceil_cols - 1);
 
     // Maximum number of vertices a Mesh Workgroup can handle
-    int mesh_max_verts = 256;
+    int mesh_max_verts = 16;
 
     // Number of Mesh Shader WorkGroups to launch
     left_divs = int(ceil(float(no_verts_left - 2) / float(mesh_max_verts - 2)));
