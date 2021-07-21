@@ -2,7 +2,8 @@
 #extension GL_NV_mesh_shader : enable
  
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=16, max_primitives=16) out;
+//layout(triangles, max_vertices=16, max_primitives=16) out;
+layout(triangles, max_vertices=256, max_primitives=256) out;
 //layout(lines, max_vertices=4, max_primitives=4) out;
 //layout(points, max_vertices=4, max_primitives=4) out;
 
@@ -54,7 +55,7 @@ void main()
     uint side_wg_id = workg_id, side_id = 0;
     for(; side_wg_id >= divs[side_id]; side_id++) side_wg_id -= divs[side_id];
 
-    if (side_id != 0) return;
+    //if (side_id != 0) return;
     
     // Quad vertices
     vec4 v0 = vec4(disp + vec3 (vertices[((side_id + 0) % 4) * 3 + 1], 
@@ -91,14 +92,14 @@ void main()
     double top_min = 1.0 + double(ceil_iuLvl - 2) * double(side_wg_id) / double(divs[side_id]);
     double top_max = 1.0 + double(ceil_iuLvl - 2) * double(side_wg_id + 1) / double(divs[side_id]);
 
-    int min_u_down = int(max( 0.0, int( side_wg_id >= double(divs[side_id]) * 0.5 ) * ceil( down_min ) + 
-                                   int( side_wg_id < double(divs[side_id]) * 0.5 ) * floor( down_min )));
-    int max_u_down = int(max( 0.0, int( side_wg_id + 1 >= double(divs[side_id]) * 0.5 ) * ceil( down_max ) + 
-                                   int( side_wg_id + 1 < double(divs[side_id]) * 0.5 ) * floor( down_max )));
-    int min_u_top = int(max( 0.0, int( side_wg_id >= double(divs[side_id]) * 0.5 ) * floor( top_min ) + 
-                                  int( side_wg_id < double(divs[side_id]) * 0.5 ) * ceil( top_min )));
-    int max_u_top = int(max( 0.0, int( side_wg_id + 1 >= double(divs[side_id]) * 0.5 ) * floor( top_max ) + 
-                                  int( side_wg_id + 1 < double(divs[side_id]) * 0.5 ) * ceil( top_max )));
+    int min_u_down = int(max( 0.0, int( side_wg_id >= double(divs[side_id]) * 0.5 ) * round( down_min ) + 
+                                   int( side_wg_id < double(divs[side_id]) * 0.5 ) * round( down_min )));
+    int max_u_down = int(max( 0.0, int( side_wg_id + 1 >= double(divs[side_id]) * 0.5 ) * round( down_max ) + 
+                                   int( side_wg_id + 1 < double(divs[side_id]) * 0.5 ) * round( down_max )));
+    int min_u_top = int(max( 0.0, int( side_wg_id >= double(divs[side_id]) * 0.5 ) * round( top_min ) + 
+                                  int( side_wg_id < double(divs[side_id]) * 0.5 ) * round( top_min )));
+    int max_u_top = int(max( 0.0, int( side_wg_id + 1 >= double(divs[side_id]) * 0.5 ) * round( top_max ) + 
+                                  int( side_wg_id + 1 < double(divs[side_id]) * 0.5 ) * round( top_max )));
 
     //gl_MeshVerticesNV[0].gl_Position = m_pvm * mix(v0, v1, side_wg_id / float(divs[side_id]));
     //gl_PrimitiveIndicesNV[0] = 0;
@@ -141,10 +142,16 @@ void main()
         double lvl = is_down * oLvl + is_up * iuLvl;
         int ceil_lvl = is_down * ceil_oLvl + is_up * ceil_iuLvl;
 
-        uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, int(round(
-                            (ceil_lvl - 2) * double(u_idx) / double(ceil_lvl)))));
-        uint prev_v_idx = max(is_up, min(ceil_ivLvl - 2 - is_up, int(round(
-                            (ceil_ivLvl - 2) * double(v_idx) / double(ceil_ivLvl)))));
+        uint dup_prev_u_idx = ceil_lvl - 2 - int(pow(2, floor(log2(ceil_lvl - 2)))) + 1;
+
+        uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, u_idx -
+                    int(u_idx > dup_prev_u_idx) - int(u_idx >= ceil_lvl - dup_prev_u_idx)));
+        uint prev_v_idx = is_up;
+
+        //uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, int(round(
+                            //(ceil_lvl - 2) * double(u_idx) / double(ceil_lvl)))));
+        //uint prev_v_idx = max(is_up, min(ceil_ivLvl - 2 - is_up, int(round(
+                            //(ceil_ivLvl - 2) * double(v_idx) / double(ceil_ivLvl)))));
         //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_lvl - is_up) * 1 + int(u_idx == is_up) * 1;
         //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_ivLvl - 1) * 1 + int(v_idx == 1) * 1;
 
@@ -168,10 +175,10 @@ void main()
             vec2 (inter_v, 1 - inter_u)
         };
 
-        if (idx == no_bottom_verts - 1) continue;
-        
         int is_fst_half = int(u_idx < ceil_lvl * 0.5), is_snd_half = int(u_idx >= ceil_lvl * 0.5);
 
+        if (idx == no_bottom_verts - 1) continue;
+        
         double next_u = double(u_idx + 1) / double(ceil_lvl);
 
         //double inter_up =  is_fst_half * ceil((ceil_iuLvl - 2) * double(u_idx) / double(ceil_oLvl)) + 
