@@ -81,8 +81,16 @@ void main()
 
         //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols - 1) * 1 + int(u_idx == 1) * 1;
         //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows - 1) * 1 + int(v_idx == 1) * 1;
-        uint prev_u_idx = max(1, min(ceil_cols - 3, int(round(mix(0, ceil_cols - 2, float(u_idx) / float(ceil_cols))))));
-        uint prev_v_idx = max(1, min(ceil_rows - 3, int(round(mix(0, ceil_rows - 2, float(v_idx) / float(ceil_rows))))));
+        //uint prev_u_idx = max(1, min(ceil_cols - 3, int(round(mix(0, ceil_cols - 2, float(u_idx) / float(ceil_cols))))));
+        //uint prev_v_idx = max(1, min(ceil_rows - 3, int(round(mix(0, ceil_rows - 2, float(v_idx) / float(ceil_rows))))));
+       
+        uint dup_prev_u_idx = ceil_cols - 2 - int(pow(2, floor(log2(ceil_cols - 2)))) + 1;
+        uint dup_prev_v_idx = ceil_rows - 2 - int(pow(2, floor(log2(ceil_rows - 2)))) + 1;
+
+        uint prev_u_idx = max(1, min(ceil_cols - 3, u_idx -
+                    int(u_idx > dup_prev_u_idx) - int(u_idx >= ceil_cols - dup_prev_u_idx)));
+        uint prev_v_idx = max(1, min(ceil_rows - 3, v_idx - 
+                    int(v_idx > dup_prev_v_idx) - int(v_idx >= ceil_rows - dup_prev_v_idx)));
 
         float u = float(u_idx) / float(ceil_cols);
         float prev_u = float(prev_u_idx) / float(max(1, ceil_cols - 2));
