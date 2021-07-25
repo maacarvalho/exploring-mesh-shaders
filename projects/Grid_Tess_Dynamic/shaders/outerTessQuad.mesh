@@ -197,12 +197,13 @@ void main()
 
         double inter_up = min((ceil_iuLvl - 2) * 0.5, double(u_idx - div_verts_bot_offset) / bottom_top_ratio);
 
-        bottom_top_ratio /= int(floor(inter_up) < ceil(top_divergent_idx * 0.5)) + 1;
-        //if (floor(inter_up) < 2) bottom_top_ratio /= 2;
-        //bottom_top_ratio /= int(floor(inter_up) < 2) * 2;
+        if (floor(log2(ceil_iuLvl)) != ceil(log2(ceil_iuLvl))) {
 
-        inter_up = min((ceil_iuLvl - 2) * 0.5, double(u_idx - div_verts_bot_offset) / bottom_top_ratio) + 
-                   int(floor(inter_up) >= ceil(top_divergent_idx * 0.5)) * div_verts_top_offset;
+            bottom_top_ratio /= int(floor(inter_up) < ceil(top_divergent_idx * 0.5)) + 1;
+
+            inter_up = min((ceil_iuLvl - 2) * 0.5, double(u_idx - div_verts_bot_offset) / bottom_top_ratio) + 
+                       int(floor(inter_up) >= ceil(top_divergent_idx * 0.5)) * div_verts_top_offset;
+        }
 
         //int trunc_log_iuLvl = int(inter_up > top_divergent_idx) * int(floor(log2(ceil_iuLvl))) +
                               //int(inter_up <= top_divergent_idx) * int(ceil(log2(ceil_iuLvl)));
