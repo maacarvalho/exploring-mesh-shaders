@@ -126,11 +126,15 @@ void main()
 
         double lvl = is_down * oLvl + is_up * iuLvl;
         int ceil_lvl = is_down * ceil_oLvl + is_up * ceil_iuLvl;
+        
+        double adj_lvl = is_down * iuLvl + is_up * oLvl;
+        int ceil_adj = is_down * ceil_iuLvl + is_up * ceil_oLvl;
 
-        uint dup_prev_u_idx = is_down * bot_divergent_idx + is_up * top_divergent_idx; 
+        uint lvl_divergent_idx = is_down * bot_divergent_idx + is_up * top_divergent_idx; 
+        uint adj_divergent_idx = is_down * top_divergent_idx + is_up * bot_divergent_idx; 
 
         uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, u_idx -
-                    int(u_idx > dup_prev_u_idx) - int(u_idx >= ceil_lvl - dup_prev_u_idx)));
+                    int(u_idx > lvl_divergent_idx) - int(u_idx >= ceil_lvl - lvl_divergent_idx)));
         uint prev_v_idx = is_up;
 
         //uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, int(round(
@@ -162,53 +166,43 @@ void main()
 
         int is_fst_half = int(u_idx < ceil_lvl * 0.5), is_snd_half = int(u_idx >= ceil_lvl * 0.5);
 
+        u_idx = is_fst_half * u_idx + is_snd_half * (ceil_lvl - 1 - u_idx);
+
         if (idx == no_bottom_verts - 1) continue;
        
-        if (is_snd_half == 1 || is_up == 1) continue;
+        //if (is_up == 1) continue;
+        if (is_snd_half == 1) continue;
 
-        int trunc_log_oLvl = int (u_idx > bot_divergent_idx) * int(floor(log_oLvl)) + 
-                             int (u_idx <= bot_divergent_idx) * int(ceil(log_oLvl));
+        double log_lvl = is_down * log_oLvl + is_up * log_iuLvl;
+        double log_adj = is_down * log_iuLvl + is_up * log_oLvl;
 
-        double bottom_top_ratio = pow (2, int(trunc_log_oLvl - floor(log_iuLvl)));
+        int trunc_log_lvl = int (u_idx > lvl_divergent_idx) * int(floor(log_lvl)) + 
+                            int (u_idx <= lvl_divergent_idx) * int(ceil(log_lvl));
 
-        //int div_verts_offset = 0;
-        int div_verts_bot_offset = max(0, int((ceil_oLvl - pow(2, trunc_log_oLvl)) * 0.5));
-        int div_verts_top_offset = max(0, int((ceil_iuLvl - pow(2, int(floor(log_iuLvl)))) * 0.5));
+        double ratio = pow (2, int(trunc_log_lvl - floor(log_adj)));
 
-        double inter_up = min((ceil_iuLvl - 2) * 0.5, double(u_idx - div_verts_bot_offset) / bottom_top_ratio);
+        int lvl_offset = max(0, int((ceil_lvl - pow(2, trunc_log_lvl)) * 0.5));
+        int adj_offset = max(0, int((ceil_adj - pow(2, int(floor(log_adj)))) * 0.5));
 
-        bottom_top_ratio /= int(floor(log_iuLvl) != ceil(log_iuLvl)) * int(floor(inter_up) < ceil(top_divergent_idx * 0.5)) + 1;
+        double inter_idx = min((ceil_adj - 2) * 0.5, double(u_idx - lvl_offset) / ratio);
 
-        inter_up = min((ceil_iuLvl - 2) * 0.5, double(u_idx - div_verts_bot_offset) / bottom_top_ratio) + 
-                   int(floor(inter_up) >= ceil(top_divergent_idx * 0.5)) * div_verts_top_offset;
+        ratio /= int(floor(log_adj) != ceil(log_adj)) * int(floor(inter_idx) < ceil(int(adj_divergent_idx) * 0.5)) + 1;
 
-        int f_inter_idx = is_down * (no_bottom_verts + int(floor(inter_up)) - min_u_top + 1); 
-        int c_inter_idx = is_down * (no_bottom_verts + int(ceil(inter_up)) - min_u_top + 1); 
-        int r_inter_idx = is_down * (no_bottom_verts + int(round(inter_up)) - min_u_top + 1); 
+        inter_idx = min((ceil_adj - 2) * 0.5, double(u_idx - lvl_offset) / ratio) + 
+                   int(floor(inter_idx) >= ceil(int(adj_divergent_idx) * 0.5)) * adj_offset;
 
-        gl_PrimitiveIndicesNV[idx * 9 + 0] = idx + is_up;
-        gl_PrimitiveIndicesNV[idx * 9 + 1] = idx + is_down;
-        gl_PrimitiveIndicesNV[idx * 9 + 2] = f_inter_idx;
+        inter_idx = is_fst_half * floor(inter_idx) + is_snd_half * ceil((ceil_adj - 2 - inter_idx));
+
+        int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) + 
+                               is_up * (int(inter_idx) - min_u_down);
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = idx + is_up;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = idx + is_down;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = offset_inter_idx;
         //gl_PrimitiveIndicesNV[idx * 9 + 2] = idx + is_down;
         
-        p_out[3 * idx + 0].mesh_id = 0;
-        p_out[3 * idx + 0].divs = 3;
-
-        gl_PrimitiveIndicesNV[idx * 9 + 3] = idx + is_up;
-        gl_PrimitiveIndicesNV[idx * 9 + 4] = idx + is_down;
-        //gl_PrimitiveIndicesNV[idx * 9 + 5] = c_inter_idx;
-        gl_PrimitiveIndicesNV[idx * 9 + 5] = idx + is_down;
-
-        p_out[3 * idx + 1].mesh_id = 3;
-        p_out[3 * idx + 1].divs = 12;
-
-        gl_PrimitiveIndicesNV[idx * 9 + 6] = idx + is_up;
-        gl_PrimitiveIndicesNV[idx * 9 + 7] = idx + is_down;
-        //gl_PrimitiveIndicesNV[idx * 9 + 8] = r_inter_idx;
-        gl_PrimitiveIndicesNV[idx * 9 + 8] = idx + is_down;
-
-        p_out[3 * idx + 2].mesh_id = 2;
-        p_out[3 * idx + 2].divs = 3;
+        p_out[idx].mesh_id = 0;
+        p_out[idx].divs = 3;
 
     }
 
