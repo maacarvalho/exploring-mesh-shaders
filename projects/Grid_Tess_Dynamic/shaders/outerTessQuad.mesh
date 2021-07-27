@@ -169,11 +169,12 @@ void main()
         // Adjusting u_idx when is_up so it begins in the first bottom vertex
         u_idx -= is_up;
 
-        u_idx = is_fst_half * u_idx + is_snd_half * (ceil_lvl - 1 - u_idx);
+        u_idx = is_fst_half * u_idx + is_snd_half * (ceil_lvl - 1 - 2 * is_up - u_idx);
         //u_idx = is_fst_half * (u_idx - is_up) + is_snd_half * (ceil_lvl - 1 - (u_idx + is_up));
 
         if (idx == no_bottom_verts - 1) continue;
-        if (is_up == 1 && is_snd_half == 1) continue;
+        if (idx == no_verts - 1) continue;
+        //if (is_up == 1 && is_snd_half == 1) continue;
 
         double log_lvl = is_down * log_oLvl + is_up * log_iuLvl;
         double log_adj = is_down * log_iuLvl + is_up * log_oLvl;
@@ -200,7 +201,7 @@ void main()
             max(0, min(new_verts, (adj_divergent_idx + 1 - inter_idx) * 0.5)));
 
         inter_idx += is_up * max(1, up_offset);
-        inter_idx = is_fst_half * floor(inter_idx) + is_snd_half * ceil((ceil_adj - 2 - inter_idx));
+        inter_idx = is_fst_half * floor(inter_idx) + is_snd_half * ceil((ceil_adj - 2 * is_down - inter_idx));
 
         int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) +
                                is_up * (int(inter_idx)); 
