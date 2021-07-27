@@ -166,20 +166,22 @@ void main()
 
         int is_fst_half = int(u_idx < ceil_lvl * 0.5), is_snd_half = int(u_idx >= ceil_lvl * 0.5);
 
+        // Adjusting u_idx when is_up so it begins in the first bottom vertex
+        u_idx -= is_up;
+
         u_idx = is_fst_half * u_idx + is_snd_half * (ceil_lvl - 1 - u_idx);
+        //u_idx = is_fst_half * (u_idx - is_up) + is_snd_half * (ceil_lvl - 1 - (u_idx + is_up));
 
         if (idx == no_bottom_verts - 1) continue;
-       
-        //if (is_up == 1) continue;
-        if (is_snd_half == 1) continue;
+        if (is_up == 1 && is_snd_half == 1) continue;
 
         double log_lvl = is_down * log_oLvl + is_up * log_iuLvl;
         double log_adj = is_down * log_iuLvl + is_up * log_oLvl;
 
-        int trunc_log_lvl = int (u_idx > lvl_divergent_idx) * int(floor(log_lvl)) + 
-                            int (u_idx <= lvl_divergent_idx) * int(ceil(log_lvl));
+        int trunc_log_lvl = int(u_idx > lvl_divergent_idx) * int(floor(log_lvl)) +
+                            int(u_idx <= lvl_divergent_idx) * int(ceil(log_lvl));
 
-        double ratio = pow (2, int(trunc_log_lvl - floor(log_adj)));
+        double ratio = pow(2, int(trunc_log_lvl - floor(log_adj)));
 
         int lvl_offset = max(0, int((ceil_lvl - pow(2, trunc_log_lvl)) * 0.5));
         int adj_offset = max(0, int((ceil_adj - pow(2, int(floor(log_adj)))) * 0.5));
@@ -189,19 +191,26 @@ void main()
         ratio /= int(floor(log_adj) != ceil(log_adj)) * int(floor(inter_idx) < ceil(int(adj_divergent_idx) * 0.5)) + 1;
 
         inter_idx = min((ceil_adj - 2) * 0.5, double(u_idx - lvl_offset) / ratio) + 
-                   int(floor(inter_idx) >= ceil(int(adj_divergent_idx) * 0.5)) * adj_offset;
+                    int(floor(inter_idx) >= ceil(int(adj_divergent_idx) * 0.5)) * adj_offset;
 
+        // Is_Up Offset
+        double new_verts = pow(2, int(floor(log_adj) - trunc_log_lvl));
+
+        int up_offset = int(new_verts + int(floor(log_adj) != ceil(log_adj)) *
+            max(0, min(new_verts, (adj_divergent_idx + 1 - inter_idx) * 0.5)));
+
+        inter_idx += is_up * max(1, up_offset);
         inter_idx = is_fst_half * floor(inter_idx) + is_snd_half * ceil((ceil_adj - 2 - inter_idx));
 
-        int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) + 
-                               is_up * (int(inter_idx) - min_u_down);
+        int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) +
+                               is_up * (int(inter_idx)); 
 
         gl_PrimitiveIndicesNV[idx * 3 + 0] = idx + is_up;
         gl_PrimitiveIndicesNV[idx * 3 + 1] = idx + is_down;
         gl_PrimitiveIndicesNV[idx * 3 + 2] = offset_inter_idx;
         //gl_PrimitiveIndicesNV[idx * 9 + 2] = idx + is_down;
         
-        p_out[idx].mesh_id = 0;
+        p_out[idx].mesh_id = is_up;
         p_out[idx].divs = 3;
 
     }
