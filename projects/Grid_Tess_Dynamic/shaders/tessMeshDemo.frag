@@ -2,8 +2,8 @@
 
 perprimitiveNV in PerPrimitiveData 
 {
-    uint divs;
-    uint mesh_id;
+    int divs;
+    int mesh_id;
 };
 
 out vec4 color;
