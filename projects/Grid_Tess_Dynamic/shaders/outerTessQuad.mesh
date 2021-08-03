@@ -2,7 +2,7 @@
 #extension GL_NV_mesh_shader : enable
  
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=16, max_primitives=16) out;
+layout(triangles, max_vertices=256, max_primitives=256) out;
 
 //layout(triangles, max_vertices=256, max_primitives=512) out;
 //layout(lines, max_vertices=4, max_primitives=4) out;
@@ -131,7 +131,7 @@ void main()
 
     // Current WorkGroupID portion of the side
     //int mesh_max_verts = 256;
-    int mesh_max_verts = 16;
+    int mesh_max_verts = 256;
     
     int higher_is_down = int(ceil_oLvl >= ceil_iuLvl - 2), higher_is_up = 1 - higher_is_down;
     int ceil_higher = higher_is_down * ceil_oLvl + higher_is_up * ceil_iuLvl, 
@@ -145,11 +145,11 @@ void main()
     int no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
     int no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
 
-    int min_u_higher = (no_higher_verts - 1) * side_wg_id;
-    int max_u_higher = (no_higher_verts - 1) * (side_wg_id + 1);
+    //int min_u_higher = (no_higher_verts - 1) * side_wg_id;
+    //int max_u_higher = (no_higher_verts - 1) * (side_wg_id + 1);
 
-    //int min_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id) / double(divs[side_id])) - 1);
-    //int max_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id + 1) / double(divs[side_id])) - 1);
+    int min_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id) / double(divs[side_id])) - 1);
+    int max_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id + 1) / double(divs[side_id])) - 1);
 
     int min_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, min_u_higher - 1, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
     int max_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, max_u_higher + 1, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
