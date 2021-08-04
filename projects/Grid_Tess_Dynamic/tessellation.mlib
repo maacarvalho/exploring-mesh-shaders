@@ -17,8 +17,8 @@
         
         <shader name="meshOuterTessQuad" 	ts = "shaders/outerTessQuad.task" 
                                             ms = "shaders/outerTessQuad.mesh" 
-                                            ps = "shaders/tessMeshDemo.frag" />
-                                            <!--ps = "shaders/lightTexture.frag" />-->
+                                            ps = "shaders/lightTexture.frag" />
+                                            <!--ps = "shaders/tessMeshDemo.frag" />-->
 
 	</shaders>
 

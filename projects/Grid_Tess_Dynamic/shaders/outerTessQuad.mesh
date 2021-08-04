@@ -15,16 +15,16 @@ taskNV in perTaskData {
   int top_divs;
 };
 
-perprimitiveNV out PerPrimitiveData 
-{
-  int divs;
-  int mesh_id;
-} p_out[]; 
-
-//out perVertexData
+//perprimitiveNV out PerPrimitiveData 
 //{
-    //vec2 texCoordTE;
-//} v_out[];
+  //int divs;
+  //int mesh_id;
+//} p_out[]; 
+
+out perVertexData
+{
+    vec2 texCoordTE;
+} v_out[];
 
 uniform mat4 m_pvm;
 
@@ -91,8 +91,6 @@ void main()
     int side_wg_id = workg_id, side_id = 0;
     for(; side_wg_id >= divs[side_id]; side_id++) side_wg_id -= divs[side_id];
 
-    //if (side_id != 0) return;
-    
     // Quad vertices
     vec4 v0 = vec4(disp + vec3 (vertices[((side_id + 0) % 4) * 3 + 1], 
                                 vertices[((side_id + 0) % 4) * 3 + 2], 
@@ -130,8 +128,8 @@ void main()
     double log_iuLvl = log2(ceil_iuLvl);
 
     // Current WorkGroupID portion of the side
-    //int mesh_max_verts = 256;
     int mesh_max_verts = 256;
+    //int mesh_max_verts = 16;
     
     int higher_is_down = int(ceil_oLvl >= ceil_iuLvl - 2), higher_is_up = 1 - higher_is_down;
     int ceil_higher = higher_is_down * ceil_oLvl + higher_is_up * ceil_iuLvl, 
@@ -191,13 +189,6 @@ void main()
                     int(u_idx > lvl_divergent_idx) - int(u_idx >= ceil_lvl - lvl_divergent_idx)));
         int prev_v_idx = is_up;
 
-        //uint prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, int(round(
-                            //(ceil_lvl - 2) * double(u_idx) / double(ceil_lvl)))));
-        //uint prev_v_idx = max(is_up, min(ceil_ivLvl - 2 - is_up, int(round(
-                            //(ceil_ivLvl - 2) * double(v_idx) / double(ceil_ivLvl)))));
-        //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_lvl - is_up) * 1 + int(u_idx == is_up) * 1;
-        //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_ivLvl - 1) * 1 + int(v_idx == 1) * 1;
-
         double u = double(u_idx) / double(ceil_lvl);
         double prev_u = double(prev_u_idx) / double(max(1, ceil_lvl - 2));
         double v = double(v_idx) / double(ceil_ivLvl);
@@ -206,10 +197,7 @@ void main()
         double inter_u = mix (prev_u, u, 1 - int(lvl >= 2) * 0.5 * (ceil_lvl - lvl));
         double inter_v = mix (prev_v, v, 1 - is_up * (int(ivLvl >= 2) * 0.5 * (ceil_ivLvl - ivLvl)));
 
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
         gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, float(inter_u)), mix(v3, v2, float(inter_u)), float(inter_v));
-        //gl_PrimitiveIndicesNV[idx] = idx;
 
         vec2 uvs[] = {
             vec2 (inter_u, inter_v),
@@ -217,6 +205,8 @@ void main()
             vec2 (1 - inter_u, 1 - inter_v),
             vec2 (inter_v, 1 - inter_u)
         };
+
+        v_out[idx].texCoordTE = uvs[side_id];
 
         // ============================================================================================
         // PRIMITIVES
@@ -238,15 +228,10 @@ void main()
         gl_PrimitiveIndicesNV[prim_idx * 3 + 1] = idx + is_down;
         gl_PrimitiveIndicesNV[prim_idx * 3 + 2] = offset_inter_idx;
         
-        //p_out[prim_idx].mesh_id = is_up;
-        //p_out[prim_idx].divs = 3;
-
-        p_out[prim_idx].mesh_id = side_wg_id;
-        p_out[prim_idx].divs = divs[side_id];
+        //p_out[prim_idx].mesh_id = side_wg_id;
+        //p_out[prim_idx].divs = divs[side_id];
     }
 
-    //int no_prims = no_verts;
-    //int no_prims = no_bottom_verts - 1;
     int no_prims = no_bottom_verts + no_top_verts - 2;
 
 
