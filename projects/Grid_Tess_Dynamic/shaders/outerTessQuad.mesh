@@ -2,7 +2,7 @@
 #extension GL_NV_mesh_shader : enable
  
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=256, max_primitives=256) out;
+layout(triangles, max_vertices=256, max_primitives=512) out;
 
 //layout(triangles, max_vertices=256, max_primitives=512) out;
 //layout(lines, max_vertices=4, max_primitives=4) out;

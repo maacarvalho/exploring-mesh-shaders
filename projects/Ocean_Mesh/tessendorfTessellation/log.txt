@@ -1,0 +1,117 @@
+Name                                      #c  CPU(ms)  GPU(ms)       wt
+----                                ------------------------------------
+ Nau                                       1     7.45              0.00
+  Main cicle                               1     7.45              0.00
+    Pipeline execute                       1     6.96              0.00
+      ocean#pass_hkt                       1     0.04              0.00
+        Buffers                            1     0.00              0.00
+        State                              1     0.00              0.00
+        Color                              1     0.00              0.00
+        Texture                            1     0.01              0.00
+        Image Textures                     1     0.00              0.00
+        Shaders                            1     0.02              0.00
+          Set Uniforms                     1     0.01     0.00     0.01
+          Set Blocks                       1     0.00     0.00     0.00
+        Pre Process List                   1     0.00     0.00     0.01
+        Compute shader                     1     0.01     0.09     0.00
+        Post Process List                  1     0.00     0.00     0.00
+      Lua                                  2     0.01              0.00
+      ocean#ifftHorizontal                10     0.23              0.00
+        LUA                               10     0.05              0.00
+        Buffers                            9     0.00              0.00
+        State                              9     0.01              0.00
+        Color                              9     0.01              0.00
+        Texture                            9     0.00              0.00
+        Image Textures                     9     0.02              0.00
+        Shaders                            9     0.05              0.00
+          Set Uniforms                     9     0.03     0.00     0.01
+          Set Blocks                       9     0.00     0.00     0.01
+        Pre Process List                   9     0.00     0.01     0.01
+        Compute shader                     9     0.02     1.22     0.02
+        Post Process List                  9     0.00     0.00     0.02
+      ocean#ifftVertical                  10     0.22              0.00
+        LUA                               10     0.05              0.00
+        Buffers                            9     0.00              0.00
+        State                              9     0.01              0.00
+        Color                              9     0.01              0.00
+        Texture                            9     0.00              0.00
+        Image Textures                     9     0.01              0.00
+        Shaders                            9     0.06              0.00
+          Set Uniforms                     9     0.04     0.00     0.01
+          Set Blocks                       9     0.00     0.00     0.00
+        Pre Process List                   9     0.00     0.01     0.01
+        Compute shader                     9     0.02     1.31     0.02
+        Post Process List                  9     0.00     0.00     0.01
+      ocean#mipmapHeights                 10     0.24              0.00
+        LUA                               10     0.07              0.00
+        Buffers                            9     0.00              0.00
+        State                              9     0.00              0.00
+        Color                              9     0.01              0.01
+        Texture                            9     0.01              0.00
+        Image Textures                     9     0.01              0.00
+        Shaders                            9     0.05              0.00
+          Set Uniforms                     9     0.01     0.00     0.02
+          Set Blocks                       9     0.00     0.00     0.01
+        Pre Process List                   9     0.00     0.01     0.01
+        Compute shader                     9     0.02     0.17     0.01
+        Post Process List                  9     0.00     0.00     0.01
+      ocean#sky                            1     0.05              0.00
+        Pre Process List                   1     0.00     0.00     0.00
+        Queue add                          1     0.00              0.00
+          Get material                     1     0.00              0.00
+        Process queue                      1     0.02              0.00
+          Material prepare                 1     0.02              0.00
+            Buffers                        1     0.00              0.00
+            State                          1     0.00              0.00
+            Color                          1     0.00              0.00
+            Texture                        1     0.00              0.00
+            Image Textures                 1     0.00              0.00
+            Shaders                        1     0.01              0.00
+              Set Uniforms                 1     0.01     0.00     0.00
+              Set Blocks                   1     0.00     0.00     0.00
+          Geometry rendering               1     0.01              0.00
+            Draw                           1     0.01              0.00
+              Bindings                     1     0.00              0.00
+              Draw elements                1     0.00     0.28     0.00
+        Post Process List                  1     0.00     0.00     0.01
+      ocean#renderGrid                     1     6.13              0.00
+        Pre Process List                   1     0.03     0.09     0.00
+        View Frustum Culling               1     0.00              0.00
+        Queue add                          1     0.00              0.00
+          Get material                     1     0.00              0.00
+        Process queue                      1     6.07              0.00
+          Material prepare                 1     0.04              0.00
+            Buffers                        1     0.00              0.00
+            State                          1     0.00              0.00
+            Color                          1     0.00              0.00
+            Texture                        1     0.00              0.00
+            Image Textures                 1     0.00              0.00
+            Shaders                        1     0.04              0.00
+              Set Uniforms                 1     0.03     0.00     0.01
+              Set Blocks                   1     0.00     0.00     0.00
+          Geometry rendering               1     6.02              0.00
+            Draw                           1     6.02              0.00
+              Bindings                     1     0.00              0.00
+              Draw elements                1     0.01     2.62     0.00
+        Post Process List                  1     0.00     0.00     0.01
+      ocean#ball                           1     0.04              0.00
+        Pre Process List                   1     0.00     0.00     0.00
+        View Frustum Culling               1     0.00              0.00
+        Queue add                          1     0.00              0.00
+          Get material                     1     0.00              0.00
+        Process queue                      1     0.02              0.00
+          Material prepare                 1     0.01              0.00
+            Buffers                        1     0.00              0.00
+            State                          1     0.00              0.00
+            Color                          1     0.01              0.00
+            Texture                        1     0.00              0.00
+            Image Textures                 1     0.00              0.00
+            Shaders                        1     0.00              0.00
+              Set Uniforms                 1     0.00     0.00     0.00
+              Set Blocks                   1     0.00     0.00     0.00
+          Geometry rendering               1     0.01              0.00
+            Draw                           1     0.00              0.00
+              Bindings                     1     0.00              0.00
+              Draw elements                1     0.00     0.00     0.00
+        Post Process List                  1     0.00     0.00     0.00
+    Zi swap                                1     0.19              0.00

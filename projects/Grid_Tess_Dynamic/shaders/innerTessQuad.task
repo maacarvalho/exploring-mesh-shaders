@@ -21,13 +21,17 @@ void main() {
     // Number of Vertices of the Quad
     int no_verts = (ceil_cols - 1) * (ceil_rows - 1);
 
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 256;
+    //int mesh_max_verts = 16;
+    
     // Number of Mesh Shader WorkGroups to launch
-    int mesh_wg_needed = int(ceil(no_verts / 256.0));
+    int mesh_wg_needed = int(ceil(no_verts / float(mesh_max_verts)));
     divs = 1;
-    for (int i=1; i<256; i++) {
+    for (int i=1; i<mesh_max_verts; i++) {
 
         if (int(ceil(float(ceil_cols + 1) / float(i) + 1)) * 
-            int(ceil(float(ceil_rows + 1) / float(i) + 1)) <= 256) {
+            int(ceil(float(ceil_rows + 1) / float(i) + 1)) <= mesh_max_verts) {
         //if ( i*i >= mesh_wg_needed * 2 ) {
 
             divs = i;
