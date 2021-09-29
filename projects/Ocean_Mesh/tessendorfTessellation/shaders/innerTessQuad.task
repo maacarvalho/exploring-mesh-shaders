@@ -8,6 +8,7 @@ uniform int width,L;
 uniform float windSpeed;
 uniform float choppyFactor;
 
+uniform float maxTessLvl = 64;
 uniform float gridSpacing = 5;
 uniform vec2 windowSize;
 uniform int pixelsPerEdge = 32;
@@ -29,7 +30,6 @@ layout(std430, binding = 1) writeonly buffer debugBuffer
 };
 
 #define ID gl_WorkGroupID.x
-#define  maxPatchSize 64.0
 
 float height(float u, float v) {
 
@@ -62,7 +62,7 @@ float screenSphereSize(vec4 p1, vec4 p2) {
 	p2NDC = p2Proj/p2Proj.w;
 	
 	return( clamp(length((p2NDC.xy - p1NDC.xy) * windowSize * 0.5) / (pixelsPerEdge), 
-                    1.0, maxPatchSize));
+                    1.0, maxTessLvl));
 }
 
 
@@ -100,36 +100,6 @@ void main() {
     v3.xz = v3.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;	
     v3 = m_pvm * v3;
     
-    //vec4 posTransV[4];
-    //vec2 pAux;
-    //vec4 posTCAux[4];
-    
-    //posTC[ID] = posV[ID];
-    
-    //posTCAux[0] = posTC[0];
-    //posTCAux[1] = posTC[0] + vec4(0.0, 0.0, gridSpacing, 0.0);
-    //posTCAux[2] = posTC[0] + vec4(gridSpacing,0.0, 0.0, 0.0);
-    //posTCAux[3] = posTC[0] + vec4(gridSpacing, 0.0, gridSpacing, 0.0);
-    
-    //float chopiness = choppyFactor;// ( 1+ choppyFactor/(1+(exp(-windSpeed+20)/5)));
-    
-    //vec2 tc = vec2(posTCAux[0].xz) / L  ;
-    //v0.xz = posTCAux[0].xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
-    
-    //tc = vec2(posTCAux[1].xz)  / L  ;
-    //v1.xz = posTCAux[1].xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
-    
-    //tc = vec2(posTCAux[2].xz) / L  ;
-    //v2.xz = posTCAux[2].xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
-    
-    //tc = vec2(posTCAux[3].xz)  / L  ;
-    //v3.xz = posTCAux[3].xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;	
-    
-    //for (int i = 0; i < 4; ++i ) {
-        //posTransV[i] = m_pvm * vec4(posTransV[i].x, 0, posTransV[i].z, 1.0);
-////		posTCAux[i] = m_pvm * vec4(posTCAux[i].x, 0, posTCAux[i].z, 1.0);
-    //}
-    
     if (useCulling == 0 || (		
                 segmentInFrustum(v0, v1) ||
                 segmentInFrustum(v0, v2) ||
@@ -140,15 +110,15 @@ void main() {
                     
             // Screen size based LOD
             oLevel = vec4(screenSphereSize(v0, v1),
-                            screenSphereSize(v0, v2),
+                          screenSphereSize(v0, v2),
                           screenSphereSize(v2, v3),
                           screenSphereSize(v3, v1));
             iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
 
         } else {
 
-            oLevel = vec4(maxPatchSize);
-            iLevel = vec2(maxPatchSize);
+            oLevel = vec4(maxTessLvl);
+            iLevel = vec2(maxTessLvl);
         
         }
 
@@ -159,8 +129,8 @@ void main() {
         
     } else {
 
-        oLevel = vec4(maxPatchSize);
-        iLevel = vec2(maxPatchSize);
+        oLevel = vec4(maxTessLvl);
+        iLevel = vec2(maxTessLvl);
         
     }
 
@@ -189,10 +159,6 @@ void main() {
 
     if (iLevel == vec2(0)) divs = 0;
 
-    //iLevel = vec2(1,1);
-    //oLevel = vec4(1,1,1,1);
-    //divs = 1;
-    //gl_TaskCountNV = 1;
     gl_TaskCountNV = divs * divs;
 
 }

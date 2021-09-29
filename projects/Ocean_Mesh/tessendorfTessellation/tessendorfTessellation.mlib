@@ -546,6 +546,10 @@
 							component="POSITION" />
 
 					<!-- tessellation stuff --> 
+                    <valueof uniform="maxTessLvl" 
+                             type="RENDERER" context="CURRENT" 
+                             component="MaxTessellationLvl" />  
+
 					<valueof uniform="gridSize" 
 							type="RENDERER" context="CURRENT" 
 							component="GridSize" />  
@@ -700,6 +704,10 @@
 							component="POSITION" />
 
 					<!-- tessellation stuff --> 
+                    <valueof uniform="maxTessLvl" 
+                             type="RENDERER" context="CURRENT" 
+                             component="MaxTessellationLvl" />  
+
 					<valueof uniform="gridSize" 
 							type="RENDERER" context="CURRENT" 
 							component="GridSize" />  
@@ -854,6 +862,10 @@
 							component="POSITION" />
 
 					<!-- tessellation stuff --> 
+                    <valueof uniform="maxTessLvl" 
+                             type="RENDERER" context="CURRENT" 
+                             component="MaxTessellationLvl" />  
+
 					<valueof uniform="gridSize" 
 							type="RENDERER" context="CURRENT" 
 							component="GridSize" />  

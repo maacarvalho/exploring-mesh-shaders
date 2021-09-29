@@ -9,7 +9,7 @@ uniform int width,L;
 uniform float windSpeed;
 uniform float choppyFactor;
 
-
+uniform float maxTessLvl = 64;
 uniform float gridSpacing = 5;
 uniform vec2 windowSize;
 uniform int pixelsPerEdge = 32;
@@ -30,7 +30,6 @@ layout(std430, binding = 1) writeonly buffer debugBuffer
 };
 
 #define ID gl_InvocationID
-#define  maxPatchSize 64.0
 
 float height(float u, float v) {
 
@@ -65,7 +64,7 @@ float screenSphereSize(vec4 p1, vec4 p2) {
 	p2NDC = p2Proj/p2Proj.w;
 	
 	return( clamp(length((p2NDC.xy - p1NDC.xy) * windowSize * 0.5) / (pixelsPerEdge), 
-                    1.0, maxPatchSize));
+                    1.0, maxTessLvl));
 }
 
 
@@ -130,8 +129,8 @@ void main() {
 */				
 		}
 		else {
-			oLevel = vec4(maxPatchSize);
-			iLevel = vec2(maxPatchSize);
+			oLevel = vec4(maxTessLvl);
+			iLevel = vec2(maxTessLvl);
 		
 		}
 	}
@@ -141,8 +140,8 @@ void main() {
 		
 	}
 	else {
-		oLevel = vec4(maxPatchSize);
-		iLevel = vec2(maxPatchSize);
+		oLevel = vec4(maxTessLvl);
+		iLevel = vec2(maxTessLvl);
 		
 	}
 

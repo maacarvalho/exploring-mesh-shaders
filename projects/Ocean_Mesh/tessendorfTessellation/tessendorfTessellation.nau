@@ -17,10 +17,6 @@
 			<constant name="L2SIZE_PLUS1" value=9 /> 
 			<constant name="D8SIZE" value=32 /-->
 
-			<!-- tessellation constants -->
-			 <constant name="GRIDSIZE" value=255.0 />
-			 <constant name="GSSQUARED" value=65025 />
-			
 		</constants>
 		
 		<attributes>
@@ -94,7 +90,8 @@
 			<attribute type="RENDERER" name="oceanFloorColor" data="VEC3" x="0.956" y="0.925" z="0.925" />
 			
 			<!-- tessellation attributes -->
-			<attribute type="RENDERER" name="GridSize" data="INT" value="GRIDSIZE" />
+            <attribute type="RENDERER" name="MaxTessellationLvl" data="FLOAT" value="64" />
+			<attribute type="RENDERER" name="GridSize" data="INT" value="255" />
 			<attribute type="RENDERER" name="PixelsPerEdge" data="INT" value="5" />
 			<attribute type="RENDERER" name="GridSpacing" data="FLOAT" value=20 />
 			<attribute type="RENDERER" name="Culling" data="INT" value="1" />
@@ -150,7 +147,7 @@
 		
 		<viewports>
 			<viewport name="MainViewport">
-				<CLEAR_COLOR r="1.0" g="1.0" b="1.0" />
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
 			</viewport>
 		</viewports>
 		
@@ -232,12 +229,13 @@
             </pass>
 			
 			<pass class="default" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess1x" />
 				<preProcess>
 					<texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
 					<texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
 				</preProcess>
 				<COLOR_CLEAR value=false />
-				<scenes instances = "GSSQUARED">
+				<scenes instances = "65025">
 					<scene name="GridTess" />
 				</scenes>
 				<camera name="MainCamera" />
@@ -272,7 +270,7 @@
 			
 		</pipeline>
         
-        <pipeline name="ocean_mesh" default="true" defaultCamera="MainCamera">
+        <pipeline name="ocean_mesh (1x)" default="true" defaultCamera="MainCamera">
             <!--[> sky init script <]-->
             <preScript script="tChanged" file="scripts/interface.lua" />
         
@@ -317,6 +315,7 @@
             <!--</pass>-->
             
             <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess1x" />
                 <preProcess>
                     <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
                     <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
@@ -330,6 +329,342 @@
                 <materials>
                     <material name="meshInnerTessQuad" fromLibrary="Ocean" count="65025" />
                     <material name="meshOuterTessQuad" fromLibrary="Ocean" count="65025" />
+                </materials>
+            </pass>
+
+            <pass class="default" name="ball" >
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Ball" />
+                </scenes>
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="sphere" toLibrary="Ocean" toMaterial="lambert" />
+                </materialMaps>
+            
+            </pass>
+            <!--[> render tessellated grid with height and disp maps: pos <]-->
+            
+            <!--[> ray trace for reflection, sky color.... <]-->
+            
+        </pipeline>
+        
+        <pipeline name="ocean_mesh (2x)" default="true" defaultCamera="MainCamera">
+            <!--[> sky init script <]-->
+            <preScript script="tChanged" file="scripts/interface.lua" />
+        
+            <pass class="compute" name="h0">
+                <mode value="RUN_ONCE" />
+                <material name="fft_h0" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+        
+            <pass class="compute" name="pass_hkt">
+                <material name="fft_hkt" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1/>
+            </pass>
+        
+            <!--[> inverse fourier <]-->
+            <!--[> inverse FFT horizontal pass <]-->
+            <pass class="compute" name="ifftHorizontal"> 
+                <preScript file="scripts/fft.lua" script="resetInverseFFT" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftHorizontal" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--[> inverse FFT vertical pass <]-->
+            <pass class="compute" name="ifftVertical"> 
+                <preScript file="scripts/fft.lua" script="resetInverseVertical" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftVertical" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--pass class="compute" name="mipmap">
+                <testScript file="scripts/fft.lua" script="testMipmap" TEST_MODE="RUN_WHILE"/>
+                <material name="mipmap" fromLibrary="Ocean" 
+                    dimX=256 dimY=256 dimZ=1/>
+            </pass-->
+
+            <pass class="quad" name="skyTexture">
+                <renderTarget name="sky" fromLibrary="Ocean"/>
+                <material name="skyTexture" fromLibrary="atmos" />
+            </pass>
+                        
+            <!--<pass class="quad" name="sky">-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<material name="sky" fromLibrary="atmos" />-->
+            <!--</pass>-->
+            
+            <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess2x" />
+                <preProcess>
+                    <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
+                    <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
+                </preProcess>
+                <COLOR_CLEAR value=false />
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="Ocean" count="16129" />
+                    <material name="meshOuterTessQuad" fromLibrary="Ocean" count="16129" />
+                </materials>
+            </pass>
+
+            <pass class="default" name="ball" >
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Ball" />
+                </scenes>
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="sphere" toLibrary="Ocean" toMaterial="lambert" />
+                </materialMaps>
+            
+            </pass>
+            <!--[> render tessellated grid with height and disp maps: pos <]-->
+            
+            <!--[> ray trace for reflection, sky color.... <]-->
+            
+        </pipeline>
+        
+        <pipeline name="ocean_mesh (4x)" default="true" defaultCamera="MainCamera">
+            <!--[> sky init script <]-->
+            <preScript script="tChanged" file="scripts/interface.lua" />
+        
+            <pass class="compute" name="h0">
+                <mode value="RUN_ONCE" />
+                <material name="fft_h0" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+        
+            <pass class="compute" name="pass_hkt">
+                <material name="fft_hkt" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1/>
+            </pass>
+        
+            <!--[> inverse fourier <]-->
+            <!--[> inverse FFT horizontal pass <]-->
+            <pass class="compute" name="ifftHorizontal"> 
+                <preScript file="scripts/fft.lua" script="resetInverseFFT" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftHorizontal" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--[> inverse FFT vertical pass <]-->
+            <pass class="compute" name="ifftVertical"> 
+                <preScript file="scripts/fft.lua" script="resetInverseVertical" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftVertical" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--pass class="compute" name="mipmap">
+                <testScript file="scripts/fft.lua" script="testMipmap" TEST_MODE="RUN_WHILE"/>
+                <material name="mipmap" fromLibrary="Ocean" 
+                    dimX=256 dimY=256 dimZ=1/>
+            </pass-->
+
+            <pass class="quad" name="skyTexture">
+                <renderTarget name="sky" fromLibrary="Ocean"/>
+                <material name="skyTexture" fromLibrary="atmos" />
+            </pass>
+                        
+            <!--<pass class="quad" name="sky">-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<material name="sky" fromLibrary="atmos" />-->
+            <!--</pass>-->
+            
+            <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess4x" />
+                <preProcess>
+                    <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
+                    <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
+                </preProcess>
+                <COLOR_CLEAR value=false />
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="Ocean" count="3969" />
+                    <material name="meshOuterTessQuad" fromLibrary="Ocean" count="3969" />
+                </materials>
+            </pass>
+
+            <pass class="default" name="ball" >
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Ball" />
+                </scenes>
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="sphere" toLibrary="Ocean" toMaterial="lambert" />
+                </materialMaps>
+            
+            </pass>
+            <!--[> render tessellated grid with height and disp maps: pos <]-->
+            
+            <!--[> ray trace for reflection, sky color.... <]-->
+            
+        </pipeline>
+
+        <pipeline name="ocean_mesh (8x)" default="true" defaultCamera="MainCamera">
+            <!--[> sky init script <]-->
+            <preScript script="tChanged" file="scripts/interface.lua" />
+        
+            <pass class="compute" name="h0">
+                <mode value="RUN_ONCE" />
+                <material name="fft_h0" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+        
+            <pass class="compute" name="pass_hkt">
+                <material name="fft_hkt" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1/>
+            </pass>
+        
+            <!--[> inverse fourier <]-->
+            <!--[> inverse FFT horizontal pass <]-->
+            <pass class="compute" name="ifftHorizontal"> 
+                <preScript file="scripts/fft.lua" script="resetInverseFFT" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftHorizontal" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--[> inverse FFT vertical pass <]-->
+            <pass class="compute" name="ifftVertical"> 
+                <preScript file="scripts/fft.lua" script="resetInverseVertical" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftVertical" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--pass class="compute" name="mipmap">
+                <testScript file="scripts/fft.lua" script="testMipmap" TEST_MODE="RUN_WHILE"/>
+                <material name="mipmap" fromLibrary="Ocean" 
+                    dimX=256 dimY=256 dimZ=1/>
+            </pass-->
+
+            <pass class="quad" name="skyTexture">
+                <renderTarget name="sky" fromLibrary="Ocean"/>
+                <material name="skyTexture" fromLibrary="atmos" />
+            </pass>
+                        
+            <!--<pass class="quad" name="sky">-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<material name="sky" fromLibrary="atmos" />-->
+            <!--</pass>-->
+            
+            <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess8x" />
+                <preProcess>
+                    <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
+                    <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
+                </preProcess>
+                <COLOR_CLEAR value=false />
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="Ocean" count="961" />
+                    <material name="meshOuterTessQuad" fromLibrary="Ocean" count="961" />
+                </materials>
+            </pass>
+
+            <pass class="default" name="ball" >
+                <COLOR_CLEAR value=false />
+                <DEPTH_CLEAR value=false />
+                <scenes>
+                    <scene name="Ball" />
+                </scenes>
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="sphere" toLibrary="Ocean" toMaterial="lambert" />
+                </materialMaps>
+            
+            </pass>
+            <!--[> render tessellated grid with height and disp maps: pos <]-->
+            
+            <!--[> ray trace for reflection, sky color.... <]-->
+            
+        </pipeline>
+        
+        <pipeline name="ocean_mesh (16x)" default="true" defaultCamera="MainCamera">
+            <!--[> sky init script <]-->
+            <preScript script="tChanged" file="scripts/interface.lua" />
+        
+            <pass class="compute" name="h0">
+                <mode value="RUN_ONCE" />
+                <material name="fft_h0" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+        
+            <pass class="compute" name="pass_hkt">
+                <material name="fft_hkt" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1/>
+            </pass>
+        
+            <!--[> inverse fourier <]-->
+            <!--[> inverse FFT horizontal pass <]-->
+            <pass class="compute" name="ifftHorizontal"> 
+                <preScript file="scripts/fft.lua" script="resetInverseFFT" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftHorizontal" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--[> inverse FFT vertical pass <]-->
+            <pass class="compute" name="ifftVertical"> 
+                <preScript file="scripts/fft.lua" script="resetInverseVertical" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftVertical" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--pass class="compute" name="mipmap">
+                <testScript file="scripts/fft.lua" script="testMipmap" TEST_MODE="RUN_WHILE"/>
+                <material name="mipmap" fromLibrary="Ocean" 
+                    dimX=256 dimY=256 dimZ=1/>
+            </pass-->
+
+            <pass class="quad" name="skyTexture">
+                <renderTarget name="sky" fromLibrary="Ocean"/>
+                <material name="skyTexture" fromLibrary="atmos" />
+            </pass>
+                        
+            <!--<pass class="quad" name="sky">-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<material name="sky" fromLibrary="atmos" />-->
+            <!--</pass>-->
+            
+            <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess16x" />
+                <preProcess>
+                    <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
+                    <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
+                </preProcess>
+                <COLOR_CLEAR value=false />
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="Ocean" count="225" />
+                    <!--<material name="meshOuterTessQuad" fromLibrary="Ocean" count="225" />-->
                 </materials>
             </pass>
 
@@ -475,6 +810,8 @@
             <pipelineList label="Pipeline" />
 			<var label="Culling" type="RENDERER" context="CURRENT"
 			     component="Culling" def="min=0 max=1 step=1" />
+            <var label="Max Tess." type="RENDERER" context="CURRENT"
+                 component="MaxTessellationLvl"  />
 			<var label="Adaptative Tess." type="RENDERER" context="CURRENT"
 			     component="AdapTessellation"  />
 			<var label="Grid Spacing" type="RENDERER" context="CURRENT"
