@@ -29,7 +29,14 @@
 			<structure>
 				<field value="FLOAT" />
 			</structure>
-        </buffer>		
+        </buffer>	
+        <!--Debug Buffer-->
+		<buffer name="debugBufferMesh">
+			<DIM x="262144" y="1" z=1 />
+			<structure>
+				<field value="VEC4" />
+			</structure>
+		</buffer>
     </buffers>
 	
     <materials>
@@ -41,6 +48,11 @@
 					<TYPE value="SHADER_STORAGE" />
     				<BINDING_POINT value="1" />
                 </buffer>
+                <!--Debug Buffer-->
+                <buffer name="debugBufferMesh">
+					<TYPE value="SHADER_STORAGE" />
+					<BINDING_POINT value="2" />
+				</buffer>
             </buffers>
             
             <shader name="meshOuterTessQuad" >
@@ -94,6 +106,10 @@
 					<TYPE value="SHADER_STORAGE" />
     				<BINDING_POINT value="1" />
                 </buffer>
+                <buffer name="debugBufferMesh">
+					<TYPE value="SHADER_STORAGE" />
+					<BINDING_POINT value="2" />
+				</buffer>
             </buffers>
             
             <shader name="meshInnerTessQuad" >

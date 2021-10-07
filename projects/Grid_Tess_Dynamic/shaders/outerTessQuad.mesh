@@ -43,6 +43,42 @@ layout(std430, binding = 1) readonly buffer verticesBuffer
     float vertices[];
 };
 
+layout(std430, binding = 2) writeonly buffer debugBuffer
+{
+    vec4 printf[];
+};
+
+// Simplex 2D noise
+//
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+  + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+    dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
 int calculate_adj_idx (int ceil_lvl, int ceil_adj, int u_idx, int is_down, int is_up, double log_lvl, double log_adj, int lvl_divergent_idx, int adj_divergent_idx) {
 
     int is_fst_half = int(u_idx < ceil_lvl * 0.5), is_snd_half = 1 - is_fst_half;
@@ -86,10 +122,12 @@ void main()
     int workg_id = int(gl_WorkGroupID.x);
     int workg_len = int(gl_WorkGroupSize.x);
 
-    int divs[] =  {bottom_divs, right_divs,top_divs, left_divs};
+    int divs[] =  {bottom_divs, right_divs, top_divs, left_divs};
 
     int side_wg_id = workg_id, side_id = 0;
     for(; side_wg_id >= divs[side_id]; side_id++) side_wg_id -= divs[side_id];
+
+    //if (side_wg_id != 0) { gl_PrimitiveCountNV = 0; return;}
 
     // Quad vertices
     vec4 v0 = vec4(disp + vec3 (vertices[((side_id + 0) % 4) * 3 + 1], 
@@ -140,17 +178,11 @@ void main()
     int lesser_divergent_idx = top_divergent_idx * higher_is_down + bot_divergent_idx * higher_is_up;
     double min_ratio = pow(2, int(floor(log_higher) - ceil(log_lesser)));
 
-    int no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
-    int no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+    int min_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id) / double(divs[side_id])));
+    int max_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id + 1) / double(divs[side_id])));
 
-    //int min_u_higher = (no_higher_verts - 1) * side_wg_id;
-    //int max_u_higher = (no_higher_verts - 1) * (side_wg_id + 1);
-
-    int min_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id) / double(divs[side_id])) - 1);
-    int max_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id + 1) / double(divs[side_id])) - 1);
-
-    int min_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, min_u_higher - 1, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
-    int max_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, max_u_higher + 1, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
+    int min_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, min_u_higher, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
+    int max_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, max_u_higher, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
 
     int min_u_down = max(0, min(ceil_oLvl, higher_is_down * min_u_higher + higher_is_up * min_u_lesser));
     int max_u_down = max(0, min(ceil_oLvl, higher_is_down * max_u_higher + higher_is_up * max_u_lesser));
@@ -160,6 +192,9 @@ void main()
     int no_bottom_verts = max_u_down - min_u_down + 1;
     int no_top_verts = max_u_top - min_u_top + 1;
     int no_verts = no_bottom_verts + no_top_verts;
+
+    printf[side_wg_id * 514 + 0] = vec4( min_u_down, max_u_down, min_u_top, max_u_top );
+    printf[side_wg_id * 514 + 1] = vec4( no_bottom_verts, no_top_verts, no_verts, 1.0);
 
     for (int i=0; i <= no_verts / workg_len; i++) {
 
@@ -197,8 +232,6 @@ void main()
         double inter_u = mix (prev_u, u, 1 - int(lvl >= 2) * 0.5 * (ceil_lvl - lvl));
         double inter_v = mix (prev_v, v, 1 - is_up * (int(ivLvl >= 2) * 0.5 * (ceil_ivLvl - ivLvl)));
 
-        gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, float(inter_u)), mix(v3, v2, float(inter_u)), float(inter_v));
-
         vec2 uvs[] = {
             vec2 (inter_u, inter_v),
             vec2 (1 - inter_v, inter_u),
@@ -206,14 +239,19 @@ void main()
             vec2 (inter_v, 1 - inter_u)
         };
 
+        vec4 inter_pos = mix(mix(v0, v1, float(inter_u)), mix(v3, v2, float(inter_u)), float(inter_v));
+        inter_pos.z = 0.25 * snoise (vec2(uvs[side_id].x, uvs[side_id].y));
+
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+
         v_out[idx].texCoordTE = uvs[side_id];
 
         // ============================================================================================
         // PRIMITIVES
         // ============================================================================================
 
-        //if (idx == no_bottom_verts - 1 || idx == no_verts - 1) continue;
-        if (idx == no_bottom_verts - 1) continue;
+        if (idx == no_bottom_verts - 1 || idx == no_verts - 1) continue;
+        //if (idx == no_bottom_verts - 1) continue;
         uint prim_idx = idx - is_up;
 
         double log_lvl = is_down * log_oLvl + is_up * log_iuLvl;
@@ -221,8 +259,15 @@ void main()
 
         int inter_idx = calculate_adj_idx (ceil_lvl, ceil_adj, u_idx, is_down, is_up, log_lvl, log_adj, lvl_divergent_idx, adj_divergent_idx);
 
+        //if (( is_down == 1 && (inter_idx < min_u_top - 1 || inter_idx > max_u_top - 1)) ||
+            //( is_up   == 1 && (inter_idx < min_u_down || inter_idx > max_u_down )) )
+                //continue;
+
         int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) +
                                is_up * (int(inter_idx) - min_u_down); 
+
+        //printf[side_id * 512 + prim_idx] = vec4( side_id );
+        printf[side_wg_id * 514 + prim_idx + 2] = vec4( idx + is_up, idx + is_down, offset_inter_idx, inter_idx );
 
         gl_PrimitiveIndicesNV[prim_idx * 3 + 0] = idx + is_up;
         gl_PrimitiveIndicesNV[prim_idx * 3 + 1] = idx + is_down;
@@ -233,7 +278,6 @@ void main()
     }
 
     int no_prims = no_bottom_verts + no_top_verts - 2;
-
 
     // No. Primitives
     gl_PrimitiveCountNV = no_prims;
