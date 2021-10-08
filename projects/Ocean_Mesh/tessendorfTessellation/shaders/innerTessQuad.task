@@ -19,7 +19,6 @@ uniform int useAdaTess = 1;
 
 taskNV out perTaskData {
   vec4 originV;
-  vec4 oLevel;
   vec2 iLevel;
   uint divs;
 };
@@ -65,6 +64,13 @@ float screenSphereSize(vec4 p1, vec4 p2) {
                     1.0, maxTessLvl));
 }
 
+// Adjusts tessellation levels to be multiples of 2
+float adjustTessLvl(float tessLvl) {
+
+    float ratio = maxTessLvl / tessLvl;
+    return maxTessLvl / pow(2, round(log2(ratio)));
+
+}
 
 void main() {
 
@@ -78,9 +84,9 @@ void main() {
                    row * gridSpacing - shift + camShift.y * gridSpacing, 1);
     
     vec4 v0 = originV;
-    vec4 v1 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
-    vec4 v2 = originV + vec4(gridSpacing,0.0, gridSpacing, 0.0);
-    vec4 v3 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v1 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v2 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
+    vec4 v3 = originV + vec4(gridSpacing,0.0, gridSpacing, 0.0);
 
     float chopiness = choppyFactor;// ( 1+ choppyFactor/(1+(exp(-windSpeed+20)/5)));
     
@@ -109,27 +115,29 @@ void main() {
         if (useAdaTess == 1) {
                     
             // Screen size based LOD
-            oLevel = vec4(screenSphereSize(v0, v1),
-                          screenSphereSize(v0, v2),
-                          screenSphereSize(v2, v3),
-                          screenSphereSize(v3, v1));
+            //vec4 oLevel = vec4(screenSphereSize(v0, v1),
+                               //screenSphereSize(v0, v2),
+                               //screenSphereSize(v2, v3),
+                               //screenSphereSize(v3, v1));
+            vec4 oLevel = vec4(adjustTessLvl(screenSphereSize(v0, v1)),
+                          adjustTessLvl(screenSphereSize(v0, v2)),
+                          adjustTessLvl(screenSphereSize(v2, v3)),
+                          adjustTessLvl(screenSphereSize(v3, v1)));
+            //iLevel = vec2(max(oLevel[1] , oLevel[2]) , max(oLevel[0] , oLevel[3]) );
             iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
 
         } else {
 
-            oLevel = vec4(maxTessLvl);
             iLevel = vec2(maxTessLvl);
         
         }
 
     } else if (useCulling == 1) {
 
-        oLevel = vec4(0);
         iLevel = vec2(0);
         
     } else {
 
-        oLevel = vec4(maxTessLvl);
         iLevel = vec2(maxTessLvl);
         
     }

@@ -152,14 +152,30 @@
 		</viewports>
 		
 		<cameras>
-			<camera name="MainCamera" >
-				<viewport name="MainViewport" />
-				<FOV value="60.0" />
-				<NEAR value="1" FAR="2000.0" />
-				<POSITION x="0" y="20" z="0" />
-				<VIEW x="0.86" y="-0.173" z="0.478" />
-				<UP x="0" y="1" z="0" />
+			<!--<camera name="MainCamera" >-->
+				<!--<viewport name="MainViewport" />-->
+				<!--<FOV value="60.0" />-->
+				<!--<NEAR value="1" FAR="2000.0" />-->
+				<!--<POSITION x="0" y="20" z="0" />-->
+				<!--<VIEW x="0.86" y="-0.173" z="0.478" />-->
+				<!--<UP x="0" y="1" z="0" />-->
+            <!--</camera>-->
+            <camera name="MainCamera" >
+                <viewport name="MainViewport" />
+                <FOV value="60.0" />
+                <NEAR value="1" FAR="10000.0" />
+                <POSITION x="-1823.438" y="10.986" z="-2184.574" />
+                <VIEW x="0.069" y="-0.920" z="-0.386" />
+                <UP x="0" y="1" z="0" />
             </camera>
+            <!--<camera name="MainCamera" >-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<FOV value="60.0" />-->
+                <!--<NEAR value="1" FAR="10000.0" />-->
+                <!--<POSITION x="-1944.778" y="14.414" z="-2518.094" />-->
+                <!--<VIEW x="-0.988" y="0.050" z="-0.145" />-->
+                <!--<UP x="0" y="1" z="0" />-->
+            <!--</camera>-->
             <!--<camera name="MainCamera" >-->
 				<!--<viewport name="MainViewport" />-->
 				<!--<FOV value="60.0" />-->
@@ -664,7 +680,7 @@
                 </lights>
                 <materials>
                     <material name="meshInnerTessQuad" fromLibrary="Ocean" count="225" />
-                    <!--<material name="meshOuterTessQuad" fromLibrary="Ocean" count="225" />-->
+                    <material name="meshOuterTessQuad" fromLibrary="Ocean" count="225" />
                 </materials>
             </pass>
 
@@ -684,6 +700,93 @@
                 </materialMaps>
             
             </pass>
+            <!--[> render tessellated grid with height and disp maps: pos <]-->
+            
+            <!--[> ray trace for reflection, sky color.... <]-->
+            
+        </pipeline>
+        
+        <pipeline name="ocean_mesh (32x)" default="true" defaultCamera="MainCamera">
+            <!--[> sky init script <]-->
+            <preScript script="tChanged" file="scripts/interface.lua" />
+        
+            <pass class="compute" name="h0">
+                <mode value="RUN_ONCE" />
+                <material name="fft_h0" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+        
+            <pass class="compute" name="pass_hkt">
+                <material name="fft_hkt" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1/>
+            </pass>
+        
+            <!--[> inverse fourier <]-->
+            <!--[> inverse FFT horizontal pass <]-->
+            <pass class="compute" name="ifftHorizontal"> 
+                <preScript file="scripts/fft.lua" script="resetInverseFFT" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftHorizontal" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--[> inverse FFT vertical pass <]-->
+            <pass class="compute" name="ifftVertical"> 
+                <preScript file="scripts/fft.lua" script="resetInverseVertical" />
+                <testScript file="scripts/fft.lua" script="fft" TEST_MODE="RUN_WHILE" />
+                <material name="fftVertical" fromLibrary="Ocean" dimX="D8SIZE" dimY="D8SIZE" dimZ=1 />
+            </pass>
+            
+            <!--pass class="compute" name="mipmap">
+                <testScript file="scripts/fft.lua" script="testMipmap" TEST_MODE="RUN_WHILE"/>
+                <material name="mipmap" fromLibrary="Ocean" 
+                    dimX=256 dimY=256 dimZ=1/>
+            </pass-->
+
+            <!--<pass class="quad" name="skyTexture">-->
+                <!--<renderTarget name="sky" fromLibrary="Ocean"/>-->
+                <!--<material name="skyTexture" fromLibrary="atmos" />-->
+            <!--</pass>-->
+                        
+            <!--<pass class="quad" name="sky">-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<material name="sky" fromLibrary="atmos" />-->
+            <!--</pass>-->
+            
+            <pass class="mesh" name="renderGrid" >
+                <preScript file="scripts/tess.lua" script="setTess32x" />
+                <preProcess>
+                    <texture name="hkt" fromLibrary="Ocean" MIPMAP=true />
+                    <texture name="voronoi" fromLibrary="Ocean" MIPMAP=true />
+                    <buffer name="debugBufferMesh" fromLibrary="Ocean" CLEAR=true />
+                </preProcess>
+                <COLOR_CLEAR value=false />
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshInnerTessQuad" fromLibrary="Ocean" count="49" />
+                    <material name="meshOuterTessQuad" fromLibrary="Ocean" count="49" />
+                    <!--<material name="meshInnerTessQuad" fromLibrary="Ocean" count="2" />-->
+                    <!--<material name="meshOuterTessQuad" fromLibrary="Ocean" count="9" />-->
+                </materials>
+            </pass>
+
+            <!--<pass class="default" name="ball" >-->
+                <!--<COLOR_CLEAR value=false />-->
+                <!--<DEPTH_CLEAR value=false />-->
+                <!--<scenes>-->
+                    <!--<scene name="Ball" />-->
+                <!--</scenes>-->
+                <!--<camera name="MainCamera" />-->
+                <!--<viewport name="MainViewport" />-->
+                <!--<lights>-->
+                    <!--<light name="Sun" />-->
+                <!--</lights>-->
+                <!--<materialMaps>-->
+                    <!--<map fromMaterial="sphere" toLibrary="Ocean" toMaterial="lambert" />-->
+                <!--</materialMaps>-->
+            
+            <!--</pass>-->
             <!--[> render tessellated grid with height and disp maps: pos <]-->
             
             <!--[> ray trace for reflection, sky color.... <]-->

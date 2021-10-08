@@ -22,9 +22,9 @@ taskNV out perTaskData {
   vec4 oLevel;
   vec2 iLevel;
   int left_divs;
-  int bottom_divs;
-  int right_divs;
   int top_divs;
+  int right_divs;
+  int bottom_divs;
 };
 
 layout(std430, binding = 1) writeonly buffer debugBuffer
@@ -68,6 +68,13 @@ float screenSphereSize(vec4 p1, vec4 p2) {
                     1.0, maxTessLvl));
 }
 
+// Adjusts tessellation levels to be multiples of 2
+float adjustTessLvl(float tessLvl) {
+
+    float ratio = maxTessLvl / tessLvl;
+    return maxTessLvl / pow(2, round(log2(ratio)));
+
+}
 
 void main() {
 
@@ -81,9 +88,9 @@ void main() {
                    row * gridSpacing - shift + camShift.y * gridSpacing, 1);
     
     vec4 v0 = originV;
-    vec4 v1 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
-    vec4 v2 = originV + vec4(gridSpacing,0.0, gridSpacing, 0.0);
-    vec4 v3 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v1 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v2 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
+    vec4 v3 = originV + vec4(gridSpacing, 0.0, gridSpacing, 0.0);
 
     float chopiness = choppyFactor;// ( 1+ choppyFactor/(1+(exp(-windSpeed+20)/5)));
     
@@ -102,7 +109,7 @@ void main() {
     tc = vec2(v3.xz) / L;
     v3.xz = v3.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;	
     v3 = m_pvm * v3;
-    
+   
     if (useCulling == 0 || (		
                 segmentInFrustum(v0, v1) ||
                 segmentInFrustum(v0, v2) ||
@@ -112,11 +119,16 @@ void main() {
         if (useAdaTess == 1) {
                     
             // Screen size based LOD
-            oLevel = vec4(screenSphereSize(v0, v1),
-                            screenSphereSize(v0, v2),
-                          screenSphereSize(v2, v3),
-                          screenSphereSize(v3, v1));
+            //oLevel = vec4(screenSphereSize(v0, v1),
+                          //screenSphereSize(v0, v2),
+                          //screenSphereSize(v2, v3),
+                          //screenSphereSize(v3, v1));
+            oLevel = vec4(adjustTessLvl(screenSphereSize(v0, v1)),
+                          adjustTessLvl(screenSphereSize(v0, v2)),
+                          adjustTessLvl(screenSphereSize(v2, v3)),
+                          adjustTessLvl(screenSphereSize(v3, v1)));
             iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
+            //iLevel = vec2(max(oLevel[1] , oLevel[2]) , max(oLevel[0] , oLevel[3]) );
 
         } else {
 
@@ -137,15 +149,18 @@ void main() {
         
     }
 
+    printf[gl_WorkGroupID.x * 1 + 0] = oLevel;
+    //printf[gl_WorkGroupID.x * 2 + 1] = vec4(iLevel.x, iLevel.y, 0, 0);
+
     // Tessellation Levels
     int ceil_left = int(ceil(oLevel.x));
     ceil_left += ceil_left % 2;
-    int ceil_bottom = int(ceil(oLevel.y));
-    ceil_bottom += ceil_bottom % 2;
+    int ceil_top = int(ceil(oLevel.y));
+    ceil_top += ceil_top % 2;
     int ceil_right = int(ceil(oLevel.z));
     ceil_right += ceil_right % 2;
-    int ceil_top = int(ceil(oLevel.w));
-    ceil_top += ceil_top % 2;
+    int ceil_bottom = int(ceil(oLevel.w));
+    ceil_bottom += ceil_bottom % 2;
     
     int ceil_cols = int(ceil(iLevel.x));
     ceil_cols += ceil_cols % 2;
@@ -154,9 +169,9 @@ void main() {
 
     // Number of Vertices of the Quad
     int no_verts_left = (ceil_left + 1) + max(1, ceil_rows - 1);
-    int no_verts_bottom = (ceil_bottom + 1) + max(1, ceil_cols - 1);
-    int no_verts_right = (ceil_right + 1) + max(1, ceil_rows - 1);
     int no_verts_top = (ceil_top + 1) + max(1, ceil_cols - 1);
+    int no_verts_right = (ceil_right + 1) + max(1, ceil_rows - 1);
+    int no_verts_bottom = (ceil_bottom + 1) + max(1, ceil_cols - 1);
 
     // Maximum number of vertices a Mesh Workgroup can handle
     int mesh_max_verts = 256;
@@ -169,34 +184,10 @@ void main() {
 
     double min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
     
-    int no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
+    int no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
     int no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
 
     left_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
-
-    // Bottom
-    higher_is_down = int(ceil_bottom >= ceil_cols - 2), higher_is_up = 1 - higher_is_down;
-    ceil_higher = higher_is_down * ceil_bottom + higher_is_up * ceil_cols;
-    ceil_lesser = higher_is_down * ceil_cols + higher_is_up * ceil_bottom;
-
-    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
-    
-    no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
-    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
-
-    bottom_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
-
-    // Right
-    higher_is_down = int(ceil_right >= ceil_rows - 2), higher_is_up = 1 - higher_is_down;
-    ceil_higher = higher_is_down * ceil_right + higher_is_up * ceil_rows;
-    ceil_lesser = higher_is_down * ceil_rows + higher_is_up * ceil_right;
-
-    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
-    
-    no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
-    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
-
-    right_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
 
     // Top
     higher_is_down = int(ceil_top >= ceil_cols - 2), higher_is_up = 1 - higher_is_down;
@@ -205,14 +196,46 @@ void main() {
 
     min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
     
-    no_higher_verts = int(floor((mesh_max_verts - 2) / ceil(1 + 1.0 / min_ratio)));
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
     no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
 
     top_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+    
+    // Right
+    higher_is_down = int(ceil_right >= ceil_rows - 2), higher_is_up = 1 - higher_is_down;
+    ceil_higher = higher_is_down * ceil_right + higher_is_up * ceil_rows;
+    ceil_lesser = higher_is_down * ceil_rows + higher_is_up * ceil_right;
 
-    if (iLevel == vec2(0) || oLevel == vec4(0)) {left_divs = 0; bottom_divs = 0; right_divs = 0; top_divs = 0;}
+    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    right_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+
+    // Bottom
+    higher_is_down = int(ceil_bottom >= ceil_cols - 2), higher_is_up = 1 - higher_is_down;
+    ceil_higher = higher_is_down * ceil_bottom + higher_is_up * ceil_cols;
+    ceil_lesser = higher_is_down * ceil_cols + higher_is_up * ceil_bottom;
+
+    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    bottom_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+
+    //printf[2] = vec4(left_divs, bottom_divs, top_divs, right_divs);
+    //printf[3] = vec4(7777, 7777, 7777, 7777);
+
+    //left_divs = 0;
+    //top_divs = 0;
+    //right_divs = 0;
+    //bottom_divs = 0;
+
+    if (iLevel == vec2(0)) {left_divs = 0; right_divs = 0; top_divs = 0; bottom_divs = 0;}
 
     // Number of Mesh Workgroups to emit
-    gl_TaskCountNV = left_divs + bottom_divs + right_divs + top_divs;
+    gl_TaskCountNV = left_divs + top_divs + bottom_divs + right_divs;
 
 }

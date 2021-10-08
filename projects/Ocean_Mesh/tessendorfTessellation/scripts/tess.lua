@@ -48,3 +48,13 @@ setTess16x = function ()
     setAttr("RENDERER", "CURRENT", "MaxTessellationLvl", 0, {totalTess / newGridSize})
 
 end
+
+setTess32x = function ()
+
+    local newGridSize = math.floor(gridSize * 0.03125)
+
+    setAttr("RENDERER", "CURRENT", "GridSize", 0, {newGridSize})
+    setAttr("RENDERER", "CURRENT", "GridSpacing", 0, {totalLength / newGridSize})
+    setAttr("RENDERER", "CURRENT", "MaxTessellationLvl", 0, {totalTess / newGridSize})
+
+end

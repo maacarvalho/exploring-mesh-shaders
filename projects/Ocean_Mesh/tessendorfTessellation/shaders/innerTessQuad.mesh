@@ -23,7 +23,6 @@ uniform vec4 l_dir;
 
 taskNV in perTaskData {
     vec4 originV;
-    vec4 oLevel;
     vec2 iLevel;
     uint divs;
 };
@@ -54,22 +53,6 @@ void main()
     //printf[gl_LocalInvocationID.x] = originV;
     //printf[taskID] = originV;
     //printf[taskID] = vec4(2,2,2,2);
-    vec4 v0 = originV;
-    vec4 v1 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
-    vec4 v2 = originV + vec4(gridSpacing,0.0, gridSpacing, 0.0);
-    vec4 v3 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
-
-    //vec4 v0 = vec4(originV.xyz, 1.0);
-    //vec4 v1 = v0 + vec4(0.0, 0.0, gridSpacing, 0.0);
-    //vec4 v2 = v0 + vec4(gridSpacing,0.0, 0.0, 0.0);
-    //vec4 v3 = v0 + vec4(gridSpacing, 0.0, gridSpacing, 0.0);
-    
-    //vec4 v0 = vec4(-gridSpacing, 0, -gridSpacing, 1.0);
-	//vec4 v1 = vec4(-gridSpacing, 0.0, gridSpacing, 1.0);
-	//vec4 v2 = vec4(gridSpacing, 0.0, -gridSpacing, 1.0);
-	//vec4 v3 = vec4(gridSpacing, 0.0, gridSpacing, 1.0);
-
-    //printf[ID] = vec4(iLevel.x, oLevel.y, divs, 0);
 
     // Inputs
     uint local_id  = gl_LocalInvocationID.x;
@@ -126,8 +109,10 @@ void main()
         float inter_v = mix (prev_v, v, 1 - int(iLevel.y >= 2) * 0.5 * (ceil_rows - iLevel.y));
 
         // Computing vertex position
-        vec4 inter_pos = mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
-        inter_pos.y = height(inter_u, inter_v);
+        inter_u = 1 - inter_u;
+        vec4 inter_pos = originV + vec4(inter_u * gridSpacing, height(inter_u, inter_v), inter_v * gridSpacing, 0);
+        //vec4 inter_pos = mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        //inter_pos.y = height(inter_u, inter_v);
         
         float yAtCam = texture(htk, vec3(camPos.xz/L, LAYER_Y_JXY_JXX_JYY)).r;
         vec2 tc = inter_pos.xz / L;
