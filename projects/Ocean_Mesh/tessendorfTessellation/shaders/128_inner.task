@@ -149,23 +149,14 @@ void main() {
     ceil_rows += ceil_rows % 2;
 
     // Maximum number of vertices a Mesh Workgroup can handle
-    int mesh_max_verts = 256;
-    //int mesh_max_verts = 16;
+    int mesh_max_verts = 128;
     
     // Number of Mesh Shader WorkGroups to launch
-    divs = 1;
-    for (int i=1; i<mesh_max_verts; i++) {
-
-        if (int(ceil(float(ceil_cols + 1) / float(i) + 1)) * 
-            int(ceil(float(ceil_rows + 1) / float(i) + 1)) <= mesh_max_verts) {
-
-            divs = i;
-            break;
-        }
-
-    }
-
+    divs = uint(ceil(max(ceil_cols, ceil_rows) / floor(sqrt(mesh_max_verts) - 1)));
+    
     if (iLevel == vec2(0)) divs = 0;
+ 
+    //printf[gl_WorkGroupID.x] = vec4(mesh_max_verts, divs * divs, iLevel.x, iLevel.y);
 
     gl_TaskCountNV = divs * divs;
 

@@ -67,6 +67,13 @@ float screenSphereSize(vec4 p1, vec4 p2) {
                     1.0, maxTessLvl));
 }
 
+// Adjusts tessellation levels to be multiples of 2
+float adjustTessLvl(float tessLvl) {
+
+    float ratio = maxTessLvl / tessLvl;
+    return maxTessLvl / pow(2, round(log2(ratio)));
+
+}
 
 void main() {
 
@@ -115,10 +122,15 @@ void main() {
 					
 		// Screen size based LOD
 
-			oLevel = vec4(screenSphereSize(posTransV[0], posTransV[1]),
-						screenSphereSize(posTransV[0], posTransV[2]),
-						screenSphereSize(posTransV[2], posTransV[3]),
-						screenSphereSize(posTransV[3], posTransV[1]));
+			//oLevel = vec4(screenSphereSize(posTransV[0], posTransV[1]),
+						//screenSphereSize(posTransV[0], posTransV[2]),
+						//screenSphereSize(posTransV[2], posTransV[3]),
+						//screenSphereSize(posTransV[3], posTransV[1]));
+            oLevel = vec4(adjustTessLvl(screenSphereSize(posTransV[0], posTransV[1])),
+						adjustTessLvl(screenSphereSize(posTransV[0], posTransV[2])),
+						adjustTessLvl(screenSphereSize(posTransV[2], posTransV[3])),
+						adjustTessLvl(screenSphereSize(posTransV[3], posTransV[1])));
+
 			iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
 /*	
 			oLevel = vec4(screenSphereSize(posTCAux[0], posTCAux[1]),

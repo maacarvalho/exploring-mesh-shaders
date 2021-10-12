@@ -1,12 +1,13 @@
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=256, max_primitives=512) out;
-//layout(lines, max_vertices=256, max_primitives=512) out;
-//layout(points, max_vertices=256, max_primitives=512) out;
+layout(triangles, max_vertices=128, max_primitives=126) out;
+//layout(lines, max_vertices=128, max_primitives=512) out;
+//layout(points, max_vertices=128, max_primitives=128) out;
 
 uniform sampler2DArray htk;
 uniform sampler2D voronoi;
 
-uniform	mat4 m_pvm, m_view;
+uniform int camMode;
+uniform	mat4 m_pvm, m_view, m_model, m_proj, m_godView;
 uniform mat3 m_normal;
 uniform vec3 camPos;
 
@@ -95,7 +96,7 @@ void main()
     //printf[0] = vec4(bottom_divs, right_divs, top_divs, left_divs);
     //printf[workg_id + 4] = vec4(-9999, -9999, -9999, -9999);
     
-    //for (int i=0; i<257; i++) printf[4 + workg_id * 256 + i] = vec4(-9999, -9999, -9999, -9999);
+    //for (int i=0; i<257; i++) printf[4 + workg_id * 128 + i] = vec4(-9999, -9999, -9999, -9999);
 
     int divs[] =  {left_divs, top_divs, right_divs, bottom_divs};
 
@@ -127,10 +128,6 @@ void main()
     double log_oLvl = log2(ceil_oLvl);
     double log_iuLvl = log2(ceil_iuLvl);
 
-    // Current WorkGroupID portion of the side
-    int mesh_max_verts = 256;
-    //int mesh_max_verts = 16;
-    
     int higher_is_down = int(ceil_oLvl >= ceil_iuLvl - 2), higher_is_up = 1 - higher_is_down;
     int ceil_higher = higher_is_down * ceil_oLvl + higher_is_up * ceil_iuLvl, 
         ceil_lesser = higher_is_down * ceil_iuLvl + higher_is_up * ceil_oLvl;
@@ -231,13 +228,11 @@ void main()
         
         v_out[idx].pos = inter_pos.xyz;
 
-#ifdef TESTE
-        float v = texture(voronoi, DataOut.texCoord).r * 10;
-        p.y = v;
-#endif	
+        mat4 god_pvm = m_proj * m_godView * m_model;
+
+        if (camMode == 1) gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+        else              gl_MeshVerticesNV[idx].gl_Position = god_pvm * inter_pos;
         
-        gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
-        //all_verts[idx] = 1;
         //gl_PrimitiveIndicesNV[idx] = idx;
 
         // ============================================================================================

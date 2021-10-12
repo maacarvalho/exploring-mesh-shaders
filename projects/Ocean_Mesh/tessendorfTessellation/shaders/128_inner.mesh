@@ -1,11 +1,12 @@
 layout(local_size_x=32) in;
-layout(triangles, max_vertices=256, max_primitives=512) out;
-//layout(points, max_vertices=256, max_primitives=512) out;
+layout(triangles, max_vertices=128, max_primitives=200) out;
+//layout(points, max_vertices=128, max_primitives=128) out;
 
 uniform sampler2DArray htk;
 uniform sampler2D voronoi;
 
-uniform	mat4 m_pvm, m_view;
+uniform int camMode;
+uniform	mat4 m_pvm, m_view, m_model, m_proj, m_godView;
 uniform mat3 m_normal;
 uniform vec3 camPos;
 
@@ -135,19 +136,11 @@ void main()
         
         v_out[idx].pos = inter_pos.xyz;
 
-#ifdef TESTE
-        float v = texture(voronoi, DataOut.texCoord).r * 10;
-        p.y = v;
-#endif	
+        mat4 god_pvm = m_proj * m_godView * m_model;
 
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
-        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
-        gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
-        //gl_PrimitiveIndicesNV[idx] = idx;
+        if (camMode == 1) gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+        else              gl_MeshVerticesNV[idx].gl_Position = god_pvm * inter_pos;
 
-        //v_out[idx].texCoordTE = vec2(inter_u, inter_v);
-        //p_out[idx].mesh_id = workg_id;
-        //p_out[idx].divs = divs * divs;
     }
 
     int no_prims = (no_cols) * (no_lines) * 2;

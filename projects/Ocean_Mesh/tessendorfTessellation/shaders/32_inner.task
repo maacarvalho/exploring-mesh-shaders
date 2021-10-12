@@ -1,0 +1,163 @@
+layout(local_size_x = 1) in;
+
+uniform sampler2DArray htk;
+
+uniform	mat4 m_pvm;
+
+uniform int width,L;
+uniform float windSpeed;
+uniform float choppyFactor;
+
+uniform float maxTessLvl = 64;
+uniform float gridSpacing = 5;
+uniform vec2 windowSize;
+uniform int pixelsPerEdge = 32;
+uniform int gridSize = 512;
+
+uniform int useCulling = 0;
+uniform int useAdaTess = 1;
+
+taskNV out perTaskData {
+  vec4 originV;
+  vec2 iLevel;
+  uint divs;
+};
+
+layout(std430, binding = 1) writeonly buffer debugBuffer
+{
+    vec4 printf[];
+};
+
+#define ID gl_WorkGroupID.x
+
+float height(float u, float v) {
+
+	return 1; // this should be the patch maximum height
+}
+
+// Checks if a segment is at least partially inside the frustum
+// Need to add a little tolerance in here
+bool segmentInFrustum(vec4 p1, vec4 p2) {
+
+	float epsilon = +0.1*p1.w;
+	if ((p1.x < -p1.w-epsilon && p2.x < -p2.w-epsilon) || (p1.x > p1.w+epsilon && p2.x > p2.w+epsilon) ||
+		(p1.z < -p1.w-epsilon && p2.z < -p2.w-epsilon) || (p1.z > p1.w+epsilon && p2.z > p2.w+epsilon))
+		return false;
+	else 
+		return true;
+}
+
+// Measures the screen size of segment p1-p2
+float screenSphereSize(vec4 p1, vec4 p2) {
+
+	vec4 viewCenter = (p1+p2) * 0.5;
+	vec4 viewUp = viewCenter;
+	viewUp.y += distance(p1,p2);
+	vec4 p1Proj = viewCenter;
+	vec4 p2Proj = viewUp;
+
+	vec4 p1NDC, p2NDC;
+	p1NDC = p1Proj/p1Proj.w;
+	p2NDC = p2Proj/p2Proj.w;
+	
+	return( clamp(length((p2NDC.xy - p1NDC.xy) * windowSize * 0.5) / (pixelsPerEdge), 
+                    1.0, maxTessLvl));
+}
+
+// Adjusts tessellation levels to be multiples of 2
+float adjustTessLvl(float tessLvl) {
+
+    float ratio = maxTessLvl / tessLvl;
+    return maxTessLvl / pow(2, round(log2(ratio)));
+
+}
+
+void main() {
+
+    uint col = ID % gridSize;
+	uint row = ID / gridSize;
+
+    float shift = gridSize * gridSpacing * 0.5;
+    ivec2 camShift = ivec2(0);//ivec2(camPos.xz / gridSpacing);
+
+    originV = vec4(col * gridSpacing - shift + camShift.x * gridSpacing, 0, 
+                   row * gridSpacing - shift + camShift.y * gridSpacing, 1);
+    
+    vec4 v0 = originV;
+    vec4 v1 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v2 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
+    vec4 v3 = originV + vec4(gridSpacing,0.0, gridSpacing, 0.0);
+
+    float chopiness = choppyFactor;// ( 1+ choppyFactor/(1+(exp(-windSpeed+20)/5)));
+    
+    vec2 tc = vec2(v0.xz) / L;
+    v0.xz = v0.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v0 = m_pvm * v0;
+    
+    tc = vec2(v1.xz) / L;
+    v1.xz = v1.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v1 = m_pvm * v1;
+    
+    tc = vec2(v2.xz) / L;
+    v2.xz = v2.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v2 = m_pvm * v2;
+    
+    tc = vec2(v3.xz) / L;
+    v3.xz = v3.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;	
+    v3 = m_pvm * v3;
+    
+    if (useCulling == 0 || (		
+                segmentInFrustum(v0, v1) ||
+                segmentInFrustum(v0, v2) ||
+                segmentInFrustum(v2, v3) ||
+                segmentInFrustum(v3, v1))) {
+                    
+        if (useAdaTess == 1) {
+                    
+            // Screen size based LOD
+            //vec4 oLevel = vec4(screenSphereSize(v0, v1),
+                               //screenSphereSize(v0, v2),
+                               //screenSphereSize(v2, v3),
+                               //screenSphereSize(v3, v1));
+            vec4 oLevel = vec4(adjustTessLvl(screenSphereSize(v0, v1)),
+                          adjustTessLvl(screenSphereSize(v0, v2)),
+                          adjustTessLvl(screenSphereSize(v2, v3)),
+                          adjustTessLvl(screenSphereSize(v3, v1)));
+            //iLevel = vec2(max(oLevel[1] , oLevel[2]) , max(oLevel[0] , oLevel[3]) );
+            iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
+
+        } else {
+
+            iLevel = vec2(maxTessLvl);
+        
+        }
+
+    } else if (useCulling == 1) {
+
+        iLevel = vec2(0);
+        
+    } else {
+
+        iLevel = vec2(maxTessLvl);
+        
+    }
+
+    // Tessellation Levels
+    int ceil_cols = int(ceil(iLevel.x));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(iLevel.y));
+    ceil_rows += ceil_rows % 2;
+
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 32;
+    
+    // Number of Mesh Shader WorkGroups to launch
+    divs = uint(ceil(max(ceil_cols, ceil_rows) / floor(sqrt(mesh_max_verts) - 1)));
+
+    if (iLevel == vec2(0)) divs = 0;
+ 
+    //printf[gl_WorkGroupID.x] = vec4(mesh_max_verts, divs * divs, iLevel.x, iLevel.y);
+
+    gl_TaskCountNV = divs * divs;
+
+}

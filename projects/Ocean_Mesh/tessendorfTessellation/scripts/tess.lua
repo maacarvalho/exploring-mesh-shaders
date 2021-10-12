@@ -1,4 +1,4 @@
-gridSize, maxTess, gridSpacing = 255, 64, 20
+gridSize, maxTess, gridSpacing = 255, 64, 40
 totalLength, totalTess = gridSize * gridSpacing, gridSize * maxTess
 
 setTess1x = function ()

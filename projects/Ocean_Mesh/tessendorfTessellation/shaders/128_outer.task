@@ -1,0 +1,240 @@
+layout(local_size_x = 1) in;
+
+uniform sampler2DArray htk;
+
+uniform	mat4 m_pvm;
+
+uniform int width,L;
+uniform float windSpeed;
+uniform float choppyFactor;
+
+uniform float maxTessLvl = 64;
+uniform float gridSpacing = 5;
+uniform vec2 windowSize;
+uniform int pixelsPerEdge = 32;
+uniform int gridSize = 512;
+
+uniform int useCulling = 0;
+uniform int useAdaTess = 1;
+
+taskNV out perTaskData {
+  vec4 originV;
+  vec4 oLevel;
+  vec2 iLevel;
+  int left_divs;
+  int top_divs;
+  int right_divs;
+  int bottom_divs;
+};
+
+layout(std430, binding = 1) writeonly buffer debugBuffer
+{
+    vec4 printf[];
+};
+
+#define ID gl_WorkGroupID.x
+
+float height(float u, float v) {
+
+	return 1; // this should be the patch maximum height
+}
+
+// Checks if a segment is at least partially inside the frustum
+// Need to add a little tolerance in here
+bool segmentInFrustum(vec4 p1, vec4 p2) {
+
+	float epsilon = +0.1*p1.w;
+	if ((p1.x < -p1.w-epsilon && p2.x < -p2.w-epsilon) || (p1.x > p1.w+epsilon && p2.x > p2.w+epsilon) ||
+		(p1.z < -p1.w-epsilon && p2.z < -p2.w-epsilon) || (p1.z > p1.w+epsilon && p2.z > p2.w+epsilon))
+		return false;
+	else 
+		return true;
+}
+
+// Measures the screen size of segment p1-p2
+float screenSphereSize(vec4 p1, vec4 p2) {
+
+	vec4 viewCenter = (p1+p2) * 0.5;
+	vec4 viewUp = viewCenter;
+	viewUp.y += distance(p1,p2);
+	vec4 p1Proj = viewCenter;
+	vec4 p2Proj = viewUp;
+
+	vec4 p1NDC, p2NDC;
+	p1NDC = p1Proj/p1Proj.w;
+	p2NDC = p2Proj/p2Proj.w;
+	
+	return( clamp(length((p2NDC.xy - p1NDC.xy) * windowSize * 0.5) / (pixelsPerEdge), 
+                    1.0, maxTessLvl));
+}
+
+// Adjusts tessellation levels to be multiples of 2
+float adjustTessLvl(float tessLvl) {
+
+    float ratio = maxTessLvl / tessLvl;
+    return maxTessLvl / pow(2, round(log2(ratio)));
+
+}
+
+void main() {
+
+    uint col = ID % gridSize;
+	uint row = ID / gridSize;
+
+    float shift = gridSize * gridSpacing * 0.5;
+    ivec2 camShift = ivec2(0);//ivec2(camPos.xz / gridSpacing);
+
+    originV = vec4(col * gridSpacing - shift + camShift.x * gridSpacing, 0, 
+                   row * gridSpacing - shift + camShift.y * gridSpacing, 1);
+    
+    vec4 v0 = originV;
+    vec4 v1 = originV + vec4(0.0, 0.0, gridSpacing, 0.0);
+    vec4 v2 = originV + vec4(gridSpacing, 0.0, 0.0, 0.0);
+    vec4 v3 = originV + vec4(gridSpacing, 0.0, gridSpacing, 0.0);
+
+    float chopiness = choppyFactor;// ( 1+ choppyFactor/(1+(exp(-windSpeed+20)/5)));
+    
+    vec2 tc = vec2(v0.xz) / L;
+    v0.xz = v0.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v0 = m_pvm * v0;
+    
+    tc = vec2(v1.xz) / L;
+    v1.xz = v1.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v1 = m_pvm * v1;
+    
+    tc = vec2(v2.xz) / L;
+    v2.xz = v2.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;
+    v2 = m_pvm * v2;
+    
+    tc = vec2(v3.xz) / L;
+    v3.xz = v3.xz - texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ)).xy * chopiness;	
+    v3 = m_pvm * v3;
+   
+    if (useCulling == 0 || (		
+                segmentInFrustum(v0, v1) ||
+                segmentInFrustum(v0, v2) ||
+                segmentInFrustum(v2, v3) ||
+                segmentInFrustum(v3, v1))) {
+                    
+        if (useAdaTess == 1) {
+                    
+            // Screen size based LOD
+            //oLevel = vec4(screenSphereSize(v0, v1),
+                          //screenSphereSize(v0, v2),
+                          //screenSphereSize(v2, v3),
+                          //screenSphereSize(v3, v1));
+            oLevel = vec4(adjustTessLvl(screenSphereSize(v0, v1)),
+                          adjustTessLvl(screenSphereSize(v0, v2)),
+                          adjustTessLvl(screenSphereSize(v2, v3)),
+                          adjustTessLvl(screenSphereSize(v3, v1)));
+            iLevel = vec2(max(oLevel[1] , oLevel[3]) , max(oLevel[0] , oLevel[2]) );
+            //iLevel = vec2(max(oLevel[1] , oLevel[2]) , max(oLevel[0] , oLevel[3]) );
+
+        } else {
+
+            oLevel = vec4(maxTessLvl);
+            iLevel = vec2(maxTessLvl);
+        
+        }
+
+    } else if (useCulling == 1) {
+
+        oLevel = vec4(0);
+        iLevel = vec2(0);
+        
+    } else {
+
+        oLevel = vec4(maxTessLvl);
+        iLevel = vec2(maxTessLvl);
+        
+    }
+
+    //printf[gl_WorkGroupID.x * 1 + 0] = oLevel;
+    //printf[gl_WorkGroupID.x * 2 + 1] = vec4(iLevel.x, iLevel.y, 0, 0);
+
+    // Tessellation Levels
+    int ceil_left = int(ceil(oLevel.x));
+    ceil_left += ceil_left % 2;
+    int ceil_top = int(ceil(oLevel.y));
+    ceil_top += ceil_top % 2;
+    int ceil_right = int(ceil(oLevel.z));
+    ceil_right += ceil_right % 2;
+    int ceil_bottom = int(ceil(oLevel.w));
+    ceil_bottom += ceil_bottom % 2;
+    
+    int ceil_cols = int(ceil(iLevel.x));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(iLevel.y));
+    ceil_rows += ceil_rows % 2;
+
+    // Number of Vertices of the Quad
+    int no_verts_left = (ceil_left + 1) + max(1, ceil_rows - 1);
+    int no_verts_top = (ceil_top + 1) + max(1, ceil_cols - 1);
+    int no_verts_right = (ceil_right + 1) + max(1, ceil_rows - 1);
+    int no_verts_bottom = (ceil_bottom + 1) + max(1, ceil_cols - 1);
+
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 128;
+
+    // Left
+    int higher_is_down = int(ceil_left >= ceil_rows - 2), higher_is_up = 1 - higher_is_down;
+    int ceil_higher = higher_is_down * ceil_left + higher_is_up * ceil_rows, 
+        ceil_lesser = higher_is_down * ceil_rows + higher_is_up * ceil_left;
+
+    double min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    int no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    int no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    left_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+
+    // Top
+    higher_is_down = int(ceil_top >= ceil_cols - 2), higher_is_up = 1 - higher_is_down;
+    ceil_higher = higher_is_down * ceil_top + higher_is_up * ceil_cols;
+    ceil_lesser = higher_is_down * ceil_cols + higher_is_up * ceil_top;
+
+    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    top_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+    
+    // Right
+    higher_is_down = int(ceil_right >= ceil_rows - 2), higher_is_up = 1 - higher_is_down;
+    ceil_higher = higher_is_down * ceil_right + higher_is_up * ceil_rows;
+    ceil_lesser = higher_is_down * ceil_rows + higher_is_up * ceil_right;
+
+    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    right_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+
+    // Bottom
+    higher_is_down = int(ceil_bottom >= ceil_cols - 2), higher_is_up = 1 - higher_is_down;
+    ceil_higher = higher_is_down * ceil_bottom + higher_is_up * ceil_cols;
+    ceil_lesser = higher_is_down * ceil_cols + higher_is_up * ceil_bottom;
+
+    min_ratio = pow(2, floor(log2(ceil_higher)) - ceil(log2(ceil_lesser)));
+    
+    no_higher_verts = int(floor((mesh_max_verts - 2) / (1 + 1.0 / min_ratio)));
+    no_lesser_verts = int(ceil(float(no_higher_verts) / min_ratio) + 2);
+
+    bottom_divs = int(ceil(float(ceil_higher + higher_is_down - higher_is_up - 2) / (no_higher_verts - 2)));
+
+    //printf[2] = vec4(left_divs, bottom_divs, top_divs, right_divs);
+    //printf[3] = vec4(7777, 7777, 7777, 7777);
+
+    //left_divs = 0;
+    //top_divs = 0;
+    //right_divs = 0;
+    //bottom_divs = 0;
+
+    if (iLevel == vec2(0)) {left_divs = 0; right_divs = 0; top_divs = 0; bottom_divs = 0;}
+
+    // Number of Mesh Workgroups to emit
+    gl_TaskCountNV = left_divs + top_divs + bottom_divs + right_divs;
+
+}

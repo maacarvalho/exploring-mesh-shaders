@@ -4,10 +4,11 @@ layout(quads, fractional_even_spacing, cw) in;
 uniform sampler2DArray htk;
 uniform sampler2D voronoi;
 
-uniform	mat4 m_pvm, m_view;
+uniform	mat4 m_pvm, m_view, m_model, m_proj, m_godView;
 uniform mat3 m_normal;
 uniform vec3 camPos;
 
+uniform int camMode;
 
 uniform int width;
 uniform int L;
@@ -86,7 +87,9 @@ void main() {
 	p.y = v;
 #endif	
 	
-	
-	gl_Position = m_pvm * p;
+    mat4 god_pvm = m_proj * m_godView * m_model;
+
+    if (camMode == 1) gl_Position = m_pvm * p;
+    else              gl_Position = god_pvm * p;
 }
 
