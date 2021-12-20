@@ -1,0 +1,66 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+ 
+layout(local_size_x=2) in;
+layout(triangles, max_vertices=4, max_primitives=2) out;
+
+perPrimitiveNV out PerPrimitiveData
+{
+  vec4 color;
+} p_out[];   
+
+uniform mat4 m_pvm;
+
+const vec4 vertices[8] = {vec4(-1, -1, -1, 1), 
+                          vec4(-1, -1, 1, 1), 
+                          vec4(1, -1, 1, 1),
+                          vec4(1, -1, -1, 1), 
+                          vec4(-1, 1, -1, 1), 
+                          vec4(-1, 1, 1, 1), 
+                          vec4(1, 1, 1, 1),
+                          vec4(1, 1, -1, 1)};
+
+const vec4 colors[6] = {vec4(1, 0, 1, 1),
+                        vec4(0, 0, 1, 1),
+                        vec4(0, 1, 1, 1), 
+                        vec4(1, 1, 0, 1),
+                        vec4(1, 0, 0, 1), 
+                        vec4(0, 1, 0, 1)};
+
+const uint faces[6][4] = {{3, 2, 1, 0},
+                          {4, 5, 6, 7},
+                          {0, 1, 5, 4},
+                          {0, 4, 7, 3},
+                          {2, 3, 7, 6},
+                          {1, 2, 6, 5}};
+ 
+void main()
+{
+
+  const uint workg_id = gl_WorkGroupID.x;
+  const uint local_id = gl_LocalInvocationID.x;
+  const uint global_id = gl_GlobalInvocationID.x;
+  const uint workg_size = gl_WorkGroupSize.x;
+
+  // Setting the number of primitives of the face
+  gl_PrimitiveCountNV = 2;
+
+  // Distribute the vertices of the face
+  for (int i=0; i < 4 / workg_size; i++) {
+
+    const uint v_ind = min(i * workg_size + local_id, 4);
+
+    gl_MeshVerticesNV[v_ind].gl_Position = m_pvm * vertices[faces[workg_id][v_ind]];
+  
+  }
+
+  // Distribute the primitives
+  gl_PrimitiveIndicesNV[0 + 3 * local_id] = 0;
+  gl_PrimitiveIndicesNV[1 + 3 * local_id] = 1 + local_id % 2;
+  gl_PrimitiveIndicesNV[2 + 3 * local_id] = 2 + local_id % 2;
+
+  // Applying different brightness to the primitives emitted by the same work group
+  float prim_shade = (float(local_id) + 1.0) * 0.4 / float(workg_size);
+  p_out[local_id].color = colors[workg_id] * vec4(prim_shade, prim_shade, prim_shade, 1.0);
+
+}
