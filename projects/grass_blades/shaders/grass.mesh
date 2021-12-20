@@ -1,0 +1,146 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+//layout(triangles, max_vertices=255, max_primitives=153) out;
+layout(triangles, max_vertices=5, max_primitives=3) out;
+
+uniform sampler2D noise;
+uniform mat4 m_pvm;
+uniform float timer;
+
+taskNV in perTaskData {
+  uint globalID;
+};
+
+out Data {
+	float height;
+    float green;
+} DataOut[];
+
+const uint no_blade_verts = 5;
+const uint no_blade_prims = 3;
+const uint blades_per_group = 1;
+
+void main() {
+
+    // Mesh Shader properties
+    uint local_id  = gl_LocalInvocationID.x;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    // How many grass blades (and consequently vertices) each WorkGroup emits
+    const uint no_verts = blades_per_group * no_blade_verts;
+
+    vec4 p[no_verts];
+    float h[no_verts];
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        // Index of current vertex across every grass blade emitted by this WorkGroup
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        // Index of the current grass blade across every grass blade emitted by this WorkGroup
+        int blade_idx = int(idx / no_blade_verts);
+        // Index of the current grass blade across every grass blade
+        int global_blade_idx = int(65000 * globalID + workg_id * blades_per_group + blade_idx);
+        // Index of current vertex within its grass blade
+        int blade_v_idx = int(idx % no_blade_verts);
+
+         //Grass blade position in the world
+        vec4 pos;
+        pos.x = global_blade_idx / 255;
+        pos.z = global_blade_idx % 255;
+        pos.y = 0; pos.w = 1;	
+        pos.xyz = pos.xyz * 0.15;
+    
+        // Blade widths
+        float base_width = 0.1 + texture(noise, pos.xz * vec2(3.14159, 1.17)).x* 0.1;
+        float middle_width = texture(noise, pos.zx * vec2(2.37,3.14159)).x * 0.15;
+        
+        // Blade half height
+        float middle_height = 2 * texture(noise, pos.zx * 3.14159).x;
+
+        // Bend of the grass blade
+        float bend = texture(noise, pos.zx * vec2(1.79,3.14159)).x * 0.15;
+     
+        // World Properties 
+        float c1 = texture(noise, pos.zx * vec2(0.79,14.14159)).x * 2 -1;
+        float s =  sqrt(1-c1*c1);
+        if ( texture(noise, pos.zx * vec2(0.79, 1.17)).x > 0.5)
+            s = -s;
+        mat3 randomRot = mat3(c1, 0, -s, 0,1,0, s,0,c1);
+
+        vec2 windDir = vec2(texture(noise, pos.xz * 0.0025 + timer*0.00001).x, texture(noise, pos.zx * 0.0025 + timer*0.00001).x);
+        float windSpeed = length(windDir);
+        windDir = normalize(windDir);
+        vec2 axisRot = vec2(windDir.y, -windDir.x);
+
+        mat3 rotWind = mat3(windDir.x, 0, -windDir.y, 0,1,0,   axisRot.y, 0, axisRot.x);
+        mat3 rotWindInv = transpose(rotWind);
+        
+        float c = windSpeed * 0.1 + 0.8 ;
+        s = sqrt(1 - c*c);
+        mat3 rotblade = mat3(1,0,0,   0,c,s,   0,-s,c);
+
+        // Current vertex
+        vec3 p; float h;
+        if ( blade_v_idx == 0 ) { 
+
+            p = rotWindInv * rotblade * rotWind * (randomRot * vec3(-base_width*0.5, 0,0) );
+            h = 0.0 ;
+
+        } else if ( blade_v_idx == 1 ) {  
+            
+            p = rotWindInv * rotblade * rotWind * (randomRot * vec3(+base_width*0.5, 0,0) );
+            h = 0.0 ;
+
+        } else if ( blade_v_idx == 2 ) {  
+
+            p = rotWindInv * rotblade * rotWind * (randomRot * vec3(-middle_width*0.5, middle_height,0) );
+            h = middle_height ;
+
+        } else if ( blade_v_idx == 3 ) { 
+
+            p = rotWindInv * rotblade * rotWind * (randomRot * vec3(+middle_width*0.5, middle_height,0) );
+            h = middle_height ;
+
+        } else { 
+
+            p = rotWindInv * rotblade * rotWind * (randomRot * vec3(0, middle_height * 1.75, bend) );
+            h = middle_height * 1.75 ;
+
+        }
+
+        // Emitting vertex
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * (pos + vec4(p, 0)); 
+        //gl_PrimitiveIndicesNV[idx] = idx;
+
+        // Emitting vertex properties
+        DataOut[idx].height = h;
+        DataOut[idx].green = (c1 * 0.6 + 0.4) * h;
+       
+    }
+
+    const uint no_prims = blades_per_group * no_blade_prims;
+
+    for (int i=0; i <= no_prims / workg_len; i++) {
+
+        // Index of current primitive across every grass blade emitted by this WorkGroup
+        int idx = int(min(i * workg_len + local_id, no_prims - 1));
+
+        // Index of the current grass blade across every grass blade emitted by this WorkGroup
+        int blade_idx = int(idx / no_blade_prims);
+        // Index of current primitive within its grass blade
+        int blade_v_idx = int(idx % no_blade_prims);
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = blade_idx * no_blade_verts + blade_v_idx;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = blade_idx * no_blade_verts + ((blade_v_idx + 1) / 2) * 2 + 1;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = blade_idx * no_blade_verts + ( blade_v_idx      / 2) * 2 + 2;
+
+    }
+
+    // No. Primitives
+    gl_PrimitiveCountNV = no_prims;
+    
+}

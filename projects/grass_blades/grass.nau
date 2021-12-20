@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+<project name="Geometry Shader - Pass Through" width=1898 height=1028>
+	<assets>
+		<scenes>
+			<scene name="grassField" >
+				<buffers name="grassField" primitive="POINTS" material="grassField" >
+					<position name="point" fromLibrary="grassLib" />
+				</buffers>
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera">
+				<viewport name="MainViewport" />
+				<POSITION x=-25 y=17.5 z=22 />
+				<VIEW x=1.0 y=-0.5 z=0.0 />
+				<UP x=0 y=1 z=0 />
+				<NEAR value=0.1 />
+				<FAR value=10000 />
+			</camera>
+		</cameras>
+		
+		<lights>
+			<light name="Sun" >
+				<DIRECTION x="1.0" y="-0.5" z="-2" />
+			</light>
+		</lights>
+		
+		<materialLibs>
+			<materialLib filename="grass.mlib"/>
+		</materialLibs>
+		
+	</assets>
+	
+	
+	<pipelines>
+	
+        <pipeline name="Traditional Pipeline" default="true">
+        
+            <pass class="default" name="tradGrassField">
+                <scenes instances = 65000>
+                    <scene name="grassField" />
+                </scenes>
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="grassField" toMaterial="tradGrassField" toLibrary="grassLib" />
+                </materialMaps>
+            </pass>
+
+        </pipeline>
+        <pipeline name="Mesh Pipeline" default="true">
+
+            <pass class="mesh" name="meshGrassField">
+                <camera name="MainCamera" />
+                <viewport name="MainViewport" />
+                <lights>
+                    <light name="Sun" />
+                </lights>
+                <materials>
+                    <material name="meshGrassField" fromLibrary="grassLib" count="1" />
+                </materials>
+            </pass>				
+        </pipeline>
+        
+	</pipelines>
+
+	<interface>
+		<window label="settings" >
+            <pipelineList label="pipeline" />
+		</window>
+	</interface>
+</project>
