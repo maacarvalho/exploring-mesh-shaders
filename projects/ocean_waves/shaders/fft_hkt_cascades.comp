@@ -1,0 +1,163 @@
+
+layout (local_size_x = 8, local_size_y = 8) in;
+
+layout (binding = 0, rgba32f) writeonly uniform image2DArray tilde_hkt; 
+
+uniform sampler2DArray tilde_h0k;
+
+uniform int cascadeCount;
+uniform int width;
+uniform vec4 L;
+uniform float timer;
+uniform int dispersionMode;
+uniform float depth;
+
+
+vec2 mult(vec2 v0, vec2 v1) {
+	return vec2(v0.x * v1.x - v0.y * v1.y,
+				v0.x * v1.y + v0.y * v1.x);
+}
+
+
+vec2 conj(vec2 v){
+	return vec2(v.x, -v.y);
+}
+
+void main(void) {
+
+	vec4 dy, dyi, sx, sxi, sz, szi, dx, dxi, dz, dzi, az, azi, jxx, jxxi, jyy, jyyi, jxy, jxyi;
+
+	float t = (timer+1e7) / 1000;
+	//float t = timer/1000;
+	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+
+	int kx = pos.x >= width/2 ? pos.x - width: pos.x;
+	int kz = pos.y >= width/2 ? pos.y - width: pos.y;
+	float whalf = width / 2.0;
+
+	for (int casc = 0; casc < cascadeCount; casc++) {
+
+		vec2 k = vec2(kx, kz) * 2 * M_PI/L[casc];
+	
+		float magnitude = length(k);
+		if (magnitude < 0.00000000001) magnitude = 0.00000000001;
+		
+		float w = getDispersionW(magnitude, depth, dispersionMode);
+		
+		vec4 spectrum = texelFetch(tilde_h0k, ivec3(gl_GlobalInvocationID.xy, casc),0);
+		int x,y;
+		x = (width - int(gl_GlobalInvocationID.x)) % width;
+		y = (width - int(gl_GlobalInvocationID.y)) % width;
+		vec4 spectrumC = texelFetch(tilde_h0k, ivec3(x,y,casc),0);
+
+		vec2 fourier_amp = spectrum.xy;
+		vec2 fourier_amp_conj = spectrumC.xy;
+		fourier_amp_conj.y = -fourier_amp_conj.y;
+		
+		float cosinus = cos(w*t);
+		float sinus   = sin(w*t);
+		vec2 exp_iwt = vec2(cosinus, sinus);
+		vec2 exp_iwt_inv = vec2(cosinus, -sinus);
+
+		// dy
+		vec2 h_k_t_dy = mult(fourier_amp, exp_iwt) + mult(fourier_amp_conj, exp_iwt_inv);
+		dy[casc] = h_k_t_dy.x;
+		dyi[casc] = h_k_t_dy.y;
+
+		// dx
+		vec2 d = vec2(0.0, -k.x/magnitude);
+		vec2 h_k_t_dx = mult(d, h_k_t_dy);
+		dx[casc] = h_k_t_dx.x;
+		dxi[casc] = h_k_t_dx.y;
+		
+		// dz
+		d = vec2(0.0, -k.y/magnitude);
+		vec2 h_k_t_dz = mult(d, h_k_t_dy);
+		dz[casc] = h_k_t_dz.x;
+		dzi[casc] = h_k_t_dz.y;
+		
+		// sx
+		d = vec2(0.0, k.x);
+		vec2 sxaux = mult(d, h_k_t_dy);
+		sx[casc] = sxaux.x;
+		sxi[casc] = sxaux.y;
+
+		// sz
+		d = vec2(0.0, k.y);
+		vec2 szaux = mult(d, h_k_t_dy);
+		sz[casc] = szaux.x;
+		szi[casc] = szaux.y;
+		
+#if (FOAM == USE_VERTICAL_ACCELERATION)
+
+		vec2 a0k = fourier_amp * w * w;
+		vec2 a0minusk = fourier_amp_conj * w * w;
+		vec2 a = mult(a0k, exp_iwt) + mult(a0minusk, exp_iwt_inv);
+		az[casc] = a.x;
+		azi[casc] = a.y;
+		
+#elif (FOAM == USE_JACOBIAN)
+
+		vec2 daux = vec2(0.0, -k.x);
+		vec2 jAux = mult(daux, h_k_t_dx);
+		jxx[casc] = jAux.x;
+		jxxi[casc] = jAux.y;
+
+		daux = vec2(0.0, -k.y);
+		jAux = mult(daux, h_k_t_dz);
+		jyy[casc] = jAux.x;
+		jyyi[casc] = jAux.y;
+
+		daux = vec2(0.0, -k.x);
+		jAux = mult(daux, h_k_t_dz);
+		jxy[casc] = jAux.x;
+		jxyi[casc] = jAux.y;
+		
+#endif
+
+	}
+
+	vec4 res;
+	res.xy = vec2(dy.x, dyi.x) + vec2(-dyi.y, dy.y);
+	res.zw = vec2(dy.z, dyi.z) + vec2(-dyi.w, dy.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_Y), res);
+
+	res.xy = vec2(dx.x, dxi.x) + vec2(-dxi.y, dx.y);
+	res.zw = vec2(dx.z, dxi.z) + vec2(-dxi.w, dx.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_DX), res);
+
+	res.xy = vec2(dz.x, dzi.x) + vec2(-dzi.y, dz.y);
+	res.zw = vec2(dz.z, dzi.z) + vec2(-dzi.w, dz.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_DZ), res);
+
+	res.xy = vec2(sx.x, sxi.x) + vec2(-sxi.y, sx.y);
+	res.zw = vec2(sx.z, sxi.z) + vec2(-sxi.w, sx.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_SX), res);
+
+	res.xy = vec2(sz.x, szi.x) + vec2(-szi.y, sz.y);
+	res.zw = vec2(sz.z, szi.z) + vec2(-szi.w, sz.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_SZ), res);
+
+#if (FOAM == USE_VERTICAL_ACCELERATION)
+
+	res.xy = vec2(az.x, azi.x) + vec2(-azi.y, az.y);
+	res.zw = vec2(az.z, azi.z) + vec2(-azi.w, az.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_VA_JXY), res);
+		
+#elif (FOAM == USE_JACOBIAN)
+
+	res.xy = vec2(jxy.x, jxyi.x) + vec2(-jxyi.y, jxy.y);
+	res.zw = vec2(jxy.z, jxyi.z) + vec2(-jxyi.w, jxy.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_VA_JXY), res);
+
+	res.xy = vec2(jxx.x, jxxi.x) + vec2(-jxxi.y, jxx.y);
+	res.zw = vec2(jxx.z, jxxi.z) + vec2(-jxxi.w, jxx.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_JXX), res);
+
+	res.xy = vec2(jyy.x, jyyi.x) + vec2(-jyyi.y, jyy.y);
+	res.zw = vec2(jyy.z, jyyi.z) + vec2(-jyyi.w, jyy.w);
+	imageStore(tilde_hkt, ivec3(gl_GlobalInvocationID.xy, LAYER_JYY), res);
+
+#endif
+	
+}

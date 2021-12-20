@@ -1,0 +1,168 @@
+layout(local_size_x=32) in;
+layout(triangles, max_vertices=256, max_primitives=450) out;
+//layout(points, max_vertices=256, max_primitives=256) out;
+
+uniform sampler2DArray htk;
+uniform sampler2D voronoi;
+
+uniform int camMode;
+uniform	mat4 m_pvm, m_view, m_model, m_proj, m_godView;
+uniform mat3 m_normal;
+uniform vec3 camPos;
+
+
+uniform int width;
+uniform int L;
+uniform float windSpeed;
+uniform float choppyFactor;
+uniform float gridSpacing = 5;
+
+uniform float A = 1, Q = 0.3, w = 0.4, phi = 1;
+uniform vec2 D = vec2(1,1);
+uniform float timer;
+uniform vec4 l_dir;
+
+taskNV in perTaskData {
+    vec4 originV;
+    vec2 iLevel;
+    uint col_divs;
+    uint row_divs;
+};
+
+out Data {
+	vec3 normal;
+	vec3 l_dir;
+	vec3 pos;
+	vec3 world_norm;
+	vec2 texCoord;
+} v_out[];
+
+// layout(std430, binding = 1) writeonly buffer debugBuffer
+// {
+//     vec4 printf[];
+// };
+
+
+float height(float u, float v) {
+
+	return 1; // this should be the patch maximum height
+}
+
+void main()
+{
+    //printf[gl_GlobalInvocationID.x] = divs;
+    //printf[taskID] = vec4(3,3,3,3);
+    //printf[gl_LocalInvocationID.x] = originV;
+    //printf[taskID] = originV;
+    //printf[taskID] = vec4(2,2,2,2);
+
+    // Inputs
+    uint local_id  = gl_LocalInvocationID.x;
+    uint global_id  = gl_GlobalInvocationID.x;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    // Tessellation Levels
+    int ceil_cols = int(ceil(iLevel.x));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(iLevel.y));
+    ceil_rows += ceil_rows % 2;
+
+    int workg_u_id = int(workg_id % col_divs);
+    int workg_v_id = int(workg_id / col_divs);
+
+    int min_u_idx = int(max( 1.0, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id) / float(col_divs)))));
+    int max_u_idx = int(min( ceil_cols - 1, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id + 1) / float(col_divs)))));
+    int min_v_idx = int(max( 1.0, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id) / float(row_divs)))));
+    int max_v_idx = int(min( ceil_rows - 1, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id + 1) / float(row_divs)))));
+
+    int no_cols = max_u_idx - min_u_idx;
+    int no_lines = max_v_idx - min_v_idx;
+    int no_verts = (no_cols + 1) * (no_lines + 1);
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        int u_idx = min_u_idx + idx % int(no_cols + 1);
+        int v_idx = min_v_idx + idx / int(no_cols + 1);
+
+        //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols - 1) * 1 + int(u_idx == 1) * 1;
+        //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows - 1) * 1 + int(v_idx == 1) * 1;
+        //uint prev_u_idx = max(1, min(ceil_cols - 3, int(round(mix(0, ceil_cols - 2, float(u_idx) / float(ceil_cols))))));
+        //uint prev_v_idx = max(1, min(ceil_rows - 3, int(round(mix(0, ceil_rows - 2, float(v_idx) / float(ceil_rows))))));
+       
+        uint dup_prev_u_idx = ceil_cols - 2 - int(pow(2, floor(log2(ceil_cols - 2)))) + 1;
+        uint dup_prev_v_idx = ceil_rows - 2 - int(pow(2, floor(log2(ceil_rows - 2)))) + 1;
+
+        uint prev_u_idx = max(1, min(ceil_cols - 3, u_idx -
+                    int(u_idx > dup_prev_u_idx) - int(u_idx >= ceil_cols - dup_prev_u_idx)));
+        uint prev_v_idx = max(1, min(ceil_rows - 3, v_idx - 
+                    int(v_idx > dup_prev_v_idx) - int(v_idx >= ceil_rows - dup_prev_v_idx)));
+
+        float u = float(u_idx) / float(ceil_cols);
+        float prev_u = float(prev_u_idx) / float(max(1, ceil_cols - 2));
+        float v = float(v_idx) / float(ceil_rows);
+        float prev_v = float(prev_v_idx) / float(max(1, ceil_rows - 2));
+
+        //float inter_u = mix (prev_u, u, 1 - int(iLevel.x >= 2) * 0.5 * (ceil_cols - iLevel.x));
+        //float inter_v = mix (prev_v, v, 1 - int(iLevel.y >= 2) * 0.5 * (ceil_rows - iLevel.y));
+        float inter_u = mix (prev_u, u, 1 - int(iLevel.x >= 2) * 0.5 * (ceil_cols - iLevel.x));
+        float inter_v = mix (prev_v, v, 1 - int(iLevel.y >= 2) * 0.5 * (ceil_rows - iLevel.y));
+
+        // Computing vertex position
+        inter_u = 1 - inter_u;
+        vec4 inter_pos = originV + vec4(inter_u * gridSpacing, height(inter_u, inter_v), inter_v * gridSpacing, 0);
+        //vec4 inter_pos = mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        //inter_pos.y = height(inter_u, inter_v);
+        
+        float yAtCam = texture(htk, vec3(camPos.xz/L, LAYER_Y_JXY_JXX_JYY)).r;
+        vec2 tc = inter_pos.xz / L;
+
+        vec4 dy = texture(htk, vec3(tc, LAYER_Y_JXY_JXX_JYY));
+        vec4 ds = texture(htk, vec3(tc, LAYER_DX_DZ_SX_SZ));
+
+        // wind based chopiness
+        inter_pos.xz =  inter_pos.xz - ds.xy * choppyFactor;//( 1+choppyFactor/(1+(exp(-windSpeed+20)/5)));
+        inter_pos.y = dy.r;// + (camPos.y - yAtCam) -3;
+        
+        // texture coordinates after vertex displacement
+        vec2 slope = ds.zw;
+        vec3 normal = normalize(vec3( -slope.x, 1,  -slope.y));
+
+        v_out[idx].l_dir = vec3(normalize(- (m_view * l_dir)));
+        v_out[idx].world_norm = normal;
+        v_out[idx].normal = normalize(m_normal * normal);
+        v_out[idx].texCoord = tc;
+        
+        v_out[idx].pos = inter_pos.xyz;
+
+        mat4 god_pvm = m_proj * m_godView * m_model;
+
+        if (camMode == 1) gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+        else              gl_MeshVerticesNV[idx].gl_Position = god_pvm * inter_pos;
+
+    }
+
+    int no_prims = (no_cols) * (no_lines) * 2;
+
+    for (int i=0; i <= no_prims / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_prims - 1));
+
+        int u_idx = (idx / 2) % (no_cols);
+        int v_idx = (idx / 2) / (no_cols);
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = v_idx * (no_cols + 1) + u_idx;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = (v_idx + 1 * idx % 2) * (no_cols + 1) + u_idx + 1;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = (v_idx + 1) * (no_cols + 1) + u_idx + 1 * (1 - idx % 2);
+
+        //p_out[idx].mesh_id = workg_id;
+        //p_out[idx].divs = divs * divs;
+
+    }
+
+    // No. Primitives
+    gl_PrimitiveCountNV = no_prims;
+
+}
