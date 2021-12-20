@@ -491,6 +491,8 @@ do
         sleep 1
     done
 
+    sleep 30s
+
 done"
 
 }
@@ -510,8 +512,15 @@ reset_proj () {
 
 }
 
+#####################################################################################################################
+#####################################################################################################################
+######################################                                  #############################################
+######################################              Main                #############################################
+######################################                                  #############################################
+#####################################################################################################################
+#####################################################################################################################
 
-## Main
+
 if [ $# -ne 1 ] 
 then
 
@@ -520,21 +529,15 @@ then
 
 fi
 
-source proj_helper.sh
+source lib/nau_project_helper.sh
 
 filepath=$1
 dirname=$(dirname $filepath)
 basename=$(basename $filepath)
 
-max_vertices=( 256 128 64 32 16 8 )
-max_primitives=( 512 256 128 64 32 16 8 )
-local_size=( 32 16 8 )
-#max_vertices=( 256 )
-#max_primitives=( 512 )
-#local_size=( 32 )
-#max_vertices=()
-#max_primitives=()
-#local_size=()
+max_vertices=( 128 )
+max_primitives=( 44 )
+local_size=( 32 )
 
 declare vertices_count
 declare normals_count
@@ -558,11 +561,14 @@ for maxv in "${max_vertices[@]}"
 do
     for maxp in "${max_primitives[@]}" 
     do
-        
+       
+        echo "## $maxv Vertices & $maxp Primitives"
+
         # Folder for the buffers of this specific confirguration
         folder=$(printf "buffers/%03d_%03d" $maxv $maxp)
         [[ ! -d $dirname/$folder ]] && mkdir $dirname/$folder
 
+        echo "# Converting .obj to buffers"
         # Converting .obj to buffers if necessary
         if [[ ! -f "$dirname/$folder/$basename.vertices.buf" ]]
         then
@@ -575,9 +581,11 @@ do
 
         fi
 
+        echo "# Measuring buffers"
         # Getting information on the materials of the mesh
         measure_buffers "$dirname/$folder/$basename"
 
+        echo "# Creating shaders"
         # Creating mesh shader
         for locs in "${local_size[@]}"
         do
@@ -588,6 +596,7 @@ do
             [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"
         done
 
+        echo "# Creating project and material lib"
         # Configure mesh pipelines
         configure_mesh_pipelines
         
@@ -602,13 +611,15 @@ done
 
 # Creating remainder shaders
 [[ ! -f "$dirname/shaders/objTrad.vert" ]] && create_vert_shader > "$dirname/shaders/objTrad.vert"
-[[ ! -f "$dirname/shaders/objTex.frag" ]] && [[ ! -z "$texcoords_count" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
+[[ ! -f "$dirname/shaders/objTex.frag" ]] && create_tex_frag_shader > "$dirname/shaders/objTex.frag"
 [[ ! -f "$dirname/shaders/objDiffuse.frag" ]] && create_diffuse_frag_shader > "$dirname/shaders/objDiffuse.frag"
 
 # Creating project for the traditional pipeline
 locs=0
 maxv=0
 maxp=0
+
+echo "## $maxv Vertices & $maxp Primitives"
 
 # Creating lua script for performance measuring
 [[ ! -f "$dirname/scripts/times.$locs.$maxv.$maxp.lua" ]] && create_timer_lua_script > "$dirname/scripts/times.$locs.$maxv.$maxp.lua"

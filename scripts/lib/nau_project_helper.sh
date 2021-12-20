@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!ausr/bin/bash
 
 ## Creates a mesh shader with different configurations
 # Arguments:
@@ -320,14 +320,36 @@ end
 ## Creates a project 
 create_proj () {
     
-#<project name=\"Obj Renderer\">
-#<project name=\"Obj Renderer\" width=1280 height=720>
-                #<POSITION x="-20" y="450" z="-25" />
-                #<VIEW x="1.0" y="0.1" z="0" />
-                #<POSITION x="8" y="8" z="4" />
-                #<VIEW x="1.0" y="-1.0" z="-0.5" />
-                #<POSITION x="-2.75" y="11" z="-5" />
-                #<VIEW x="0.75" y="0.0" z="0.75" />
+## Dragon Camera
+                #<NEAR value= 0.0001/>
+                #<FAR value= 10/>
+                #<POSITION x=0.15 y=0.07 z=0 />
+                #<LOOK_AT_POINT x=0 y=0.07 z=0 />
+## San Miguel Camera
+                #<NEAR value= 0.001/>
+                #<FAR value= 1000/>
+                #<POSITION x=12 y=2 z=5 />
+                #<LOOK_AT_POINT x=11.5 y=2 z=4 />
+## Powerplant Camera
+                #<NEAR value= 0.01/>
+                #<FAR value= 10000/>
+                #<POSITION x=-100 y=100 z=100 />
+                #<LOOK_AT_POINT x=0 y=0 z=0 />
+## Rungholt Camera
+                #<NEAR value= 0.01/>
+                #<FAR value= 10000/>
+                #<POSITION x=-100 y=65 z=-75 />
+                #<VIEW x=-0.75 y=-0.75 z=0 />
+## Sponza Camera
+                #<NEAR value= 1/>
+                #<FAR value= 10000000/>
+                #<POSITION x=300 y=300 z=0 />
+                #<VIEW x=-1 y=0 z=0 />
+## Lucy Camera
+                #<NEAR value= 0.0001/>
+                #<FAR value= 100/>
+                #<POSITION x=1 y=12 z=-4 />
+                #<VIEW x=-0.5 y=0.4 z=1 />
     echo "<?xml version=\"1.0\" ?>
 <project name=\"Obj Renderer\">
     <assets>
@@ -349,10 +371,10 @@ create_proj () {
                 <viewport name="objViewport" />
                 <TYPE value="PERSPECTIVE"/>
                 <FOV value = "90"/>
-                <NEAR value= "0.01"/>
-                <FAR value= "10000"/>
-                <POSITION x="0" y="500" z="0" />
-                <VIEW x="-0.001" y="-1.0" z="0.00" />
+                <NEAR value= 0.0001/>
+                <FAR value= 100/>
+                <POSITION x=1 y=12 z=-4 />
+                <VIEW x=-0.5 y=0.4 z=1 />
             </camera>
         </cameras>
         

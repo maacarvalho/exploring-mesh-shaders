@@ -22,22 +22,8 @@ MTL_TYPES = {newmtl = true, Kd = true, map_Kd = true}
 FD_V, FD_VT, FD_VN, FD_I, FD_P, FD_M, FD_MT = nil, nil, nil, nil, nil, nil, nil
 
 -- Meshlet properties
-CACHE_SIZE                = 98304
-N_WARPS                   = 4
-MAX_MESHLET_SIZE          = CACHE_SIZE / N_WARPS
---MAX_MESHLET_SIZE          = 168
 MAX_MESHLET_PRIMITIVES    = 32
 MAX_MESHLET_VERTICES      = 32
-
--- Size of a vertex
-GEOMETRY_SIZE             = 0
-NORMALS_SIZE              = 0
-TEXCOORDS_SIZE            = 0
-
-MESHLET_SIZE              = 4
-
--- Size of data types
-FLOAT_SIZE = 4
 
 -- Materials
 MATERIALS = {}
@@ -46,23 +32,18 @@ CUR_MATERIAL = ""
 
 -- Current Meshlet properties by Material
 MESHLETS = {}
-MESHLETS[CUR_MATERIAL] = {}
-MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
-MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
-MESHLETS[CUR_MATERIAL].INDICES_OFFSET = 0
-MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
-MESHLETS[CUR_MATERIAL].PRIMITIVES_OFFSET = 0
-MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = 0
+--MESHLETS[CUR_MATERIAL] = {}
+--MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
+--MESHLETS[CUR_MATERIAL].INDICES_OFFSET = 0
+--MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
+--MESHLETS[CUR_MATERIAL].PRIMITIVES_OFFSET = 0
+--MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = 0
 
 -- Handles adding the primitive to a meshlet
 write_primitive = function (prim)
 
-    -- Updating meshlet size to check if it doesn't go above the expected
-    local updated_meshlet_size = MESHLETS[CUR_MATERIAL].SIZE
     local updated_meshlet_indices_count = MESHLETS[CUR_MATERIAL].INDICES_COUNT
     local updated_meshlet_primitives_count = MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT
-
-    updated_meshlet_size = updated_meshlet_size + 3 * FLOAT_SIZE -- A primitive is composed of 3 indices
 
     -- Checking how each vertex increments the size of the meshlet
     for _, v in ipairs(prim) do
@@ -73,9 +54,6 @@ write_primitive = function (prim)
 
         if MESHLETS[CUR_MATERIAL].INDICES_DICT[v_key] == nil then
             -- Updating meshlet size accordingly
-            updated_meshlet_size = updated_meshlet_size +
-                (GEOMETRY_SIZE + NORMALS_SIZE + TEXCOORDS_SIZE) * FLOAT_SIZE -- Vertex Data
-            updated_meshlet_size = updated_meshlet_size + 3 * FLOAT_SIZE -- Indices
             updated_meshlet_indices_count = updated_meshlet_indices_count + 1
 
         end
@@ -84,9 +62,8 @@ write_primitive = function (prim)
 
     end
 
-    -- Checking if adding the primitive to the meshlet makes it's size be above the batch size
-    if updated_meshlet_size > MAX_MESHLET_SIZE or -- Can't go over cache size
-        updated_meshlet_indices_count > MAX_MESHLET_VERTICES or -- Can't output over the max_vertices
+    -- Checking if adding the primitive to the meshlet makes it's size be above the vertex and primitive maximums
+    if updated_meshlet_indices_count > MAX_MESHLET_VERTICES or -- Can't output over the max_vertices
         updated_meshlet_primitives_count / 3 > MAX_MESHLET_PRIMITIVES then -- Can't output over the max_primitives
 
         -- Writing meshlet information & adding lines to indices and primitives
@@ -98,7 +75,6 @@ write_primitive = function (prim)
         end
 
         -- Resetting current meshlet info
-        MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
         MESHLETS[CUR_MATERIAL].INDICES_OFFSET = MESHLETS[CUR_MATERIAL].INDICES_OFFSET + MESHLETS[CUR_MATERIAL].INDICES_COUNT
         MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
         MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
@@ -122,7 +98,7 @@ write_primitive = function (prim)
                 MESHLETS[CUR_MATERIAL].INDICES_COUNT = MESHLETS[CUR_MATERIAL].INDICES_COUNT + 1
 
                 -- Writing index
-                if FD_I == nil then FD_I = io.open(OBJ_PATH..I_EXT, "w+") end
+                if FD_I == nil then FD_I = io.open(OBJ_PATH..I_EXT, "a") end
                 FD_I:write((v.vi - 1).." ")
                 if v.vni and CONVERT_NORMALS then FD_I:write((v.vni - 1).." ") else FD_I:write((-1).." ") end
                 if v.vti and CONVERT_MATERIALS then FD_I:write((v.vti - 1).." ") else FD_I:write((-1).." ") end
@@ -132,13 +108,10 @@ write_primitive = function (prim)
             MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT + 1
 
             -- Writing primitive
-            if FD_P == nil then FD_P = io.open(OBJ_PATH..P_EXT, "w+") end
+            if FD_P == nil then FD_P = io.open(OBJ_PATH..P_EXT, "a") end
             FD_P:write(MESHLETS[CUR_MATERIAL].INDICES_DICT[v_key].." ")
 
         end
-
-        -- Updating meshlet size
-        MESHLETS[CUR_MATERIAL].SIZE = updated_meshlet_size
 
     end
 
@@ -148,6 +121,8 @@ end
 finish_meshlets = function ()
 
     for m, p in pairs(MESHLETS) do
+
+        --print("Material: {"..m.."}")
 
         if m ~= "" or CUR_MATERIAL ~= "" then
 
@@ -209,7 +184,6 @@ convertObj = function ()
 
         -- Starting Meshlet information for current material
         MESHLETS[CUR_MATERIAL] = {}
-        MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
         MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
         MESHLETS[CUR_MATERIAL].INDICES_OFFSET = 0
         MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
@@ -217,7 +191,7 @@ convertObj = function ()
         MESHLETS[CUR_MATERIAL].PRIMITIVES_COUNT = 0
 
         -- Writing material to file
-        FD_MT = io.open(OBJ_PATH..MT_EXT, "w+")
+        FD_MT = io.open(OBJ_PATH..MT_EXT, "a")
         FD_MT:write(string.format("%03d", m.idx).." " ..CUR_MATERIAL.." "..m.Kd.r.." "..m.Kd.g.." "..m.Kd.b)
         FD_MT:write("\n")
 
@@ -229,10 +203,8 @@ convertObj = function ()
 
         if type == "v" then
 
-            -- Setting the size the geometry takes
-            if GEOMETRY_SIZE == 0 then GEOMETRY_SIZE = 4 end
             -- Checking if file is open
-            if FD_V == nil then FD_V = io.open(OBJ_PATH..V_EXT, "w+") end
+            if FD_V == nil then FD_V = io.open(OBJ_PATH..V_EXT, "a") end
             -- Creating string
             local v_str = parsed_line['x'].." "..parsed_line['y'].." "..parsed_line['z'].." "..parsed_line['w']
             -- Writing string to file
@@ -240,10 +212,8 @@ convertObj = function ()
 
         elseif type == "vt" and CONVERT_MATERIALS then
 
-            -- Setting the size the texture coordinates take
-            if TEXCOORDS_SIZE == 0 then TEXCOORDS_SIZE = 4 end
             -- Checking if file is open
-            if FD_VT == nil then FD_VT = io.open(OBJ_PATH..VT_EXT, "w+") end
+            if FD_VT == nil then FD_VT = io.open(OBJ_PATH..VT_EXT, "a") end
             -- Creating string
             local vt_str = parsed_line['u'].." "..parsed_line['v'].." "..parsed_line['w']
             -- Writing string to file
@@ -251,10 +221,8 @@ convertObj = function ()
 
         elseif type == "vn" and CONVERT_NORMALS then
 
-            -- Setting the size the geometry takes
-            if NORMALS_SIZE == 0 then NORMALS_SIZE = 3 end
             -- Checking if file is open
-            if FD_VN == nil then FD_VN = io.open(OBJ_PATH..VN_EXT, "w+") end
+            if FD_VN == nil then FD_VN = io.open(OBJ_PATH..VN_EXT, "a") end
             -- Creating string
             local vn_str = parsed_line['x'].." "..parsed_line['y'].." "..parsed_line['z']
             -- Writing string to file
@@ -302,7 +270,7 @@ convertObj = function ()
 
             end
             -- Opening .materials file
-            FD_MT = io.open(OBJ_PATH..MT_EXT, "w+")
+            FD_MT = io.open(OBJ_PATH..MT_EXT, "a")
 
         elseif type == "usemtl" and CONVERT_MATERIALS then
 
@@ -327,7 +295,6 @@ convertObj = function ()
 
                 -- Starting Meshlet information for current material
                 MESHLETS[CUR_MATERIAL] = {}
-                MESHLETS[CUR_MATERIAL].SIZE = MESHLET_SIZE * FLOAT_SIZE
                 MESHLETS[CUR_MATERIAL].INDICES_DICT = {}
                 MESHLETS[CUR_MATERIAL].INDICES_OFFSET = 0
                 MESHLETS[CUR_MATERIAL].INDICES_COUNT = 0
