@@ -1,9 +1,0 @@
-# IDEs
-.vscode
-glslang
-imgui.ini
-mesh_shader_samples_direct3D_12
-meshconvert.exe
-vertex_batch_optimization
-temp.txt
-assets
