@@ -1,0 +1,54 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+ 
+layout(local_size_x = 1) in;
+
+taskNV out perTaskData {
+  uint col_divs, row_divs;
+};
+
+uniform float icols;
+uniform float irows;
+
+void main() {
+
+    // Tessellation Levels
+    int ceil_cols = int(ceil(icols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(irows));
+    ceil_rows += ceil_rows % 2;
+
+    // Number of Vertices of the Quad
+    int no_verts = (ceil_cols - 1) * (ceil_rows - 1);
+
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 32;
+    //int mesh_max_verts = 16;
+    
+    // Number of Mesh Shader WorkGroups to launch
+    //uint divs = uint(ceil(max(ceil_cols, ceil_rows) / floor(sqrt(mesh_max_verts) - 1)));
+
+    //float bn = sqrt ( pow((float(ceil_cols) + float(ceil_rows)), 2.0) - 4.0 * float(ceil_cols) * float(ceil_rows) * float(1 - mesh_max_verts) );
+    //float n = (- float(ceil_cols) - float(ceil_rows) - bn) / (2.0 * float(1 - mesh_max_verts));
+
+    //float mesh_cols = ceil(max ( 1.0, min ( floor(mesh_max_verts * 0.5) - 1, ceil_cols / ceil(n) )));
+    //float mesh_rows = ceil(max ( 1.0, min ( floor(mesh_max_verts * 0.5) - 1, ceil_rows / ceil(n) )));
+   
+    //mesh_cols -= int((mesh_cols + 1) * (mesh_rows + 1) > 256) * int(mesh_cols >= mesh_rows);
+    //mesh_rows -= int((mesh_cols + 1) * (mesh_rows + 1) > 256);
+    //mesh_cols -= int((mesh_cols + 1) * (mesh_rows + 1) > 256);
+    
+    //col_divs = uint(ceil(ceil_cols / mesh_cols));
+    //row_divs = uint(ceil(ceil_rows / mesh_rows)); 
+    
+    //col_divs = divs; row_divs = divs;
+
+    float max_mesh_tess = floor(sqrt(mesh_max_verts - 1));
+    
+    col_divs = uint(ceil(ceil_cols / max_mesh_tess));
+    row_divs = uint(ceil(ceil_rows / max_mesh_tess));
+
+    //divs = 1;
+    gl_TaskCountNV = col_divs * row_divs;
+
+}

@@ -1,0 +1,258 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+layout(triangles, max_vertices=64, max_primitives=98) out;
+//layout(points, max_vertices=256, max_primitives=512) out;
+
+taskNV in perTaskData {
+  uint col_divs, row_divs;
+};
+
+//perprimitiveNV out PerPrimitiveData 
+//{
+  //uint divs;
+  //uint mesh_id;
+//} p_out[]; 
+
+out perVertexData
+{
+    vec2 texCoordTE;
+} v_out[];
+
+uniform mat4 m_pvm;
+
+uniform vec3 disp;
+
+uniform float irows;
+uniform float icols;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+    float vertices[];
+};
+
+uniform float height_noise_frequency   = 0.1;
+uniform float height_noise_amplitude   = 1.0;
+uniform float height_noise_power       = 3.5;
+uniform int height_noise_octaves       = 50;
+uniform float height_noise_persistance = 0.5;
+uniform float height_noise_lacunarity  = 2.0;
+
+float rand(vec2 co) { return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+
+////////////////////////////////////////////////////////////////////////////
+//                                                                        //
+// Description : Array and textureless GLSL 2D simplex noise function.    //
+//      Author : Ian McEwan, Ashima Arts.                                 //
+//  Maintainer : stegu                                                    //
+//     Lastmod : 20110822 (ijm)                                           //
+//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.     //
+//               Distributed under the MIT License. See LICENSE file.     //
+//               https://github.com/ashima/webgl-noise                    //
+//               https://github.com/stegu/webgl-noise                     //
+//                                                                        //
+//                                                                        //
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+
+vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+float snoise(vec2 v) {
+  
+  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                     -0.577350269189626,  // -1.0 + 2.0 * C.x
+                      0.024390243902439); // 1.0 / 41.0
+  // First corner
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+
+  // Other corners
+  vec2 i1;
+  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+  //i1.y = 1.0 - i1.x;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  // x0 = x0 - 0.0 + 0.0 * C.xx ;
+  // x1 = x0 - i1 + 1.0 * C.xx ;
+  // x2 = x0 - 1.0 + 2.0 * C.xx ;
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+
+  // Permutations
+  i = mod289(i); // Avoid truncation effects in permutation
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+		+ i.x + vec3(0.0, i1.x, 1.0 ));
+
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+
+  // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+  // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+
+  // Normalise gradients implicitly by scaling m
+  // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+  // Compute final noise value at P
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+
+}
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+
+float max_height () {
+
+  float amp = height_noise_amplitude, height = 0;
+	
+	for(int i = 0; i < height_noise_octaves; i++, amp *= height_noise_persistance) {
+		
+    height += 1.0 * amp;
+	
+  }
+
+  return height;
+
+}
+
+float height (vec2 position) {
+
+  float freq = height_noise_frequency, amp = height_noise_amplitude, height = 0, max_height = max_height();
+	
+  // Calculating height using snoise ( height -> [-max_height, max_heigth] )
+	for(int i = 0; i < height_noise_octaves; i++, amp *= height_noise_persistance, freq *= height_noise_lacunarity) {
+		
+    height += snoise(freq * position) * amp;
+	
+  }
+
+  // Height -> [0,1]
+  height = height / max_height * 0.5 + 0.5;
+
+  // Applying the power (height -> [0, 1])
+  height = pow(height, height_noise_power);
+
+  // Height -> [-1, max_height - 1]
+  return height * 2 * max_height - 1;
+  
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+void main()
+{
+    // Inputs
+    uint local_id  = gl_LocalInvocationID.x;
+    uint global_id  = gl_GlobalInvocationID.x;
+    uint workg_id = gl_WorkGroupID.x;
+    uint workg_len = gl_WorkGroupSize.x;
+
+    // Quad vertices
+    vec4 v0 = vec4(disp + vec3 (vertices[0 * 3 + 1], 
+                                vertices[0 * 3 + 2], 
+                                vertices[0 * 3 + 3]), 1.0);
+    vec4 v1 = vec4(disp + vec3 (vertices[1 * 3 + 1], 
+                                vertices[1 * 3 + 2], 
+                                vertices[1 * 3 + 3]), 1.0);
+    vec4 v2 = vec4(disp + vec3 (vertices[2 * 3 + 1], 
+                                vertices[2 * 3 + 2], 
+                                vertices[2 * 3 + 3]), 1.0);
+    vec4 v3 = vec4(disp + vec3 (vertices[3 * 3 + 1], 
+                                vertices[3 * 3 + 2], 
+                                vertices[3 * 3 + 3]), 1.0);
+
+    // Tessellation Levels
+    int ceil_cols = int(ceil(icols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(irows));
+    ceil_rows += ceil_rows % 2;
+
+    int workg_u_id = int(workg_id % col_divs);
+    int workg_v_id = int(workg_id / col_divs);
+
+    int min_u_idx = int(max( 1.0, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id) / float(col_divs)))));
+    int max_u_idx = int(min( ceil_cols - 1, round( mix( 1.0, float(ceil_cols - 1), float(workg_u_id + 1) / float(col_divs)))));
+    int min_v_idx = int(max( 1.0, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id) / float(row_divs)))));
+    int max_v_idx = int(min( ceil_rows - 1, round( mix( 1.0, float(ceil_rows - 1), float(workg_v_id + 1) / float(row_divs)))));
+
+    int no_cols = max_u_idx - min_u_idx;
+    int no_lines = max_v_idx - min_v_idx;
+    int no_verts = (no_cols + 1) * (no_lines + 1);
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        int u_idx = min_u_idx + idx % int(no_cols + 1);
+        int v_idx = min_v_idx + idx / int(no_cols + 1);
+
+        //uint prev_u_idx = u_idx - 1 - int(u_idx == ceil_cols - 1) * 1 + int(u_idx == 1) * 1;
+        //uint prev_v_idx = v_idx - 1 - int(v_idx == ceil_rows - 1) * 1 + int(v_idx == 1) * 1;
+        //uint prev_u_idx = max(1, min(ceil_cols - 3, int(round(mix(0, ceil_cols - 2, float(u_idx) / float(ceil_cols))))));
+        //uint prev_v_idx = max(1, min(ceil_rows - 3, int(round(mix(0, ceil_rows - 2, float(v_idx) / float(ceil_rows))))));
+       
+        uint dup_prev_u_idx = ceil_cols - 2 - int(pow(2, floor(log2(ceil_cols - 2)))) + 1;
+        uint dup_prev_v_idx = ceil_rows - 2 - int(pow(2, floor(log2(ceil_rows - 2)))) + 1;
+
+        uint prev_u_idx = max(1, min(ceil_cols - 3, u_idx -
+                    int(u_idx > dup_prev_u_idx) - int(u_idx >= ceil_cols - dup_prev_u_idx)));
+        uint prev_v_idx = max(1, min(ceil_rows - 3, v_idx - 
+                    int(v_idx > dup_prev_v_idx) - int(v_idx >= ceil_rows - dup_prev_v_idx)));
+
+        float u = float(u_idx) / float(ceil_cols);
+        float prev_u = float(prev_u_idx) / float(max(1, ceil_cols - 2));
+        float v = float(v_idx) / float(ceil_rows);
+        float prev_v = float(prev_v_idx) / float(max(1, ceil_rows - 2));
+
+        //float inter_u = mix (prev_u, u, 1 - int(icols >= 2) * 0.5 * (ceil_cols - icols));
+        //float inter_v = mix (prev_v, v, 1 - int(irows >= 2) * 0.5 * (ceil_rows - irows));
+        float inter_u = mix (prev_u, u, 1 - int(icols >= 2) * 0.5 * (ceil_cols - icols));
+        float inter_v = mix (prev_v, v, 1 - int(irows >= 2) * 0.5 * (ceil_rows - irows));
+
+        vec4 inter_pos = mix(mix(v0, v1, inter_u), mix(v3, v2, inter_u), inter_v);
+        //inter_pos.z = 0.25 * height(vec2(inter_u, inter_v));
+
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, u), mix(v3, v2, u), v);
+        //gl_MeshVerticesNV[idx].gl_Position = m_pvm * mix(mix(v0, v1, prev_u), mix(v3, v2, prev_u), prev_v);
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+        //gl_PrimitiveIndicesNV[idx] = idx;
+
+        v_out[idx].texCoordTE = vec2(inter_u, inter_v);
+        //p_out[idx].mesh_id = workg_id;
+        //p_out[idx].divs = divs * divs;
+    }
+
+    int no_prims = (no_cols) * (no_lines) * 2;
+
+    for (int i=0; i <= no_prims / workg_len; i++) {
+
+        int idx = int(min(i * workg_len + local_id, no_prims - 1));
+
+        int u_idx = (idx / 2) % (no_cols);
+        int v_idx = (idx / 2) / (no_cols);
+
+        gl_PrimitiveIndicesNV[idx * 3 + 0] = v_idx * (no_cols + 1) + u_idx;
+        gl_PrimitiveIndicesNV[idx * 3 + 1] = (v_idx + 1 * idx % 2) * (no_cols + 1) + u_idx + 1;
+        gl_PrimitiveIndicesNV[idx * 3 + 2] = (v_idx + 1) * (no_cols + 1) + u_idx + 1 * (1 - idx % 2);
+
+        //p_out[idx].mesh_id = workg_id;
+        //p_out[idx].divs = divs * divs;
+
+    }
+
+    // No. Primitives
+    gl_PrimitiveCountNV = no_prims;
+
+}

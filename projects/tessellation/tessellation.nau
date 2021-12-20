@@ -1,0 +1,107 @@
+<?xml version="1.0" ?>
+<project name="Tessellation Partition" width="1024" height="512">
+	<assets>
+		<attributes>
+			<attribute name="level" data="FLOAT" type="RENDERER" value=29.999 />
+			<attribute name="icols" data="FLOAT" type="RENDERER"   value=64 />
+			<attribute name="irows" data="FLOAT" type="RENDERER"   value=64 />
+            <attribute name="olevel0" data="FLOAT" type="RENDERER" value=64 />
+            <attribute name="olevel1" data="FLOAT" type="RENDERER" value=64 />
+            <attribute name="olevel2" data="FLOAT" type="RENDERER" value=64 />
+            <attribute name="olevel3" data="FLOAT" type="RENDERER" value=64 />
+            <attribute name="quadDisp" data="VEC3" type="RENDERER" x="1.5" y=0 z=0 />
+		</attributes>
+		
+		<scenes>
+			<scene name="Square" type="OctreeByMat">
+				<file  name="models/square.patch"/>
+				<TRANSLATE x = -1.5 y = 0 z = 0 />
+			</scene>
+		</scenes>
+		
+		<viewports>
+			<viewport name="MainViewport">
+				<CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+			</viewport>
+		</viewports>
+		
+		<cameras>
+			<camera name="MainCamera" >
+				<viewport name="MainViewport" />
+				<projection TYPE="PERSPECTIVE" FOV=60.0 NEAR=0.01 FAR=100.0 />
+				<POSITION x=0 y=0.0 z=2.25 />
+				<VIEW x=0.0 y=0.0 z=-1.0 />
+				<UP x=0 y=1 z=0 />
+			</camera>
+		</cameras>
+		
+		<materialLibs>
+			<materialLib filename="tessellation.mlib"/>
+		</materialLibs>
+		
+	</assets>
+	
+    <!-- <pipelines mode=RUN_ALL> -->
+    <pipelines>
+        <pipeline name="Combined Pipeline" default="true">
+            <pass class="default" name="tradPassQuad">
+                <scenes instances=1>
+                    <scene name="Square" />
+                </scenes>
+                <camera name="MainCamera" />
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessQuad" />
+                </materialMaps>
+            </pass>
+            <pass class="mesh" name="meshPassQuad">
+                <camera name="MainCamera" />
+                <materials>
+                    <material name="meshInner64" fromLibrary="tessellation" count="1" />
+                    <material name="meshOuter64" fromLibrary="tessellation" count="1" />
+                </materials>
+            </pass>
+        </pipeline>
+
+        <pipeline name="Mesh Pipeline" default="true">
+            <pass class="mesh" name="meshPassQuad">
+                <camera name="MainCamera" />
+                <materials>
+                    <material name="meshInner64" fromLibrary="tessellation" count="1024" />
+                    <material name="meshOuter64" fromLibrary="tessellation" count="1024" />
+                </materials>
+            </pass>
+        </pipeline>
+
+        <pipeline name="Traditional Pipeline" default="true">
+            
+            <pass class="default" name="tradPassQuad">
+                <scenes instances=1024>
+                    <scene name="Square" />
+                </scenes>
+                <camera name="MainCamera" />
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="tessellation" toMaterial="tradTessQuad" />
+                </materialMaps>
+            </pass>
+            
+        </pipeline>
+	</pipelines>
+	
+	<interface>
+		<window label="Tessellation">
+            <pipelineList label="Pipeline" />
+            <var label="olevel0" type="RENDERER" context="CURRENT" component="olevel0"
+                def="min=1 max=256"/>
+            <var label="olevel1" type="RENDERER" context="CURRENT" component="olevel1"
+                def="min=1 max=256"/>
+            <var label="olevel2" type="RENDERER" context="CURRENT" component="olevel2"
+                def="min=1 max=256"/>
+            <var label="olevel3" type="RENDERER" context="CURRENT" component="olevel3"
+                def="min=1 max=256"/>
+            <var label="icols" type="RENDERER" context="CURRENT" component="icols"
+                def="min=1 max=256"/>
+            <var label="irows" type="RENDERER" context="CURRENT" component="irows"
+                def="min=1 max=256"/>
+		</window>
+	</interface>
+</project>

@@ -1,0 +1,373 @@
+#version 460
+#extension GL_NV_mesh_shader : enable
+ 
+layout(local_size_x=32) in;
+//layout(triangles, max_vertices=256, max_primitives=512) out;
+layout(triangles, max_vertices=32, max_primitives=62) out;
+
+//layout(triangles, max_vertices=256, max_primitives=512) out;
+//layout(lines, max_vertices=4, max_primitives=4) out;
+//layout(points, max_vertices=4, max_primitives=4) out;
+
+taskNV in perTaskData {
+  int left_divs;
+  int bottom_divs;
+  int right_divs;
+  int top_divs;
+};
+
+//perprimitiveNV out PerPrimitiveData 
+//{
+  //int divs;
+  //int mesh_id;
+//} p_out[]; 
+
+out perVertexData
+{
+    vec2 texCoordTE;
+} v_out[];
+
+uniform mat4 m_pvm;
+
+uniform vec3 disp;
+
+uniform float iRows;
+uniform float iCols;
+
+uniform float oLeft;
+uniform float oBottom;
+uniform float oRight;
+uniform float oTop;
+
+layout(std430, binding = 1) readonly buffer verticesBuffer
+{
+    float vertices[];
+};
+
+//layout(std430, binding = 2) writeonly buffer debugBuffer
+//{
+    //vec4 printf[];
+//};
+
+uniform float height_noise_frequency   = 0.1;
+uniform float height_noise_amplitude   = 1.0;
+uniform float height_noise_power       = 3.5;
+uniform int height_noise_octaves       = 50;
+uniform float height_noise_persistance = 0.5;
+uniform float height_noise_lacunarity  = 2.0;
+
+float rand(vec2 co) { return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453); }
+
+////////////////////////////////////////////////////////////////////////////
+//                                                                        //
+// Description : Array and textureless GLSL 2D simplex noise function.    //
+//      Author : Ian McEwan, Ashima Arts.                                 //
+//  Maintainer : stegu                                                    //
+//     Lastmod : 20110822 (ijm)                                           //
+//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.     //
+//               Distributed under the MIT License. See LICENSE file.     //
+//               https://github.com/ashima/webgl-noise                    //
+//               https://github.com/stegu/webgl-noise                     //
+//                                                                        //
+//                                                                        //
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+
+vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+float snoise(vec2 v) {
+  
+  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                     -0.577350269189626,  // -1.0 + 2.0 * C.x
+                      0.024390243902439); // 1.0 / 41.0
+  // First corner
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+
+  // Other corners
+  vec2 i1;
+  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+  //i1.y = 1.0 - i1.x;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  // x0 = x0 - 0.0 + 0.0 * C.xx ;
+  // x1 = x0 - i1 + 1.0 * C.xx ;
+  // x2 = x0 - 1.0 + 2.0 * C.xx ;
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+
+  // Permutations
+  i = mod289(i); // Avoid truncation effects in permutation
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+		+ i.x + vec3(0.0, i1.x, 1.0 ));
+
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+
+  // Gradients: 41 points uniformly over a line, mapped onto a diamond.
+  // The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+
+  // Normalise gradients implicitly by scaling m
+  // Approximation of: m *= inversesqrt( a0*a0 + h*h );
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+  // Compute final noise value at P
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+
+}
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+
+float max_height () {
+
+  float amp = height_noise_amplitude, height = 0;
+	
+	for(int i = 0; i < height_noise_octaves; i++, amp *= height_noise_persistance) {
+		
+    height += 1.0 * amp;
+	
+  }
+
+  return height;
+
+}
+
+float height (vec2 position) {
+
+  float freq = height_noise_frequency, amp = height_noise_amplitude, height = 0, max_height = max_height();
+	
+  // Calculating height using snoise ( height -> [-max_height, max_heigth] )
+	for(int i = 0; i < height_noise_octaves; i++, amp *= height_noise_persistance, freq *= height_noise_lacunarity) {
+		
+    height += snoise(freq * position) * amp;
+	
+  }
+
+  // Height -> [0,1]
+  height = height / max_height * 0.5 + 0.5;
+
+  // Applying the power (height -> [0, 1])
+  height = pow(height, height_noise_power);
+
+  // Height -> [-1, max_height - 1]
+  return height * 2 * max_height - 1;
+  
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+int calculate_adj_idx (int ceil_lvl, int ceil_adj, int u_idx, int is_down, int is_up, double log_lvl, double log_adj, int lvl_divergent_idx, int adj_divergent_idx) {
+
+    int is_fst_half = int(u_idx < ceil_lvl * 0.5), is_snd_half = 1 - is_fst_half;
+
+    u_idx = is_fst_half * (u_idx - is_up) + is_snd_half * (ceil_lvl - 1 - (u_idx + is_up));
+
+    int trunc_log_lvl = int(u_idx > lvl_divergent_idx) * int(floor(log_lvl)) +
+                        int(u_idx <= lvl_divergent_idx) * int(ceil(log_lvl));
+
+    double ratio = pow(2, int(trunc_log_lvl - floor(log_adj)));
+
+    int lvl_offset = max(0, int((ceil_lvl - pow(2, trunc_log_lvl)) * 0.5));
+    int adj_offset = max(0, int((ceil_adj - pow(2, int(floor(log_adj)))) * 0.5));
+
+    double inter_idx = min((ceil_adj - 2) * 0.5, double(u_idx - lvl_offset) / ratio);
+
+    ratio /= int(floor(log_adj) != ceil(log_adj)) * int(floor(inter_idx) < ceil(int(adj_divergent_idx) * 0.5)) + 1;
+
+    inter_idx = min((ceil_adj - 2) * 0.5, double(u_idx - lvl_offset) / ratio) + 
+                int(floor(inter_idx) >= ceil(int(adj_divergent_idx) * 0.5)) * adj_offset;
+
+    // Is_Up Offset
+    double new_verts = pow(2, int(floor(log_adj) - trunc_log_lvl));
+
+    int up_offset = int(new_verts + int(floor(log_adj) != ceil(log_adj)) *
+        max(0, min(new_verts, (adj_divergent_idx + 1 - inter_idx) * 0.5)));
+
+    inter_idx += is_up * max(1, up_offset);
+    inter_idx = is_fst_half * floor(inter_idx) + is_snd_half * ceil((ceil_adj - 2 * is_down - inter_idx));
+
+    return int(inter_idx);
+
+
+}
+
+void main()
+{
+    // Inputs
+    int local_id  = int(gl_LocalInvocationID.x);
+    int global_id  = int(gl_GlobalInvocationID.x);
+    int workg_id = int(gl_WorkGroupID.x);
+    int workg_len = int(gl_WorkGroupSize.x);
+
+    int divs[] =  {bottom_divs, right_divs, top_divs, left_divs};
+
+    int side_wg_id = workg_id, side_id = 0;
+    for(; side_wg_id >= divs[side_id]; side_id++) side_wg_id -= divs[side_id];
+
+    //if (side_wg_id != 0) { gl_PrimitiveCountNV = 0; return;}
+
+    // Quad vertices
+    vec4 v0 = vec4(disp + vec3 (vertices[((side_id + 0) % 4) * 3 + 1], 
+                                vertices[((side_id + 0) % 4) * 3 + 2], 
+                                vertices[((side_id + 0) % 4) * 3 + 3]), 1.0);
+    vec4 v1 = vec4(disp + vec3 (vertices[((side_id + 1) % 4) * 3 + 1], 
+                                vertices[((side_id + 1) % 4) * 3 + 2], 
+                                vertices[((side_id + 1) % 4) * 3 + 3]), 1.0);
+    vec4 v2 = vec4(disp + vec3 (vertices[((side_id + 2) % 4) * 3 + 1], 
+                                vertices[((side_id + 2) % 4) * 3 + 2], 
+                                vertices[((side_id + 2) % 4) * 3 + 3]), 1.0);
+    vec4 v3 = vec4(disp + vec3 (vertices[((side_id + 3) % 4) * 3 + 1], 
+                                vertices[((side_id + 3) % 4) * 3 + 2], 
+                                vertices[((side_id + 3) % 4) * 3 + 3]), 1.0);
+
+    // Side Tessellation Levels and Divisions
+    float oLvls[] = {oBottom, oRight, oTop, oLeft};
+    float iLvls[] = {iCols, iRows, iCols, iRows};
+
+    // Current side Tessellation Levels
+    float oLvl = oLvls[side_id];
+    float iuLvl = iLvls[side_id];
+    float ivLvl = iLvls[(side_id + 1) % 4];
+
+    int ceil_oLvl = int(ceil(oLvl));
+    ceil_oLvl += ceil_oLvl % 2;
+    int ceil_iuLvl = int(ceil(iuLvl));
+    ceil_iuLvl += ceil_iuLvl % 2;
+    int ceil_ivLvl = int(ceil(ivLvl));
+    ceil_ivLvl += ceil_ivLvl % 2;
+
+    int top_divergent_idx = ceil_iuLvl - 2 - int(pow(2, floor(log2(ceil_iuLvl - 2)))) + 1;
+    int bot_divergent_idx = ceil_oLvl - 2 - int(pow(2, floor(log2(ceil_oLvl - 2)))) + 1;
+
+    double log_oLvl = log2(ceil_oLvl);
+    double log_iuLvl = log2(ceil_iuLvl);
+
+    // Current WorkGroupID portion of the side
+    int mesh_max_verts = 256;
+    //int mesh_max_verts = 16;
+    
+    int higher_is_down = int(ceil_oLvl >= ceil_iuLvl - 2), higher_is_up = 1 - higher_is_down;
+    int ceil_higher = higher_is_down * ceil_oLvl + higher_is_up * ceil_iuLvl, 
+        ceil_lesser = higher_is_down * ceil_iuLvl + higher_is_up * ceil_oLvl;
+    double log_higher = log2(ceil_higher),
+           log_lesser = log2(ceil_lesser);
+    int higher_divergent_idx = bot_divergent_idx * higher_is_down + top_divergent_idx * higher_is_up;
+    int lesser_divergent_idx = top_divergent_idx * higher_is_down + bot_divergent_idx * higher_is_up;
+
+    int min_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id) / double(divs[side_id])));
+    int max_u_higher = int(round(double(ceil_higher + higher_is_down - higher_is_up) * double(side_wg_id + 1) / double(divs[side_id])));
+
+    int min_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, min_u_higher, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
+    int max_u_lesser = calculate_adj_idx (ceil_higher, ceil_lesser, max_u_higher, higher_is_down, higher_is_up, log_higher, log_lesser, higher_divergent_idx, lesser_divergent_idx);
+
+    int min_u_down = max(0, min(ceil_oLvl, higher_is_down * min_u_higher + higher_is_up * min_u_lesser));
+    int max_u_down = max(0, min(ceil_oLvl, higher_is_down * max_u_higher + higher_is_up * max_u_lesser));
+    int min_u_top = max(1, min(ceil_iuLvl - 1, 1 + higher_is_down * min_u_lesser + higher_is_up * min_u_higher));
+    int max_u_top = max(1, min(ceil_iuLvl - 1, 1 + higher_is_down * max_u_lesser + higher_is_up * max_u_higher));
+
+    int no_bottom_verts = max_u_down - min_u_down + 1;
+    int no_top_verts = max_u_top - min_u_top + 1;
+    int no_verts = no_bottom_verts + no_top_verts;
+
+    //printf[side_wg_id * 514 + 0] = vec4( min_u_down, max_u_down, min_u_top, max_u_top );
+    //printf[side_wg_id * 514 + 1] = vec4( no_bottom_verts, no_top_verts, no_verts, 1.0);
+
+    for (int i=0; i <= no_verts / workg_len; i++) {
+
+        // ============================================================================================
+        // VERTICES
+        // ============================================================================================
+
+        int idx = int(min(i * workg_len + local_id, no_verts - 1));
+
+        int is_down = int(idx < no_bottom_verts), is_up = 1 - is_down;
+
+        int min_u_idx = is_down * min_u_down + is_up * min_u_top;
+
+        int u_idx = min_u_idx + idx - is_up * no_bottom_verts; 
+        int v_idx = is_down * 0 + is_up * 1;
+
+        double lvl = is_down * oLvl + is_up * iuLvl;
+        int ceil_lvl = is_down * ceil_oLvl + is_up * ceil_iuLvl;
+        
+        double adj_lvl = is_down * iuLvl + is_up * oLvl;
+        int ceil_adj = is_down * ceil_iuLvl + is_up * ceil_oLvl;
+
+        int lvl_divergent_idx = is_down * bot_divergent_idx + is_up * top_divergent_idx; 
+        int adj_divergent_idx = is_down * top_divergent_idx + is_up * bot_divergent_idx; 
+
+        int prev_u_idx = max(is_up, min(ceil_lvl - 2 - is_up, u_idx -
+                    int(u_idx > lvl_divergent_idx) - int(u_idx >= ceil_lvl - lvl_divergent_idx)));
+        int prev_v_idx = is_up;
+
+        double u = double(u_idx) / double(ceil_lvl);
+        double prev_u = double(prev_u_idx) / double(max(1, ceil_lvl - 2));
+        double v = double(v_idx) / double(ceil_ivLvl);
+        double prev_v = double(prev_v_idx) / double(max(1, ceil_ivLvl - 2));
+
+        double inter_u = mix (prev_u, u, 1 - int(lvl >= 2) * 0.5 * (ceil_lvl - lvl));
+        double inter_v = mix (prev_v, v, 1 - is_up * (int(ivLvl >= 2) * 0.5 * (ceil_ivLvl - ivLvl)));
+
+        vec2 uvs[] = {
+            vec2 (inter_u, inter_v),
+            vec2 (1 - inter_v, inter_u),
+            vec2 (1 - inter_u, 1 - inter_v),
+            vec2 (inter_v, 1 - inter_u)
+        };
+
+        vec4 inter_pos = mix(mix(v0, v1, float(inter_u)), mix(v3, v2, float(inter_u)), float(inter_v));
+        //inter_pos.z = 0.25 * height (vec2(uvs[side_id].x, uvs[side_id].y));
+
+        gl_MeshVerticesNV[idx].gl_Position = m_pvm * inter_pos;
+
+        v_out[idx].texCoordTE = uvs[side_id];
+
+        // ============================================================================================
+        // PRIMITIVES
+        // ============================================================================================
+
+        if (idx == no_bottom_verts - 1 || idx == no_verts - 1) continue;
+        //if (idx == no_bottom_verts - 1) continue;
+        uint prim_idx = idx - is_up;
+
+        double log_lvl = is_down * log_oLvl + is_up * log_iuLvl;
+        double log_adj = is_down * log_iuLvl + is_up * log_oLvl;
+
+        int inter_idx = calculate_adj_idx (ceil_lvl, ceil_adj, u_idx, is_down, is_up, log_lvl, log_adj, lvl_divergent_idx, adj_divergent_idx);
+
+        //if (( is_down == 1 && (inter_idx < min_u_top - 1 || inter_idx > max_u_top - 1)) ||
+            //( is_up   == 1 && (inter_idx < min_u_down || inter_idx > max_u_down )) )
+                //continue;
+
+        int offset_inter_idx = is_down * (no_bottom_verts + int(inter_idx) - min_u_top + 1) +
+                               is_up * (int(inter_idx) - min_u_down); 
+
+        //printf[side_id * 512 + prim_idx] = vec4( side_id );
+        //printf[side_wg_id * 514 + prim_idx + 2] = vec4( idx + is_up, idx + is_down, offset_inter_idx, inter_idx );
+
+        gl_PrimitiveIndicesNV[prim_idx * 3 + 0] = idx + is_up;
+        gl_PrimitiveIndicesNV[prim_idx * 3 + 1] = idx + is_down;
+        gl_PrimitiveIndicesNV[prim_idx * 3 + 2] = offset_inter_idx;
+        
+        //p_out[prim_idx].mesh_id = side_wg_id;
+        //p_out[prim_idx].divs = divs[side_id];
+    }
+
+    int no_prims = no_bottom_verts + no_top_verts - 2;
+
+    // No. Primitives
+    gl_PrimitiveCountNV = no_prims;
+
+}

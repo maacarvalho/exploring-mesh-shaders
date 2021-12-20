@@ -1,0 +1,32 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+ 
+layout(local_size_x = 1) in;
+
+taskNV out perTaskData {
+  uint col_divs, row_divs;
+};
+
+uniform float icols;
+uniform float irows;
+
+void main() {
+
+    // Tessellation Levels
+    int ceil_cols = int(ceil(icols));
+    ceil_cols += ceil_cols % 2;
+    int ceil_rows = int(ceil(irows));
+    ceil_rows += ceil_rows % 2;
+
+    // Maximum number of vertices a Mesh Workgroup can handle
+    int mesh_max_verts = 128;
+    //int mesh_max_verts = 16;
+
+    double max_mesh_tess = double(floor(sqrt(mesh_max_verts - 1)));
+    
+    col_divs = uint(ceil(double(ceil_cols) / max_mesh_tess));
+    row_divs = uint(ceil(double(ceil_rows) / max_mesh_tess));
+
+    gl_TaskCountNV = col_divs * row_divs;
+
+}

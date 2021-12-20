@@ -1,0 +1,507 @@
+<?xml version="1.0" ?>
+<materialLib name="tessellation">
+
+	<textures>
+		<texture name="tex" filename="textures/calcada.jpg" mipmap=true/>		
+	</textures>
+
+	<shaders>
+        <shader name="tradTessQuad" 	ps="shaders/lightTexture.frag" 
+									    tc="shaders/simpleQuad.tesc"
+									    te="shaders/simpleQuad.tese"
+									    vs="shaders/tessDemo.vert" />
+
+        <shader name="meshInner32" 	        ts = "shaders/innerTessQuad.32.task" 
+                                            ms = "shaders/innerTessQuad.32.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+        
+        <shader name="meshOuter32" 	        ts = "shaders/outerTessQuad.32.task" 
+                                            ms = "shaders/outerTessQuad.32.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+
+        <shader name="meshInner64" 	        ts = "shaders/innerTessQuad.64.task" 
+                                            ms = "shaders/innerTessQuad.64.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+        
+        <shader name="meshOuter64" 	        ts = "shaders/outerTessQuad.64.task" 
+                                            ms = "shaders/outerTessQuad.64.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+
+        <shader name="meshInner128" 	    ts = "shaders/innerTessQuad.128.task" 
+                                            ms = "shaders/innerTessQuad.128.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+        
+        <shader name="meshOuter128" 	    ts = "shaders/outerTessQuad.128.task" 
+                                            ms = "shaders/outerTessQuad.128.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+
+        <shader name="meshInner256" 	    ts = "shaders/innerTessQuad.256.task" 
+                                            ms = "shaders/innerTessQuad.256.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+        
+        <shader name="meshOuter256" 	    ts = "shaders/outerTessQuad.256.task" 
+                                            ms = "shaders/outerTessQuad.256.mesh" 
+                                            ps = "shaders/lightTexture.frag" />
+	</shaders>
+
+    <buffers>
+		<buffer name="quadBuf" >
+            <file name="buffers/square.buf"/>
+            <DIM x=13 y=1 z=1 />
+			<structure>
+				<field value="FLOAT" />
+			</structure>
+        </buffer>	
+        <!--Debug Buffer-->
+		<!--<buffer name="debugBufferMesh">-->
+			<!--<DIM x="262144" y="1" z=1 />-->
+			<!--<structure>-->
+				<!--<field value="VEC4" />-->
+			<!--</structure>-->
+		<!--</buffer>-->
+    </buffers>
+	
+    <materials>
+
+		<material name="tradTessQuad">
+			<shader name="tradTessQuad">
+				<values>
+                    <valueof uniform="projViewModelMatrix"  
+                             type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="olevel0" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="olevel1" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="olevel2" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="olevel3" 
+                             type="RENDERER" context="CURRENT" 
+							 component="olevel3"  />
+
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <!--32 -->
+        <material name="meshOuter32">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--Debug Buffer-->
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshOuter32" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+                    
+                    <valueof uniform="iCols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="iRows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="oLeft" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="oBottom" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="oRight" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="oTop" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel3"  />
+
+                     <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <material name="meshInner32">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshInner32" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <!--64 -->
+        <material name="meshOuter64">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--Debug Buffer-->
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshOuter64" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+                    
+                    <valueof uniform="iCols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="iRows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="oLeft" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="oBottom" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="oRight" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="oTop" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel3"  />
+
+                     <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <material name="meshInner64">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshInner64" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <!--128 -->
+        <material name="meshOuter128">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--Debug Buffer-->
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshOuter128" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+                    
+                    <valueof uniform="iCols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="iRows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="oLeft" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="oBottom" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="oRight" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="oTop" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel3"  />
+
+                     <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <material name="meshInner128">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshInner128" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <!--256 -->
+        <material name="meshOuter256">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--Debug Buffer-->
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshOuter256" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+                    
+                    <valueof uniform="iCols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="iRows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                     <valueof uniform="oLeft" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel0"  />
+
+		            <valueof uniform="oBottom" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel1"  />    
+
+                    <valueof uniform="oRight" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel2"  />
+
+                     <valueof uniform="oTop" 
+                             type="RENDERER" context="CURRENT" 
+                             component="olevel3"  />
+
+                     <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+
+        <material name="meshInner256">
+
+            <buffers>
+                <buffer name="quadBuf">
+					<TYPE value="SHADER_STORAGE" />
+    				<BINDING_POINT value="1" />
+                </buffer>
+                <!--<buffer name="debugBufferMesh">-->
+					<!--<TYPE value="SHADER_STORAGE" />-->
+					<!--<BINDING_POINT value="2" />-->
+				<!--</buffer>-->
+            </buffers>
+            
+            <shader name="meshInner256" >
+				<values>
+					<valueof uniform="m_pvm" 
+							 type="RENDERER" context="CURRENT" 
+							 component="PROJECTION_VIEW_MODEL" />
+                    
+                    <valueof uniform="disp" 
+                             type="RENDERER" context="CURRENT" 
+                             component="quadDisp" />
+
+                    <valueof uniform="icols" 
+                             type="RENDERER" context="CURRENT" 
+                             component="icols"  />
+
+                    <valueof uniform="irows" 
+                             type="RENDERER" context="CURRENT" 
+                             component="irows"  />
+
+                    <valueof uniform="texUnit" 		
+                             type="TEXTURE_BINDING" context="CURRENT" 
+							 component="UNIT" id="0" />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT=0 name="tex" />
+			</textures>
+        </material>
+    </materials>
+</materialLib>
