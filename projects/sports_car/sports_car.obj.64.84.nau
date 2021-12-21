@@ -1,0 +1,139 @@
+<?xml version="1.0" ?>
+<project name="Obj Renderer">
+    <assets>
+        <attributes>
+            <attribute name="SCALE" data="FLOAT" type="RENDERER" value="1" />
+            <attribute name="DIFFUSE_007" data="VEC3" type="RENDERER" x="0.0200" y="0.0200" z="0.0200" />
+            <attribute name="DIFFUSE_006" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_005" data="VEC3" type="RENDERER" x="0.8118" y="0.8118" z="0.8118" />
+            <attribute name="DIFFUSE_004" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_003" data="VEC3" type="RENDERER" x="0.0100" y="0.0100" z="0.0100" />
+            <attribute name="DIFFUSE_002" data="VEC3" type="RENDERER" x="0.075" y="0.075" z="0.075" />
+            <attribute name="DIFFUSE_001" data="VEC3" type="RENDERER" x="0.7961" y="0.0941" z="0.0000" />
+            <attribute name="DIFFUSE_000" data="VEC3" type="RENDERER" x="0.1059" y="0.1059" z="0.1059" />
+            <attribute name="DIFFUSE_009" data="VEC3" type="RENDERER" x="0.1137" y="0.1137" z="0.1137" />
+            <attribute name="DIFFUSE_008" data="VEC3" type="RENDERER" x="0.0710" y="0.0710" z="0.0710" />
+            <attribute name="DIFFUSE_014" data="VEC3" type="RENDERER" x="0.1569" y="0.1725" z="0.1725" />
+            <attribute name="DIFFUSE_015" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_016" data="VEC3" type="RENDERER" x="0.1373" y="0.1373" z="0.1373" />
+            <attribute name="DIFFUSE_017" data="VEC3" type="RENDERER" x="0.0078" y="0.0078" z="0.0078" />
+            <attribute name="DIFFUSE_010" data="VEC3" type="RENDERER" x="0.3490" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_011" data="VEC3" type="RENDERER" x="0.039" y="0.039" z="0.039" />
+            <attribute name="DIFFUSE_012" data="VEC3" type="RENDERER" x="0.784" y="0.235" z="0.078" />
+            <attribute name="DIFFUSE_013" data="VEC3" type="RENDERER" x="0.1000" y="0.1000" z="0.1000" />
+            <attribute name="DIFFUSE_018" data="VEC3" type="RENDERER" x="0.2627" y="0.2627" z="0.2627" />
+            <attribute name="DIFFUSE_019" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_029" data="VEC3" type="RENDERER" x="0.690" y="0.006" z="0.006" />
+            <attribute name="DIFFUSE_028" data="VEC3" type="RENDERER" x="0.196" y="0.196" z="0.157" />
+            <attribute name="DIFFUSE_025" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_024" data="VEC3" type="RENDERER" x="0.0100" y="0.0100" z="0.0100" />
+            <attribute name="DIFFUSE_027" data="VEC3" type="RENDERER" x="0.0667" y="0.0667" z="0.0667" />
+            <attribute name="DIFFUSE_026" data="VEC3" type="RENDERER" x="0.0218" y="0.0218" z="0.0218" />
+            <attribute name="DIFFUSE_021" data="VEC3" type="RENDERER" x="0.00" y="0" z="0" />
+            <attribute name="DIFFUSE_020" data="VEC3" type="RENDERER" x="0.0500" y="0.0500" z="0.0500" />
+            <attribute name="DIFFUSE_023" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_022" data="VEC3" type="RENDERER" x="0.01" y="0.1" z="0.3" />
+            <attribute name="DIFFUSE_032" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_033" data="VEC3" type="RENDERER" x="0.0196" y="0.0196" z="0.0196" />
+            <attribute name="DIFFUSE_030" data="VEC3" type="RENDERER" x="0.7961" y="0.0941" z="0.0000" />
+            <attribute name="DIFFUSE_031" data="VEC3" type="RENDERER" x="0.2784" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_036" data="VEC3" type="RENDERER" x="0.2784" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_037" data="VEC3" type="RENDERER" x="0.0078" y="0.0078" z="0.0078" />
+            <attribute name="DIFFUSE_034" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_035" data="VEC3" type="RENDERER" x="0.1216" y="0.0000" z="0.0000" />
+        </attributes>
+
+        <scenes>
+        </scenes>
+
+        <viewports>
+            <viewport name="objViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+            </viewport>
+        </viewports>		
+
+        <cameras>
+            <camera name="objCamera" >
+                <viewport name=objViewport />
+                <TYPE value=PERSPECTIVE/>
+                <FOV value = 90/>
+                <NEAR value= 0.00001/>
+                <FAR value= 100/>
+                <POSITION x=2.5 y=1 z=2.5 />
+                <VIEW x=-2.5 y=-1.0 z=-2.5 />
+            </camera>
+        </cameras>
+        
+        <lights>
+            <light name="objLight">
+                <DIRECTION x="-2" y="-6" z="-2" />
+                <COLOR r="1" g="1" b="1" />
+            </light>
+        </lights>
+    
+        <materialLibs>
+            <materialLib filename="sports_car.obj.64.84.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+    <!--<pipelines mode=RUN_ALL>-->
+        <pipeline name="Mesh_32_64_84" default="true">
+            <!--<preScript file="scripts/times.32.64.84.lua" script="startTimer_32_64_84" />-->
+            <pass class="mesh" name="meshPass_32_64_84_">
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <materials>
+                    <material name="meshMat_32_64_84_007" fromLibrary="objMatLib" count="41" />
+                    <material name="meshMat_32_64_84_006" fromLibrary="objMatLib" count="5" />
+                    <material name="meshMat_32_64_84_005" fromLibrary="objMatLib" count="6" />
+                    <material name="meshMat_32_64_84_004" fromLibrary="objMatLib" count="2" />
+                    <material name="meshMat_32_64_84_003" fromLibrary="objMatLib" count="39" />
+                    <material name="meshMat_32_64_84_002" fromLibrary="objMatLib" count="236" />
+                    <material name="meshMat_32_64_84_001" fromLibrary="objMatLib" count="17" />
+                    <material name="meshMat_32_64_84_000" fromLibrary="objMatLib" count="14" />
+                    <material name="meshMat_32_64_84_009" fromLibrary="objMatLib" count="62" />
+                    <material name="meshMat_32_64_84_008" fromLibrary="objMatLib" count="650" />
+                    <material name="meshMat_32_64_84_014" fromLibrary="objMatLib" count="19" />
+                    <material name="meshMat_32_64_84_015" fromLibrary="objMatLib" count="8" />
+                    <material name="meshMat_32_64_84_016" fromLibrary="objMatLib" count="64" />
+                    <material name="meshMat_32_64_84_017" fromLibrary="objMatLib" count="5" />
+                    <material name="meshMat_32_64_84_010" fromLibrary="objMatLib" count="24" />
+                    <material name="meshMat_32_64_84_011" fromLibrary="objMatLib" count="51" />
+                    <material name="meshMat_32_64_84_012" fromLibrary="objMatLib" count="41" />
+                    <material name="meshMat_32_64_84_013" fromLibrary="objMatLib" count="28" />
+                    <material name="meshMat_32_64_84_018" fromLibrary="objMatLib" count="2" />
+                    <material name="meshMat_32_64_84_019" fromLibrary="objMatLib" count="12" />
+                    <material name="meshMat_32_64_84_029" fromLibrary="objMatLib" count="76" />
+                    <material name="meshMat_32_64_84_028" fromLibrary="objMatLib" count="281" />
+                    <material name="meshMat_32_64_84_025" fromLibrary="objMatLib" count="1" />
+                    <material name="meshMat_32_64_84_024" fromLibrary="objMatLib" count="35" />
+                    <material name="meshMat_32_64_84_027" fromLibrary="objMatLib" count="241" />
+                    <material name="meshMat_32_64_84_026" fromLibrary="objMatLib" count="1261" />
+                    <material name="meshMat_32_64_84_021" fromLibrary="objMatLib" count="19" />
+                    <material name="meshMat_32_64_84_020" fromLibrary="objMatLib" count="176" />
+                    <material name="meshMat_32_64_84_023" fromLibrary="objMatLib" count="99" />
+                    <material name="meshMat_32_64_84_022" fromLibrary="objMatLib" count="276" />
+                    <material name="meshMat_32_64_84_032" fromLibrary="objMatLib" count="169" />
+                    <material name="meshMat_32_64_84_033" fromLibrary="objMatLib" count="136" />
+                    <material name="meshMat_32_64_84_030" fromLibrary="objMatLib" count="9" />
+                    <material name="meshMat_32_64_84_031" fromLibrary="objMatLib" count="10" />
+                    <material name="meshMat_32_64_84_036" fromLibrary="objMatLib" count="61" />
+                    <material name="meshMat_32_64_84_037" fromLibrary="objMatLib" count="31" />
+                    <material name="meshMat_32_64_84_034" fromLibrary="objMatLib" count="577" />
+                    <material name="meshMat_32_64_84_035" fromLibrary="objMatLib" count="124" />
+                </materials>
+            </pass>
+            <!--<postScript file="scripts/times.32.64.84.lua" script="stopTimer_32_64_84" />-->
+        </pipeline>
+    </pipelines>
+
+    <!--<interface>-->
+        <!--<window label=Properties >-->
+            <!--<pipelineList label=Pipeline />-->
+            <!--<var label=Scale type=RENDERER context=CURRENT component=SCALE def=min=0 max=100/>-->
+        <!--</window>-->
+    <!--</interface>-->
+</project>

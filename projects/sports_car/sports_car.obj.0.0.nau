@@ -1,0 +1,145 @@
+<?xml version="1.0" ?>
+<project name="Obj Renderer">
+    <assets>
+        <attributes>
+            <attribute name="SCALE" data="FLOAT" type="RENDERER" value="1" />
+            <attribute name="DIFFUSE_007" data="VEC3" type="RENDERER" x="0.0200" y="0.0200" z="0.0200" />
+            <attribute name="DIFFUSE_006" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_005" data="VEC3" type="RENDERER" x="0.8118" y="0.8118" z="0.8118" />
+            <attribute name="DIFFUSE_004" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_003" data="VEC3" type="RENDERER" x="0.0100" y="0.0100" z="0.0100" />
+            <attribute name="DIFFUSE_002" data="VEC3" type="RENDERER" x="0.075" y="0.075" z="0.075" />
+            <attribute name="DIFFUSE_001" data="VEC3" type="RENDERER" x="0.7961" y="0.0941" z="0.0000" />
+            <attribute name="DIFFUSE_000" data="VEC3" type="RENDERER" x="0.1059" y="0.1059" z="0.1059" />
+            <attribute name="DIFFUSE_009" data="VEC3" type="RENDERER" x="0.1137" y="0.1137" z="0.1137" />
+            <attribute name="DIFFUSE_008" data="VEC3" type="RENDERER" x="0.0710" y="0.0710" z="0.0710" />
+            <attribute name="DIFFUSE_014" data="VEC3" type="RENDERER" x="0.1569" y="0.1725" z="0.1725" />
+            <attribute name="DIFFUSE_015" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_016" data="VEC3" type="RENDERER" x="0.1373" y="0.1373" z="0.1373" />
+            <attribute name="DIFFUSE_017" data="VEC3" type="RENDERER" x="0.0078" y="0.0078" z="0.0078" />
+            <attribute name="DIFFUSE_010" data="VEC3" type="RENDERER" x="0.3490" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_011" data="VEC3" type="RENDERER" x="0.039" y="0.039" z="0.039" />
+            <attribute name="DIFFUSE_012" data="VEC3" type="RENDERER" x="0.784" y="0.235" z="0.078" />
+            <attribute name="DIFFUSE_013" data="VEC3" type="RENDERER" x="0.1000" y="0.1000" z="0.1000" />
+            <attribute name="DIFFUSE_018" data="VEC3" type="RENDERER" x="0.2627" y="0.2627" z="0.2627" />
+            <attribute name="DIFFUSE_019" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_029" data="VEC3" type="RENDERER" x="0.690" y="0.006" z="0.006" />
+            <attribute name="DIFFUSE_028" data="VEC3" type="RENDERER" x="0.196" y="0.196" z="0.157" />
+            <attribute name="DIFFUSE_025" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_024" data="VEC3" type="RENDERER" x="0.0100" y="0.0100" z="0.0100" />
+            <attribute name="DIFFUSE_027" data="VEC3" type="RENDERER" x="0.0667" y="0.0667" z="0.0667" />
+            <attribute name="DIFFUSE_026" data="VEC3" type="RENDERER" x="0.0218" y="0.0218" z="0.0218" />
+            <attribute name="DIFFUSE_021" data="VEC3" type="RENDERER" x="0.00" y="0" z="0" />
+            <attribute name="DIFFUSE_020" data="VEC3" type="RENDERER" x="0.0500" y="0.0500" z="0.0500" />
+            <attribute name="DIFFUSE_023" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_022" data="VEC3" type="RENDERER" x="0.01" y="0.1" z="0.3" />
+            <attribute name="DIFFUSE_032" data="VEC3" type="RENDERER" x="0.0000" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_033" data="VEC3" type="RENDERER" x="0.0196" y="0.0196" z="0.0196" />
+            <attribute name="DIFFUSE_030" data="VEC3" type="RENDERER" x="0.7961" y="0.0941" z="0.0000" />
+            <attribute name="DIFFUSE_031" data="VEC3" type="RENDERER" x="0.2784" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_036" data="VEC3" type="RENDERER" x="0.2784" y="0.0000" z="0.0000" />
+            <attribute name="DIFFUSE_037" data="VEC3" type="RENDERER" x="0.0078" y="0.0078" z="0.0078" />
+            <attribute name="DIFFUSE_034" data="VEC3" type="RENDERER" x="0.0118" y="0.0118" z="0.0118" />
+            <attribute name="DIFFUSE_035" data="VEC3" type="RENDERER" x="0.1216" y="0.0000" z="0.0000" />
+        </attributes>
+
+        <scenes>
+            <scene name="objScene" type="Scene">
+                <file name="sports_car.obj"/>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="objViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0" />
+            </viewport>
+        </viewports>		
+
+        <cameras>
+            <camera name="objCamera" >
+                <viewport name=objViewport />
+                <TYPE value=PERSPECTIVE/>
+                <FOV value = 90/>
+                <NEAR value= 0.00001/>
+                <FAR value= 100/>
+                <POSITION x=2.5 y=1 z=2.5 />
+                <VIEW x=-2.5 y=-1.0 z=-2.5 />
+            </camera>
+        </cameras>
+        
+        <lights>
+            <light name="objLight">
+                <DIRECTION x="-2" y="-6" z="-2" />
+                <COLOR r="1" g="1" b="1" />
+            </light>
+        </lights>
+    
+        <materialLibs>
+            <materialLib filename="sports_car.obj.0.0.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+    <!--<pipelines mode=RUN_ALL>-->
+        <pipeline name="Traditional" default="true">
+            <!--<preScript file="scripts/times.0.0.0.lua" script="startTimer_0_0_0" />-->
+            <pass class="default" name="traditionalPass">
+                <scenes>
+                    <scene name="objScene" />
+                </scenes>
+                <camera name="objCamera" />
+                <lights>
+                    <light name="objLight" />
+                </lights>
+                <materialMaps>
+                    <map fromMaterial="GomBlack"  	toLibrary="objMatLib" 	toMaterial="tradMat_007" />
+                    <map fromMaterial="WindowGlassMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_006" />
+                    <map fromMaterial="Interior_White"  	toLibrary="objMatLib" 	toMaterial="tradMat_005" />
+                    <map fromMaterial="Interior_Monitor"  	toLibrary="objMatLib" 	toMaterial="tradMat_004" />
+                    <map fromMaterial="Interior_GlossBlack"  	toLibrary="objMatLib" 	toMaterial="tradMat_003" />
+                    <map fromMaterial="Interior_Black"  	toLibrary="objMatLib" 	toMaterial="tradMat_002" />
+                    <map fromMaterial="RearLights"  	toLibrary="objMatLib" 	toMaterial="tradMat_001" />
+                    <map fromMaterial="SmallHeadLights"  	toLibrary="objMatLib" 	toMaterial="tradMat_000" />
+                    <map fromMaterial="Interior_Silver"  	toLibrary="objMatLib" 	toMaterial="tradMat_009" />
+                    <map fromMaterial="EngineSilver2"  	toLibrary="objMatLib" 	toMaterial="tradMat_008" />
+                    <map fromMaterial="PedalsSilver_mat"  	toLibrary="objMatLib" 	toMaterial="tradMat_014" />
+                    <map fromMaterial="GlassMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_015" />
+                    <map fromMaterial="LightReflectMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_016" />
+                    <map fromMaterial="HeadLightBK_Mat"  	toLibrary="objMatLib" 	toMaterial="tradMat_017" />
+                    <map fromMaterial="Interior_Red"  	toLibrary="objMatLib" 	toMaterial="tradMat_010" />
+                    <map fromMaterial="BodyGlossBlackMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_011" />
+                    <map fromMaterial="SeatColor"  	toLibrary="objMatLib" 	toMaterial="tradMat_012" />
+                    <map fromMaterial="Seat_Black"  	toLibrary="objMatLib" 	toMaterial="tradMat_013" />
+                    <map fromMaterial="HeadLight_LED"  	toLibrary="objMatLib" 	toMaterial="tradMat_018" />
+                    <map fromMaterial="StopLightBK_Mat"  	toLibrary="objMatLib" 	toMaterial="tradMat_019" />
+                    <map fromMaterial="Suspention_Red"  	toLibrary="objMatLib" 	toMaterial="tradMat_029" />
+                    <map fromMaterial="BoltSilver"  	toLibrary="objMatLib" 	toMaterial="tradMat_028" />
+                    <map fromMaterial="MirrorMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_025" />
+                    <map fromMaterial="BodyMat_BK"  	toLibrary="objMatLib" 	toMaterial="tradMat_024" />
+                    <map fromMaterial="SusArm_Silver2"  	toLibrary="objMatLib" 	toMaterial="tradMat_027" />
+                    <map fromMaterial="TireMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_026" />
+                    <map fromMaterial="RedMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_021" />
+                    <map fromMaterial="CarbonBlack"  	toLibrary="objMatLib" 	toMaterial="tradMat_020" />
+                    <map fromMaterial="MeshBlack"  	toLibrary="objMatLib" 	toMaterial="tradMat_023" />
+                    <map fromMaterial="BodyMat"  	toLibrary="objMatLib" 	toMaterial="tradMat_022" />
+                    <map fromMaterial="Chassis_Black"  	toLibrary="objMatLib" 	toMaterial="tradMat_032" />
+                    <map fromMaterial="Suspention_Black"  	toLibrary="objMatLib" 	toMaterial="tradMat_033" />
+                    <map fromMaterial="Winker_Mat"  	toLibrary="objMatLib" 	toMaterial="tradMat_030" />
+                    <map fromMaterial="SpotLightCover_Mat"  	toLibrary="objMatLib" 	toMaterial="tradMat_031" />
+                    <map fromMaterial="CamCover"  	toLibrary="objMatLib" 	toMaterial="tradMat_036" />
+                    <map fromMaterial="suspension_red"  	toLibrary="objMatLib" 	toMaterial="tradMat_037" />
+                    <map fromMaterial="BrakeRotarySilver"  	toLibrary="objMatLib" 	toMaterial="tradMat_034" />
+                    <map fromMaterial="WheelHubColor"  	toLibrary="objMatLib" 	toMaterial="tradMat_035" />
+                </materialMaps>
+            </pass>
+            <!--<postScript file="scripts/times.0.0.0.lua" script="stopTimer_0_0_0" />-->
+        </pipeline>
+    </pipelines>
+
+    <!--<interface>-->
+        <!--<window label=Properties >-->
+            <!--<pipelineList label=Pipeline />-->
+            <!--<var label=Scale type=RENDERER context=CURRENT component=SCALE def=min=0 max=100/>-->
+        <!--</window>-->
+    <!--</interface>-->
+</project>
