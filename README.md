@@ -53,6 +53,9 @@ The projects folder contains four different projects developed during this thesi
 - Tessellation 
 	> The tessellation project represents the comparison of mesh shaders and the traditional tessellation shaders. To do this comparison, a tessellation algorithm, which mimics the behaviour of the tessellation shaders (for *even_spacing* tessellation), was written for mesh shaders. 
 
+- Sports Car
+	> The sports_car project is intended as an example of the comparison of the mesh pipeline and the traditional pipeline when rendering 3D models.
+
 - Ocean Waves
 	> The ocean_waves project serves as the comparison of mesh shaders and the traditional tessellation shaders,when implemented in a real-world scenario. To do this, each was tasked with generating the waves of the ocean. This project was developed by forking a project present in the Nau3D's repository.
 	
