@@ -9,7 +9,7 @@ This repository is divided into three folders:
 
 ## Renderer
 
-The renderer folder links to the **Nau3D** engine's repository, which was used throughout the thesis. This rendered is needed to run the projects present in this repository. 
+The renderer folder links to the **Nau3D** engine's repository, which was used throughout the thesis. This renderer is needed to run the projects present in this repository. 
 
 ## Scripts
 
